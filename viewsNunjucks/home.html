@@ -1,0 +1,105 @@
+{% extends 'layout.html' %}
+
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<h2>Home Page</h2>
+<p>Welcome back, <a id="userID">{{ username }}</a>!</p>
+
+<div class="content-header links">
+    <a href="/admin/account">Create Account</a>
+    <form action="" method="get" class="filters-form">
+        <Table>
+            <tr style="float: right;">
+                <th style="float: left;">
+                    <div class="filters" onmouseover="sortTable()">
+
+                        <a><i class="fas fa-filter"></i> Filters</a>
+                        <code class="hljs xml" >
+
+                            <select id="selector" onmouseout="sortTable()" name="roomSearchFilter">
+                                <option value="Users">Users</option>
+                                <option value="Age">Age</option>
+                                <option value="Alphabetical">Alphabetical</option>
+                                <option value="Cost">Cost</option>
+                            </select>
+                            <label for="Sort">Sort:</label>
+                            <a onclick="sortASC()" onmouseout="sortTable()" name="Sort"><i class="fas fa-arrow-up"></i></a>
+                            <a onclick="sortDSC()" onmouseout="sortTable()" name="Sort"><i class="fas fa-arrow-down"></i></a>
+                            <p id="order" hidden>
+                                ASC
+                            </p>
+                        </code>
+                    </div>
+                </th>
+
+                <th>
+                    <i class="fas fa-search"></i>
+                    <label for="search">Search Rooms:</label>
+                    <!-- input tag -->
+                    <input id="searchbar" onkeyup="searchRooms()" type="text" name="search"
+                        placeholder="Search rooms..">
+                    <!-- <input id="searchbar" type="text" name="search" placeholder="Search username or topic..."
+                        value="{{ search }}" class="responsive-width-100"> -->
+                    <!-- <button name="search" type="submit" onclick="searchRooms()"> Search </button> -->
+                </th>
+            </tr>
+        </Table>
+    </form>
+</div>
+<div>
+    <header>header area</header>
+
+    <style>
+        nav table {
+            height: 200px;
+            width: 50%;
+        }
+
+        nav table {
+            border: 1px solid black;
+            padding: 1px;
+        }
+
+        nav table td {
+            border: 1px solid black;
+            padding: 5px;
+            text-align: center;
+        }
+
+        nav table {
+            overflow: hidden;
+            overflow-y: scroll;
+        }
+    </style>
+    <nav>
+        <p id="roomLists" hidden>{{rooms}}</p>
+
+        <table id="activeRooms">
+
+        </table>
+    </nav>
+
+
+
+    <footer>footer area</footer>
+</div>
+<script src="js/home.js"></script>
+<script>
+    var sortOrder = document.getElementById("order");
+    function sortDSC() {
+        sortOrder.innerText = "DSC"
+    }
+    function sortASC() {
+        sortOrder.innerText = "ASC"
+    }
+</script>
+
+
+{% include 'joinorcreate.html' %}
+
+<h2></h2>
+<h3>About</h3>
+
+{% endblock %}

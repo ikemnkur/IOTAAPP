@@ -1,0 +1,104 @@
+<div id="joinORcreateROOM">
+    <table style="width:100%">
+        <tr>
+            <th><button class="open-buttonCreate" onclick="openFormCreate()">Create Room</button></th>
+            <th><button class="open-buttonJoin" onclick="openFormJoin()">Join Room</button></th>
+        </tr>
+    </table>
+
+    <div class="form-popup" id="myFormCreate">
+        <form action="/room" class="form-container">
+            <h1 style="margin-left: 50px;">Create Room</h1>
+
+            <label for="topic">Topic</label>
+            <input type="text" placeholder="Enter an Topic" name="topic" required>
+
+            <label for="roomID">Room ID</label>
+            <input type="text" placeholder="Enter an unique ID" name="roomID" required>
+            
+            <input hidden type="text" placeholder="{{username}}" name="host" value = "{{username}}">
+            <input hidden type="text" placeholder="{{username}}" name="users" value = "{{username}}">
+            <input hidden type="text" placeholder="0" name="join" value = "0">
+            <input hidden type="text" placeholder="1" name="create" value = "1">
+            <input hidden type="text" placeholder="1" name="private" id="privateBoolean" value = "1">
+
+            <label for="passcode">Passcode</label>
+            <input type="password" placeholder="Enter Passcode" name="passcode" required>
+            
+
+            <table style="width:100%;">
+                <tr>
+                    <th> <label for="costJoin">Cost to Join:</label>
+                        <input type="text" placeholder="Enter amount of points to join Stream" name="joincost" required>
+                    </th>
+                    <th> <label for="costWatch">Cost to Watch:</label>
+                        <input type="text" placeholder="Enter smaller amount to join Stream" name="watchcost" required>
+                    </th>
+                </tr>
+            </table>
+
+            <label for="teams">Teams:</label>
+            <input type="text" placeholder="Enter up to 4 teams" name="teams">
+
+            <label for="tags">Tags to search with:</label>
+            <input type="text" placeholder="Enter 5 tags using commas" name="tags">
+            
+            <div style="margin: 5px; padding-bottom: 5px;">
+                <label for="private">Keep Private:</label>
+                <input id="privateBox" type="checkbox" name="private" >
+            </div>
+
+            <button type="submit" class="btn" id="create" onclick="checkPrivate()">Create</button>
+            <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+        </form>
+    </div>
+
+    <div class="form-popup" id="myFormJoin">
+        <form action="/room" class="form-container">
+            <h1>Join Room</h1>
+
+            <label for="email">Room ID#</label>
+            <input id="joinroom#" type="text" placeholder="Enter Room ID #" name="roomID" required>
+
+            <label for="passcode">Passcode</label>
+            <input type="password" placeholder="Enter Passcode" name="passcode" required>
+
+            <input hidden type="text" placeholder="{{username}}" name="user" value = "{{username}}">
+            <input hidden type="text" placeholder="1" name="join" value = "1">
+            <input hidden type="text" placeholder="0" name="create" value = "0">
+
+            <table style="width:100%; align-content: center;">
+                <tr>
+                    <th><button type="submit" class="btn" onclick="JoinRoom()">Join</button></th>
+                    <th><button type="submit" class="btn" onclick="WatchRoom()">Watch</button></th>
+                </tr>
+            </table>
+
+            <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+        </form>
+    </div>
+
+    <script>
+        function openFormJoin() {
+            document.getElementById("myFormJoin").style.display = "block";
+        }
+        function openFormCreate() {
+            document.getElementById("myFormCreate").style.display = "block";
+        }
+
+        function checkPrivate(){
+            var value = document.getElementById("privateBox").value;
+            console.log("private checkbox: ", value);
+            if (value == true){
+                document.getElementById("privateBoolean").value = 1;
+            } else {
+                document.getElementById("privateBoolean").value = 0;
+            }
+        }
+
+        function closeForm() {
+            document.getElementById("myFormJoin").style.display = "none";
+            document.getElementById("myFormCreate").style.display = "none";
+        }
+    </script>
+</div>
