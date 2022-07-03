@@ -7,29 +7,19 @@ const roomJSONtext = document.getElementById("roomJSON");
 const userJSONtext = document.getElementById("userJSON");
 
 const roomJSON = JSON.parse(roomJSONtext.innerText);
-// const userJSON = JSON.parse(userJSONtext.innerText);
+const userJSON = JSON.parse(userJSONtext.innerText);
 
 // Get username and room from URL
 // const {roomID, topic, user } = Qs.parse(location.search, {
 //   ignoreQueryPrefix: true,
 // });
 
-// const mysql = require('mysql');
-// const connection = mysql.createConnection({
-// 	host: 'localhost',
-// 	user: 'root',
-// 	password: '',
-// 	database: 'nodelogin',
-// 	multipleStatements: true
-// });
-
-
-var nickname = document.getElementById("nickname").value;
-var secretMode = document.getElementById("secret").checked;
 const username = document.getElementById("roomuser").innerText;
 const room = roomJSON[0]["roomID"];
 const topic = roomJSON[0]["topic"];
-var points = 0, xp = 0;
+
+var points = userJSON[0]["coins"];
+var xp = userJSON[0]["xp"];
 const socket = io();
 
 // Join chatroom
@@ -61,10 +51,11 @@ chatForm.addEventListener('submit', (e) => {
 
   if (!msg) {
     return false;
-  }
-
+  }  
+  var team = document.getElementById("teams").value;
+  var nickname = document.getElementById("nickname").value;
   // Emit message to server
-  socket.emit('chatMessage', msg);
+  socket.emit('chatMessage', msg + "ßΓ" + nickname + "ßΓ" + team);
 
   // Clear input
   e.target.elements.msg.value = '';
@@ -77,16 +68,14 @@ function outputMessage(message) {
   div.classList.add('message');
   const p = document.createElement('p');
   p.classList.add('meta');
-  var nickname = document.getElementById("nickname").value;
-  var team = document.getElementById("teams").value;
-  secretMode = document.getElementById("secret").checked;
+  var secretMode = document.getElementById("secret").checked;
   if (secretMode == true) {
     p.innerText = "• " + message.nickname;
   } else if (secretMode == false){
     p.innerText = "• " + message.username + " AKA " +  message.nickname;
   }
 
-  p.innerHTML += `<span > ${" Team: " + team + " Coins: " + points + " XP: " + message.xp} </span> <span>${" " + message.time} </span>`;
+  p.innerHTML += `<span > ${" Team: " + message.team + " XP: " + message.xp} </span> <span>${" " + message.time} </span>`;
   div.appendChild(p);
   const para = document.createElement('p');
   para.classList.add('text');

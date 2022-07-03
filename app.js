@@ -47,12 +47,12 @@ const transporter = nodemailer.createTransport({
 	}
 });
 // Initialize express
-	//new
+//new
 const app = express()
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
 
-	//old
+//old
 // const app = express();
 // const server = http.createServer(app);
 // const io = socketio(server);
@@ -676,8 +676,12 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 				activeRoom = JSON.stringify(finalresult);
 				console.log("Joined Room Info: ", activeRoom);
 				// Render room templateconsole.log("Post rooms.SQL: ", result);
-				response.render('room.html', { username: request.session.account_username, role: request.session.account_role, jroom: activeRoom, juser: "username", roomId: room.roomID});
 
+				connection.query("SELECT * FROM accounts WHERE username = ?", [request.session.account_username], function (err, userStatsResult) {
+					if (err) throw err;
+					userStats = JSON.stringify(userStatsResult);console.log("user Info: ", userStats);
+					response.render('room.html', { username: request.session.account_username, role: request.session.account_role, jroom: activeRoom, juser: userStats, roomId: room.roomID });
+				});
 			});
 
 		});
@@ -691,7 +695,7 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 			console.log("1 record inserted");
 		});
 		// Render room page
-		response.render('room.html', { username: request.session.account_username, role: request.session.account_role, room: createRoomInfo, roomID: roomID});
+		response.render('room.html', { username: request.session.account_username, role: request.session.account_role, room: createRoomInfo, roomID: roomID });
 
 	} else {
 		// Render room template
