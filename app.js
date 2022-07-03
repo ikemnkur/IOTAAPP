@@ -47,9 +47,15 @@ const transporter = nodemailer.createTransport({
 	}
 });
 // Initialize express
-const app = express();
-const server = http.createServer(app);
-const io = socketio(server);
+	//new
+const app = express()
+const server = require('http').Server(app)
+const io = require('socket.io')(server)
+
+	//old
+// const app = express();
+// const server = http.createServer(app);
+// const io = socketio(server);
 
 // Set static folder
 app.use(express.static(path.join(__dirname, 'public')));
@@ -89,7 +95,7 @@ app.get(['/', '/login'], (request, response) => isLoggedin(request, () => {
 	// Store token in session
 	request.session.token = token;
 	// User is not logged in, render login template
-	response.render('index.html', { token: token , msg: ""});
+	response.render('index.html', { token: token, msg: "" });
 }));
 
 // http://localhost:3000/ - authenticate the user
@@ -157,6 +163,7 @@ app.post(['/', '/login'], (request, response) => init(request, settings => {
 				connection.query('DELETE FROM login_attempts WHERE ip_address = ?', [ip]);
 				// Output success and redirect to home page
 				response.send('success'); // do not change the message as the ajax code depends on it
+				//response.send('<a href="/home">Home</a>');
 				return response.end();
 			} else {
 				// Bruteforce
@@ -513,7 +520,7 @@ app.get(['/home'], (request, response) => isLoggedin(request, settings => {
 		activeRooms = JSON.stringify(result);
 		response.render('home.html', { username: request.session.account_username, role: request.session.account_role, rooms: activeRooms });
 	});
-	
+
 	let search = request.query.search;
 	console.log("Search Query: ", search);
 
@@ -642,21 +649,23 @@ app.post('/edit_profile', (request, response) => isLoggedin(request, settings =>
 
 // http://localhost:3000/room - display the room page
 app.get(['/room'], (request, response) => isLoggedin(request, settings => {
-	
+
 	const id = request.params; //params = {id:"000000"} for joining or creating a room 
 	var room = request.query;
-	
+
 
 	console.log("Req.params ", id);
 	console.log("Query: ", room);
-	
+
 	if (room.join == 1) { // if joining room
 
 		connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, result) {
 			if (err) throw err;
-			//console.log("Previous rooms.SQL: ", result);
+			console.log("Previous rooms.SQL: ", result);
 
-			connection.query("UPDATE rooms SET users = ? WHERE roomID = ?", [result.users + "," + room.user, room.roomID], function (err, addUserResult) {
+			var thing = result;
+
+			connection.query("UPDATE rooms SET users = ? WHERE roomID = ?", [thing.users + "," + room.user, room.roomID], function (err, addUserResult) {
 				if (err) throw err;
 				// console.log(addUserResult.affectedRows + " record(s) updated");
 			});
@@ -667,26 +676,26 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 				activeRoom = JSON.stringify(finalresult);
 				console.log("Joined Room Info: ", activeRoom);
 				// Render room templateconsole.log("Post rooms.SQL: ", result);
-				response.render('room.html', { username: request.session.account_username, role: request.session.account_role, jroom: activeRoom, usern: "username"});
-					
+				response.render('room.html', { username: request.session.account_username, role: request.session.account_role, jroom: activeRoom, juser: "username", roomId: room.roomID});
+
 			});
-			
+
 		});
-		
-		
+
+
 	} else if (room.create == 1) {// if creating a room
-		
+
 		var createRoomInfo = room;
 		connection.query('INSERT INTO rooms (roomID, host, passcode, topic, teams, users, private, watchCost, joinCost, tags) VALUES (?,?,?,?,?,?,?,?,?,?)', [room.roomID, room.host, room.passcode, room.topic, room.teams, room.users, room.private, room.watchcost, room.joincost, room.tags], function (err, result) {
 			if (err) throw err;
 			console.log("1 record inserted");
 		});
 		// Render room page
-		response.render('room.html', { username: request.session.account_username, role: request.session.account_role, room: createRoomInfo});
+		response.render('room.html', { username: request.session.account_username, role: request.session.account_role, room: createRoomInfo, roomID: roomID});
 
 	} else {
 		// Render room template
-		response.render('room.html', { username: request.session.account_username, role: request.session.account_role, roomInfo: room});
+		response.render('room.html', { username: request.session.account_username, role: request.session.account_role, roomInfo: room, roomID: roomID });
 	}
 
 }, () => {
@@ -1165,8 +1174,20 @@ const timeElapsedString = date => {
 
 // Run when client connects
 io.on('connection', socket => {
-	socket.on('joinRoom', ({ username, room }) => {
-		const user = userJoin(socket.id, username, room);
+	//WEBRTC
+	socket.on('join-room', (roomId, username) => {
+		var userId = username;
+		socket.join(roomId)
+		socket.to(roomId).broadcast.emit('user-connected', userId)
+
+		socket.on('disconnect', () => {
+			socket.to(roomId).broadcast.emit('user-disconnected', userId)
+		})
+	})
+
+	//LIVE CHAT
+	socket.on('joinRoom', ({ username, room, nickname, points, xp }) => {
+		const user = userJoin(socket.id, username, nickname, points, xp, room);
 
 		socket.join(user.room);
 
@@ -1187,6 +1208,8 @@ io.on('connection', socket => {
 			users: getRoomUsers(user.room)
 		});
 	});
+
+
 
 	// Listen for chatMessage
 	socket.on('chatMessage', msg => {

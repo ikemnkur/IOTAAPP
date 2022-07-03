@@ -2,25 +2,38 @@ const chatForm = document.getElementById('chat-form');
 const chatMessages = document.querySelector('.chat-messages');
 const roomName = document.getElementById('room-name');
 const userList = document.getElementById('users');
-const chatJSONtext = document.getElementById("roomJSON");
-const chatJSON = JSON.parse(chatJSONtext.innerText);
+
+const roomJSONtext = document.getElementById("roomJSON");
+const userJSONtext = document.getElementById("userJSON");
+
+const roomJSON = JSON.parse(roomJSONtext.innerText);
+// const userJSON = JSON.parse(userJSONtext.innerText);
 
 // Get username and room from URL
 // const {roomID, topic, user } = Qs.parse(location.search, {
 //   ignoreQueryPrefix: true,
 // });
 
-const team = document.getElementById("teams").value;
+// const mysql = require('mysql');
+// const connection = mysql.createConnection({
+// 	host: 'localhost',
+// 	user: 'root',
+// 	password: '',
+// 	database: 'nodelogin',
+// 	multipleStatements: true
+// });
+
+
 var nickname = document.getElementById("nickname").value;
 var secretMode = document.getElementById("secret").checked;
 const username = document.getElementById("roomuser").innerText;
-const room = chatJSON[0]["roomID"];
-const topic = chatJSON[0]["topic"];
-var points = 0;
+const room = roomJSON[0]["roomID"];
+const topic = roomJSON[0]["topic"];
+var points = 0, xp = 0;
 const socket = io();
 
 // Join chatroom
-socket.emit('joinRoom', { username, room });
+socket.emit('joinRoom', { username, nickname, points, xp, room });
 
 // Get room and users
 socket.on('roomUsers', ({ room, users }) => {
@@ -64,15 +77,16 @@ function outputMessage(message) {
   div.classList.add('message');
   const p = document.createElement('p');
   p.classList.add('meta');
-  nickname = document.getElementById("nickname").value;
+  var nickname = document.getElementById("nickname").value;
+  var team = document.getElementById("teams").value;
   secretMode = document.getElementById("secret").checked;
   if (secretMode == true) {
-    p.innerText = "• " + document.getElementById("nickname").value;
+    p.innerText = "• " + message.nickname;
   } else if (secretMode == false){
-    p.innerText = "• " + message.username + " AKA " + document.getElementById("nickname").value;
+    p.innerText = "• " + message.username + " AKA " +  message.nickname;
   }
 
-  p.innerHTML += `<span > ${" Team: " + team + " XP: " + points} </span> <span>${" " + message.time} </span>`;
+  p.innerHTML += `<span > ${" Team: " + team + " Coins: " + points + " XP: " + message.xp} </span> <span>${" " + message.time} </span>`;
   div.appendChild(p);
   const para = document.createElement('p');
   para.classList.add('text');
