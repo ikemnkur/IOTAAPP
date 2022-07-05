@@ -17,10 +17,12 @@
     </script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js">
     </script>
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
     <script defer src="https://unpkg.com/peerjs@1.2.0/dist/peerjs.min.js"></script>
     <script src="/socket.io/socket.io.js" defer></script>
     <script src="script.js" defer></script>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
     <style>
         /* Text alignment for body */
         body {
@@ -154,7 +156,21 @@
                 <h3><i class="fas fa-smile"></i> Lobby:</h3>
                 <h2 id="teamnames"></h2>
                 <h3><i class="fas fa-users"></i> Users</h3>
-                <ul id="users"></ul>
+                <!-- <ul id="users"></ul> -->
+                <table >
+                    <tbody>
+                        <tr>
+                            <th>&nbsp;Name</th>
+                            <th>&nbsp;Tip</th>
+                            <th>Friend&nbsp;</th>
+                            <th>Block&nbsp;</th>
+                        </tr>
+                    </tbody>
+                    <tbody id="users">
+                        
+                    </tbody>
+                </table>
+                <!-- DivTable.com -->
             </div>
             <div class="chat-messages"></div>
         </main>
@@ -176,11 +192,9 @@
 
     </script>
 
-    <script 
-        src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.2/qs.min.js"
-        integrity="sha256-TDxXjkAUay70ae/QJBEpGKkpVslXaHHayklIVglFRT4=" 
-        crossorigin="anonymous">
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.2/qs.min.js"
+        integrity="sha256-TDxXjkAUay70ae/QJBEpGKkpVslXaHHayklIVglFRT4=" crossorigin="anonymous">
+        </script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/room.js"></script>
     <script src="js/modal.js"></script>
@@ -191,6 +205,7 @@
     </script>
     <script>
         const ROOM_ID = document.getElementById("roomID").innerText;
+        console.log("ROOM_ID: ", ROOM_ID);
     </script>
 </body>
 

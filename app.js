@@ -15,6 +15,7 @@ const http = require('http');
 const socketio = require('socket.io');
 const url = require('url');
 const formatMessage = require('./utils/messages');
+// const addFriend = require('./public/js/chat');
 //const roomInfo = require('./public/js/room');
 const {
 	userJoin,
@@ -652,7 +653,7 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 
 	const id = request.params; //params = {id:"000000"} for joining or creating a room 
 	var room = request.query;
-
+	var thing;
 
 	console.log("Req.params ", id);
 	console.log("Query: ", room);
@@ -663,7 +664,7 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 			if (err) throw err;
 			console.log("Previous rooms.SQL: ", result);
 
-			var thing = result;
+			thing = result;
 
 			connection.query("UPDATE rooms SET users = ? WHERE roomID = ?", [thing.users + "," + room.user, room.roomID], function (err, addUserResult) {
 				if (err) throw err;
@@ -1249,3 +1250,16 @@ io.on('connection', socket => {
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// const addAnFriend = function addFriend(username, friendname){
+// 	var friendList;
+// 	connection.query("SELECT friends FROM users WHERE username = ?", [username], function (err, result) {
+// 		if (err) throw err;
+// 		console.log("Friend: ", result);
+// 		friendList = result;
+// 	});	
+// 	connection.query("UPDATE accounts SET friend = ? WHERE users = ?", [friendList + "," + friendname, username], function (err, addUserResult) {
+// 		if (err) throw err;
+// 		console.log(addUserResult.affectedRows + " record(s) updated");
+// 	});
+// }
