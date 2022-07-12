@@ -140,28 +140,45 @@ function outputRoomName(room) {
 function outputUsers(users) {
   userList.innerHTML = '';
   users.forEach((user) => {
+    //
+    const friendForm = document.createElement('form');
+    friendForm.method = "post";
+    friendForm.id = "addfriendForm";
+    friendForm.style = "";
+    // friendForm.role = "form";
+    //friendForm.enctype = "multipart/form-data";
     //name
     const tdName = document.createElement('td');
     tdName.innerText = user.username;
     //tip
     const tdTip = document.createElement('td');
-    tdTip.innerText = "+1";
+    tdTip.innerText = "+1";//tdTip.innerHTML = "<span> +1 <span>";
+    const coinBtn = document.createElement('button');
     const coin = document.createElement('i');
     coin.className = "fas fa-coins";
     coin.style = "font-size:24px;color:gray";
-    tdTip.appendChild(coin);
+    coin.onclick = tipUser();
+    coinBtn.type = "sumbit";
+    coinBtn.appendChild(coin);
+    tdTip.appendChild(coinBtn);
 
     //block
     const tdBlock = document.createElement('td');
-    const blocked = document.createElement('i');
-    blocked.className = "fa fa-ban";
-    blocked.style = "font-size:48px;color:red";
-    tdBlock.appendChild(blocked);
+    const blockBtn = document.createElement('button');
+    const block = document.createElement('i');
+    block.className = "fa fa-ban";
+    block.style = "font-size:24px;color:red";
+    block.onclick = blockUser();
+    blockBtn.type = "sumbit";
+    blockBtn.appendChild(block);
+    tdBlock.appendChild(blockBtn);
+    
     //add friend
     var friendname = user.username;
     const tdFriend = document.createElement('td');
+    const friendBtn = document.createElement('button');
     const friend = document.createElement('i');
-    
+    friendBtn.type = "sumbit";
     friendsList.forEach((friendObj) => {
       if (friendObj == friendname) {
         friend.className = "fa fa-check";
@@ -171,21 +188,35 @@ function outputUsers(users) {
         console.log("Not a Friend");
       }
     });
+
+    
     //friend.className = "fa-circle-plus";
     //friend.className = "fa-solid fa-user-group";
     //friend.className = "fas fa-user-friends";
-    friend.style = "font-size:48px;color:green";
+    friend.style = "font-size:24px;color:green";
+    friend.name = "friend";
     //friend.onmouseup = "addFriend(" + username + "," + friendname + ")";
-    friend.onclick = addAnFriend(username, friendname);
-    tdFriend.appendChild(friend);
+    //friend.onclick = addAnFriend(username, friendname);
+    friendBtn.onclick = addFriend();
+    friendBtn.appendChild(friend);
+    tdFriend.appendChild(friendBtn);
     
     const tr = document.createElement('tr');
     // tr.innerText = user.username;
-    tr.appendChild(tdName);
-    tr.appendChild(tdTip);
-    tr.appendChild(tdFriend);
-    tr.appendChild(tdBlock);
-    userList.appendChild(tr);
+    // tr.appendChild(tdName);
+    // tr.appendChild(tdTip);
+    // tr.appendChild(tdFriend);
+    // tr.appendChild(tdBlock);
+    // friendForm.appendChild(tr);
+    // userList.appendChild(friendForm);//userList.appendChild(tr);
+  
+    friendForm.appendChild(tdName);
+    friendForm.appendChild(tdTip);
+    friendForm.appendChild(tdFriend);
+    friendForm.appendChild(tdBlock);
+    tr.appendChild(friendForm);
+    userList.appendChild(tr);//userList.appendChild(tr);
+  
   });
 }
 
@@ -198,3 +229,6 @@ document.getElementById('leave-btn').addEventListener('click', () => {
   }
 });
 
+function tipUser(){};
+function addFriend(){};
+function blockUser(){};

@@ -648,6 +648,17 @@ app.post('/edit_profile', (request, response) => isLoggedin(request, settings =>
 	}
 }));
 
+app.post('/room', (request, response) => isLoggedin(request, settings => {
+	//if (request.method == "POST") {
+	var post = request.body;
+	var friend = post.friend;
+	console.log("friend: ", friend);
+	//}
+}, () => {
+	// Redirect to login page
+	response.redirect('/');
+}));
+
 // http://localhost:3000/room - display the room page
 app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 
@@ -662,12 +673,43 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 
 		connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, result) {
 			if (err) throw err;
-			console.log("Previous rooms.SQL: ", result);
-
+			//console.log("Previous rooms.SQL: ", result);
+			//var thing1 = JSON.stringify(result);
+			//thing = JSON.parse(thing1); 
+			//console.log("thing: ", thing);
 			thing = result;
 
-			connection.query("UPDATE rooms SET users = ? WHERE roomID = ?", [thing.users + "," + room.user, room.roomID], function (err, addUserResult) {
+			var userlist = thing[0]["users"].split(",");
+			var x = (userlist) => userlist.filter((v, i) => userlist.indexOf(v) === i)
+
+			console.log("Output :- " + x(userlist));
+			var duplicate = 0;
+			var outputUserlist;
+			userlist.forEach(myFunction);
+
+			// userlist.forEach(item => {
+			// 	if (item == room.user) {
+			// 		duplicate = 1;
+			// 	}
+			// });
+
+			function myFunction(item, index) {
+				// text += index + ": " + item + "<br>"; 
+				if (item == room.user) {
+					console.log("forEach(Item): ", item);
+					duplicate = 1;
+				}
+			}
+
+			if (duplicate == 1){
+				outputUserlist = x(userlist);
+			}else{
+				outputUserlist = x(userlist) + "," + room.user;
+			}
+				console.log("Output: ", outputUserlist, " || Duplicate: ", duplicate);
+			connection.query("UPDATE rooms SET users = ? WHERE roomID = ?", [outputUserlist, room.roomID], function (err, addUserResult) {
 				if (err) throw err;
+				//console.log("thing[users] = ", thing[0]["users"]);
 				// console.log(addUserResult.affectedRows + " record(s) updated");
 			});
 
@@ -680,7 +722,7 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 
 				connection.query("SELECT * FROM accounts WHERE username = ?", [request.session.account_username], function (err, userStatsResult) {
 					if (err) throw err;
-					userStats = JSON.stringify(userStatsResult);console.log("user Info: ", userStats);
+					userStats = JSON.stringify(userStatsResult); console.log("user Info: ", userStats);
 					response.render('room.html', { username: request.session.account_username, role: request.session.account_role, jroom: activeRoom, juser: userStats, roomId: room.roomID });
 				});
 			});
@@ -1257,7 +1299,7 @@ server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 // 		if (err) throw err;
 // 		console.log("Friend: ", result);
 // 		friendList = result;
-// 	});	
+// 	});
 // 	connection.query("UPDATE accounts SET friend = ? WHERE users = ?", [friendList + "," + friendname, username], function (err, addUserResult) {
 // 		if (err) throw err;
 // 		console.log(addUserResult.affectedRows + " record(s) updated");
