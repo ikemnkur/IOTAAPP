@@ -20,7 +20,7 @@
 const chatForm = document.getElementById('chat-form');
 const chatMessages = document.querySelector('.chat-messages');
 const roomName = document.getElementById('room-name');
-const userList = document.getElementById('users');
+const userList = document.getElementById('usersTable');
 
 const roomJSONtext = document.getElementById("roomJSON");
 const userJSONtext = document.getElementById("userJSON");
@@ -137,6 +137,7 @@ function outputRoomName(room) {
 // }
 
 // Add users to DOM table
+// this supposed to code for the add friend table
 function outputUsers(users) {
   userList.innerHTML = '';
   users.forEach((user) => {
@@ -179,6 +180,7 @@ function outputUsers(users) {
     const friendBtn = document.createElement('button');
     const friend = document.createElement('i');
     friendBtn.type = "sumbit";
+    
     friendsList.forEach((friendObj) => {
       if (friendObj == friendname) {
         friend.className = "fa fa-check";
@@ -202,13 +204,8 @@ function outputUsers(users) {
     tdFriend.appendChild(friendBtn);
     
     const tr = document.createElement('tr');
-    // tr.innerText = user.username;
-    // tr.appendChild(tdName);
-    // tr.appendChild(tdTip);
-    // tr.appendChild(tdFriend);
-    // tr.appendChild(tdBlock);
-    // friendForm.appendChild(tr);
-    // userList.appendChild(friendForm);//userList.appendChild(tr);
+    tr.style = "";
+    
   
     friendForm.appendChild(tdName);
     friendForm.appendChild(tdTip);
@@ -229,6 +226,12 @@ document.getElementById('leave-btn').addEventListener('click', () => {
   }
 });
 
-function tipUser(){};
-function addFriend(){};
-function blockUser(){};
+function tipUser(){
+  // take a coin from one user and add to the others account
+};
+function addFriend(){
+  // used to follow a user, add them to the friend list once
+};
+function blockUser(){
+  // remove friend from follow list and hide thier messages from the chat
+};
