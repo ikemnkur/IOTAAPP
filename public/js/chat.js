@@ -144,10 +144,9 @@ function outputUsers(users) {
     //
     const friendForm = document.createElement('form');
     friendForm.method = "post";
-    friendForm.id = "addfriendForm";
-    friendForm.style = "";
-    // friendForm.role = "form";
-    //friendForm.enctype = "multipart/form-data";
+    //friendForm.id = "addfriendForm";
+    //friendForm.style = "";
+    
     //name
     const tdName = document.createElement('td');
     tdName.innerText = user.username;
@@ -159,7 +158,7 @@ function outputUsers(users) {
     coin.className = "fas fa-coins";
     coin.style = "font-size:24px;color:gray";
     coin.onclick = tipUser();
-    coinBtn.type = "sumbit";
+    coinBtn.type = "submit";
     coinBtn.appendChild(coin);
     tdTip.appendChild(coinBtn);
 
@@ -170,7 +169,7 @@ function outputUsers(users) {
     block.className = "fa fa-ban";
     block.style = "font-size:24px;color:red";
     block.onclick = blockUser();
-    blockBtn.type = "sumbit";
+    blockBtn.type = "submit";
     blockBtn.appendChild(block);
     tdBlock.appendChild(blockBtn);
     
@@ -179,7 +178,7 @@ function outputUsers(users) {
     const tdFriend = document.createElement('td');
     const friendBtn = document.createElement('button');
     const friend = document.createElement('i');
-    friendBtn.type = "sumbit";
+    friendBtn.type = "submit";
     
     friendsList.forEach((friendObj) => {
       if (friendObj == friendname) {
@@ -204,15 +203,13 @@ function outputUsers(users) {
     tdFriend.appendChild(friendBtn);
     
     const tr = document.createElement('tr');
-    tr.style = "";
     
-  
     friendForm.appendChild(tdName);
     friendForm.appendChild(tdTip);
     friendForm.appendChild(tdFriend);
     friendForm.appendChild(tdBlock);
     tr.appendChild(friendForm);
-    userList.appendChild(tr);//userList.appendChild(tr);
+    userList.appendChild(tr);
   
   });
 }
@@ -223,6 +220,7 @@ document.getElementById('leave-btn').addEventListener('click', () => {
   if (leaveRoom) {
     window.location = '../home';
   } else {
+
   }
 });
 
