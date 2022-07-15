@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `last_seen` datetime NOT NULL DEFAULT current_timestamp(),
   `tfa_code` varchar(255) NOT NULL DEFAULT '',
   `ip` varchar(255) NOT NULL DEFAULT '',
+  `coins` int(11) NOT NULL DEFAULT 100,
+  `xp` int(11) NOT NULL DEFAULT 0,
+  `friends` text(5000) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 

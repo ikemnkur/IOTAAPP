@@ -707,7 +707,7 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 				outputUserlist = x(userlist) + "," + room.user;
 			}
 				console.log("Output: ", outputUserlist, " || Duplicate: ", duplicate);
-			connection.query("UPDATE rooms SET users = ? WHERE roomID = ?", [outputUserlist, room.roomID], function (err, addUserResult) {
+			connection.query("UPDATE rooms SET users = ? WHERE roomID = ?", [outputUserlist.toString(), room.roomID], function (err, addUserResult) {
 				if (err) throw err;
 				//console.log("thing[users] = ", thing[0]["users"]);
 				// console.log(addUserResult.affectedRows + " record(s) updated");
