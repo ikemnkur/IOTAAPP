@@ -152,7 +152,7 @@ function outputUsers(users) {
     tdName.innerText = user.username;
     //tip
     const tdTip = document.createElement('td');
-    tdTip.innerText = "+1";//tdTip.innerHTML = "<span> +1 <span>";
+    tdTip.innerText = "+1"; //tdTip.innerHTML = "<span> +1 <span>";
     const coinBtn = document.createElement('button');
     const coin = document.createElement('i');
     coin.className = "fas fa-coins";
@@ -204,11 +204,15 @@ function outputUsers(users) {
     
     const tr = document.createElement('tr');
     
-    friendForm.appendChild(tdName);
-    friendForm.appendChild(tdTip);
-    friendForm.appendChild(tdFriend);
-    friendForm.appendChild(tdBlock);
-    tr.appendChild(friendForm);
+    // friendForm.appendChild(tdName);
+    // friendForm.appendChild(tdTip);
+    // friendForm.appendChild(tdFriend);
+    // friendForm.appendChild(tdBlock);
+    tr.appendChild(tdName);
+    tr.appendChild(tdTip);
+    tr.appendChild(tdFriend);
+    tr.appendChild(tdBlock);
+    // tr.appendChild(friendForm);
     userList.appendChild(tr);
   
   });

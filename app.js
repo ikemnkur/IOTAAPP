@@ -163,7 +163,8 @@ app.post(['/', '/login'], (request, response) => init(request, settings => {
 				// Delete login attempts
 				connection.query('DELETE FROM login_attempts WHERE ip_address = ?', [ip]);
 				// Output success and redirect to home page
-				response.send('success'); // do not change the message as the ajax code depends on it
+				//response.send('success'); // do not change the message as the ajax code depends on it
+				response.redirect('/home');
 				//response.send('<a href="/home">Home</a>');
 				return response.end();
 			} else {
