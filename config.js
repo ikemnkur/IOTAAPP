@@ -1,7 +1,8 @@
 let config = {
     host: 'localhost',
 	user: 'root',
-	password: '',
+	password: 'root',
+	port: 8889,
 	database: 'nodelogin',
 	multipleStatements: true
   };

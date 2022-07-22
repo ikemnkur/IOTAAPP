@@ -23,5 +23,5 @@ const process_form = (ajax_form, captcha_token) => {
         } else {
             document.querySelector(".msg").innerHTML = result;
         }
-    });    
+    });
 };
