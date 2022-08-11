@@ -3,10 +3,10 @@ const roomModalJSON = JSON.parse(modalJSONtext.innerText);
 
 function roomModal() {
 
-    console.log("Room Modal JSON Obj: ", roomModalJSON);
+    // console.log("Room Modal JSON Obj: ", roomModalJSON);
 
-    var cost2join = document.getElementById("CtJ");
-    var cost2watch = document.getElementById("CtW");
+    // var cost2join = document.getElementById("CtJ");
+    // var cost2watch = document.getElementById("CtW");
     var numbOfUsers = document.getElementById("NoU");
 
     var activeUsersList = roomModalJSON[0]["users"];
@@ -14,8 +14,8 @@ function roomModal() {
     var NoU = activeUsersArray.length;
 
     // console.log("Room Modal JSON(topic): ", roomModalJSON[0]["topic"]);
-    cost2join.innerHTML = roomModalJSON[0]["joinCost"];
-    cost2watch.innerText = roomModalJSON[0]["watchCost"];
+    //cost2join.innerHTML = roomModalJSON[0]["joinCost"];
+    //cost2watch.innerText = roomModalJSON[0]["watchCost"];
     numbOfUsers.innerText = NoU;
 
 }

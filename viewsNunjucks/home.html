@@ -27,7 +27,7 @@
                             <label for="Sort">Sort:</label>
                             <a onclick="sortASC()" onmouseout="sortTable()" name="Sort"><i class="fas fa-arrow-up"></i></a>
                             <a onclick="sortDSC()" onmouseout="sortTable()" name="Sort"><i class="fas fa-arrow-down"></i></a>
-                            <p id="order" hidden>
+                            <p id="order">
                                 ASC
                             </p>
                         </code>
@@ -40,13 +40,13 @@
                     <!-- input tag -->
                     <input id="searchbar" onkeyup="searchRooms()" type="text" name="search"
                         placeholder="Search rooms..">
-                    <!-- <input id="searchbar" type="text" name="search" placeholder="Search username or topic..."
-                        value="{{ search }}" class="responsive-width-100"> -->
-                    <!-- <button name="search" type="submit" onclick="searchRooms()"> Search </button> -->
                 </th>
             </tr>
         </Table>
     </form>
+    <div>
+        <p> {{Joke["value"]}}</p>
+    </div>
 </div>
 <div>
     <header>header area</header>

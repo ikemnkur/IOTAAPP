@@ -22,3 +22,19 @@ function getRoomID() {
 function getRoomID() {
     return roomJSON.topic;
 }
+
+async function userLeaveRoom() {
+    const info = {
+        "roomID": roomJSON[0]["roomID"],
+        "user": roomJSON[0]["user"],
+    }
+
+    const res = await fetch("http://localhost:3020/userLeaveRoom", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(info),
+    });
+    
+}

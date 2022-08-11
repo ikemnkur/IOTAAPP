@@ -152,7 +152,7 @@ function sortTable() {
                     break;
                 }
             }
-        } else if (document.getElementById("order").innerText == "DSC"){
+        } else if (document.getElementById("order").innerText == "DSC") {
             for (i = (rows.length - 2); i >= 1; i--) {
                 //start by saying there should be no switching:
                 shouldSwitch = false;
@@ -177,102 +177,3 @@ function sortTable() {
         }
     }
 }
-
-
-function sortTables() {
-    var table, rows, switching, i, x, y, shouldSwitch;
-    table = document.getElementById("myTable");
-    switching = true;
-    /*Make a loop that will continue until
-    no switching has been done:*/
-    while (switching) {
-        //start by saying: no switching is done:
-        switching = false;
-        rows = table.rows;
-        /*Loop through all table rows (except the
-        first, which contains table headers):*/
-        for (i = 1; i < (rows.length - 1); i++) {
-            //start by saying there should be no switching:
-            shouldSwitch = false;
-            /*Get the two elements you want to compare,
-            one from current row and one from the next:*/
-            x = rows[i].getElementsByTagName("TD")[0];
-            y = rows[i + 1].getElementsByTagName("TD")[0];
-            //check if the two rows should switch place:
-            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                //if so, mark as a switch and break the loop:
-                shouldSwitch = true;
-                break;
-            }
-        }
-        if (shouldSwitch) {
-            /*If a switch has been marked, make the switch
-            and mark that a switch has been done:*/
-            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-            switching = true;
-        }
-    }
-}
-
-
-
-/*<script>
-
-    function searchRoom() {
-        var search = document.getElementById("search").value;
-        console.log("Search Value:", search);
-        var rooms = document.getElementById("roomInfo").innerText;
-        console.log("rooms texts:", rooms);
-        var roomsObj = JSON.parse(rooms);
-        var count = 0;
-        roomsObj.forEach(searchRoomObj);
-        console.log("searchRooms()");
-
-        function searchRoomObj(item, index) {
-            topic = roomsObj[index]["topic"];
-            users = roomsObj[index]["users"];
-            const userstxt = users.split(",");
-            host = rooms[index]["host"];
-            const hosttxt = host.split(",");
-            teams = rooms[index]["teams"];
-            const teamstxt = teams.split(",");
-            tags = rooms[index]["tags"];
-            const tagstxt = tags.split(",");
-
-            const lists = document.getElementById("activeRooms");
-
-            if (search) {
-                removeChilds(lists);
-                userstxt.forEach(searchText);
-                hosttxt.forEach(searchText);
-                teamstxt.forEach(searchText);
-                tagstxt.forEach(searchText); console.log("Searched texts ", tagstxt);
-            } else if (search == null) {
-                listRooms();
-                console.log("Searched texts == Null ", tagstxt);
-                removeChilds(lists);
-            } else {
-
-            }
-
-            const removeChilds = (parent) => {
-                while (parent.lastChild) {
-                    parent.removeChild(parent.lastChild);
-                }
-            };
-
-            function searchText(item, index) {
-                var list = document.getElementById("activeRooms");
-                if (item == search) {
-                    count++;
-                    const listitem = document.createElement("li");
-                    listitem.innerText = (count + 1) + ": " + item; // Set list text
-                    listitem.value = item;
-                    list.appendChild(listitem);    // Append to list
-                }
-                console.log("Searched texts Functions: ", tagstxt);
-            }
-        }
-    }
-
-</script> */

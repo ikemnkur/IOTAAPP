@@ -33,8 +33,8 @@ const secret_key = 'your secret key';
 var connection = mysql.createConnection({
 	host: 'localhost',
 	user: 'root',
-	port: 8889,
-	password: 'root',
+	// port: 8889,
+	password: '',//,password: 'root',
 	database: 'nodelogin',
 	multipleStatements: true,
 	bigNumberStrings: true,
@@ -517,6 +517,8 @@ app.post('/twofactor', (request, response) => {
 // http://localhost:3000/home - display the home page
 app.get(['/home'], (request, response) => isLoggedin(request, settings => {
 
+
+
 	connection.query("SELECT * FROM rooms", function (err, result) {
 		if (err) throw err;
 		//console.log("List of rooms: ", result);
@@ -526,6 +528,7 @@ app.get(['/home'], (request, response) => isLoggedin(request, settings => {
 
 	let search = request.query.search;
 	console.log("Search Query: ", search);
+
 
 }, () => {
 	// Redirect to login page
@@ -703,12 +706,12 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 				}
 			}
 
-			if (duplicate == 1){
+			if (duplicate == 1) {
 				outputUserlist = x(userlist);
-			}else{
+			} else {
 				outputUserlist = x(userlist) + "," + room.user;
 			}
-				console.log("Output: ", outputUserlist, " || Duplicate: ", duplicate);
+			console.log("Output: ", outputUserlist, " || Duplicate: ", duplicate);
 			connection.query("UPDATE rooms SET users = ? WHERE roomID = ?", [outputUserlist.toString(), room.roomID], function (err, addUserResult) {
 				if (err) throw err;
 				//console.log("thing[users] = ", thing[0]["users"]);
@@ -724,8 +727,8 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 
 				connection.query("SELECT * FROM accounts WHERE username = ?", [request.session.account_username], function (err, userStatsResult) {
 					if (err) throw err;
-					userStats = JSON.stringify(userStatsResult); console.log("user Info: ", userStats);
-					response.render('room.html', { username: request.session.account_username, role: request.session.account_role, jroom: activeRoom, juser: userStats, roomId: room.roomID });
+					userStats = JSON.stringify(userStatsResult); //console.log("user Info: ", userStats);
+					response.render('room.html', { roomObj: finalresult, username: request.session.account_username, role: request.session.account_role, QJSON: userStatsResult, jroom: activeRoom, juser: userStats, roomId: room.roomID });
 				});
 			});
 
@@ -735,12 +738,19 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 	} else if (room.create == 1) {// if creating a room
 
 		var createRoomInfo = room;
-		connection.query('INSERT INTO rooms (roomID, host, passcode, topic, teams, users, private, watchCost, joinCost, tags) VALUES (?,?,?,?,?,?,?,?,?,?)', [room.roomID, room.host, room.passcode, room.topic, room.teams, room.users, room.private, room.watchcost, room.joincost, room.tags], function (err, result) {
+		connection.query('SELECT * FROM rooms WHERE roomID = ?', [room.roomID], function (err, isRoomDuplicated) {
 			if (err) throw err;
-			console.log("1 record inserted");
+			if (isRoomDuplicated) {
+				console.log("Error: room with similar ID already exist");
+			} else {
+				connection.query('INSERT INTO rooms (roomID, host, passcode, topic, teams, users, private, watchCost, joinCost, tags) VALUES (?,?,?,?,?,?,?,?,?,?)', [room.roomID, room.host, room.passcode, room.topic, room.teams, room.users, room.private, room.watchcost, room.joincost, room.tags], function (err, result) {
+					if (err) throw err;
+					console.log("New room created");
+				});
+				// Render room page
+				response.render('room.html', { username: request.session.account_username, role: request.session.account_role, room: createRoomInfo, roomID: room.roomID });
+			}
 		});
-		// Render room page
-		response.render('room.html', { username: request.session.account_username, role: request.session.account_role, room: createRoomInfo, roomID: room.roomID });
 
 	} else {
 		// Render room template
@@ -1185,7 +1195,7 @@ const settingsFormatForm = settings => {
 
 // Get settings from database
 const getSettings = callback => {
-	try{
+	try {
 		connection.query('SELECT * FROM settings ORDER BY id', (error, settings, fields) => {
 			settings2 = {};
 			for (let setting in settings) {
@@ -1193,8 +1203,8 @@ const getSettings = callback => {
 			}
 			callback(settings2);
 		});
-	}catch(e) {
-        console.log(e);
+	} catch (e) {
+		console.log(e);
 	}
 };
 
@@ -1266,12 +1276,12 @@ io.on('connection', socket => {
 
 	// Listen for chatMessage
 	socket.on('chatMessage', msg => {
-		try{
+		try {
 			const user = getCurrentUser(socket.id);
 
 			io.to(user.room).emit('message', formatMessage(user.username, msg));
-		}catch(e) {
-             console.log(e);
+		} catch (e) {
+			console.log(e);
 		}
 	});
 
@@ -1279,10 +1289,20 @@ io.on('connection', socket => {
 	socket.on('disconnect', () => {
 		const user = userLeave(socket.id);
 
+		// connection.query('SELECT * FROM rooms WHERE roomID = ?', [user.room], function (err, result) {
+        //     if (err) {
+        //         throw err;
+        //     }					
+        //     console.log("Fetch all rooms Result: ", result);
+        //     res.json({
+        //         result
+        //     });
+        // });	
+
 		if (user) {
 			io.to(user.room).emit(
 				'message',
-				formatMessage(botName, `${user.username} has left the chat`)
+				formatMessage(botName, `${user.username} has left the chat in room: ${user.room}`)
 			);
 
 			// Send users and room info
@@ -1296,56 +1316,56 @@ io.on('connection', socket => {
 
 app.post('/tip', (request, response) => isLoggedin(request, settings => {
 	console.log(request.body);
-  var tipUser = request.body.tipUser;
-  var currentUser = request.body.currentUser;
-  console.log("tip user => ", tipUser);
-  console.log("current user => ", currentUser);
-  try{
-	connection.query("UPDATE accounts SET coins=coins-1 WHERE username=?", [currentUser], (error, results, fields) => {
-		if(error) throw error;
+	var tipUser = request.body.tipUser;
+	var currentUser = request.body.currentUser;
+	console.log("tip user => ", tipUser);
+	console.log("current user => ", currentUser);
+	try {
+		connection.query("UPDATE accounts SET coins=coins-1 WHERE username=?", [currentUser], (error, results, fields) => {
+			if (error) throw error;
 
-		  connection.query("UPDATE accounts SET coins=coins+1 WHERE username=?", [tipUser], (error, results, fields) => {
-            if(error) throw error;
-		  });
-	});
-  }catch(e) {
-	throw e;
-  }
+			connection.query("UPDATE accounts SET coins=coins+1 WHERE username=?", [tipUser], (error, results, fields) => {
+				if (error) throw error;
+			});
+		});
+	} catch (e) {
+		throw e;
+	}
 }));
 
 
 app.post('/follow', (request, response) => isLoggedin(request, settings => {
 	var tipUser = request.body.tipUser;
 	var currentUser = request.body.currentUser;
-	try{
-	  connection.query("UPDATE accounts SET friends=CONCAT(friends, ?) WHERE username=?", [","+tipUser, currentUser], (error, results, fields) => {
-		  if(error) throw error;
-		  //console.log(results);
-	  });
-	}catch(e) {
-	  throw e;
+	try {
+		connection.query("UPDATE accounts SET friends=CONCAT(friends, ?) WHERE username=?", ["," + tipUser, currentUser], (error, results, fields) => {
+			if (error) throw error;
+			//console.log(results);
+		});
+	} catch (e) {
+		throw e;
 	}
-  }));
+}));
 
-  app.post('/block', (request, response) => isLoggedin(request, settings => {
+app.post('/block', (request, response) => isLoggedin(request, settings => {
 	var tipUser = request.body.tipUser;
 	var roomId = request.body.roomId;
-	try{
-	  connection.query("UPDATE rooms SET users=REPLACE(users,?,'') WHERE roomID=?", [tipUser, roomId], (error, results, fields) => {
-		  if(error) throw error;
-		  //console.log(results);
-	  });
-	}catch(e) {
-	  throw e;
+	try {
+		connection.query("UPDATE rooms SET users=REPLACE(users,?,'') WHERE roomID=?", [tipUser, roomId], (error, results, fields) => {
+			if (error) throw error;
+			//console.log(results);
+		});
+	} catch (e) {
+		throw e;
 	}
-  }));
+}));
 
 // // Listen on port 3000 (http://localhost:3003.js/)
 // app.listen(3003, () => {
 // 	console.log("Listen on port 3000 (http://localhost:3003");
 // });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 

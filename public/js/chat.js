@@ -1,22 +1,5 @@
-// let mysql = require('mysql');
-// let config = require('../../config');
 
-//const { user } = require("../../config");
-//const { io } = require("socket.io-client");
-// let connection = mysql.createConnection(config);
-
-// function addFriend(username, friendname){
-// 	var friendList;
-// 	connection.query("SELECT friends FROM users WHERE username = ?", [username], function (err, result) {
-// 		if (err) throw err;
-// 		console.log("Friend: ", result);
-// 		friendList = result;
-// 	});
-// 	connection.query("UPDATE accounts SET friend = ? WHERE users = ?", [friendList + "," + friendname, username], function (err, addUserResult) {
-// 		if (err) throw err;
-// 		console.log(addUserResult.affectedRows + " record(s) updated");
-// 	});
-// }
+const portnum = 3000;
 
 const chatForm = document.getElementById("chat-form");
 const chatMessages = document.querySelector(".chat-messages");
@@ -43,15 +26,17 @@ var xp = userJSON[0].xp;
 var friends = userJSON[0].friends;
 var friendsList = friends.split(",");
 
-const socket = io({transports: ["websocket"],pingInterval: 1000 * 60 * 5,
-pingTimeout: 1000 * 60 * 3});
+const socket = io({
+  transports: ["websocket"], pingInterval: 1000 * 60 * 5,
+  pingTimeout: 1000 * 60 * 3
+});
 
 // Join chatroom
 socket.emit("joinRoom", { username, nickname, points, xp, room });
 
 // Get room and users
-socket.on("roomUsers", ({ room, users }) => {
-  outputRoomName(room);
+socket.on("roomUsers", ({ room, users}) => {
+  outputRoomName(topic);
   outputUsers(users);
 });
 
@@ -101,15 +86,28 @@ function outputMessage(message) {
     p.innerText = "• " + message.username + " AKA " + message.nckName;
   }
   // out put the team and xp info
-  p.innerHTML += `<span > ${
-    " Team: " + message.team + " XP: " + message.xp
-  } </span> <span>${" " + message.time} </span>`;
+  p.innerHTML += `<span > ${" Team: " + message.team + " XP: " + message.xp
+    } </span> <span>${" " + message.time} </span>`;
   div.appendChild(p);
   const para = document.createElement("p");
   para.classList.add("text");
   para.innerText = message.msgText; //output the message text
   div.appendChild(para);
   document.querySelector(".chat-messages").appendChild(div);
+}
+
+function teamsDisplay(){
+  var teams = document.getElementById("teamnames");
+  var teamlist = teams.innerText.split(",");
+  teams.innerText = '';
+  teamlist.forEach((item, index) => {
+    const list = document.createElement("li");
+    list.innerText = index + ". " + item; list.style = "list-style-type: none;";
+    var btn = document.createElement("button");
+    btn.innerText = "Switch";
+    list.appendChild(btn);
+    teams.appendChild(list);
+  })
 }
 
 // Add room name to DOM
@@ -138,90 +136,94 @@ function outputRoomName(room) {
 function outputUsers(users) {
   userList.innerHTML = "";
   users.forEach((user) => {
-    //
-    //const friendForm = document.createElement('form');
-    //friendForm.method = "post";
-    //friendForm.id = "addfriendForm";
-    //friendForm.style = "";
-    //name
-    const tdName = document.createElement("td");
-    tdName.innerText = user.username;
-    //tip
-    const tdTip = document.createElement("td");
-    tdTip.innerText = "+1"; //tdTip.innerHTML = "<span> +1 <span>";
-    const coinBtn = document.createElement("button");
-    const coin = document.createElement("i");
-    coin.className = "fas fa-coins";
-    coin.style = "font-size:24px;color:gray";
-    coin.onclick = tipUser();
-    coinBtn.type = "submit";
-    coinBtn.appendChild(coin);
-    tdTip.appendChild(coinBtn);
+    console.log("user.username = ", user.username);
+    if (user.username == userJSON[0].username) {
+      const tdName = document.createElement("td");
+      tdName.innerText = user.username; 
+      tr.appendChild(tdName);
+      userList.appendChild(tr);
 
-    //block
-    const tdBlock = document.createElement("td");
-    const blockBtn = document.createElement("button");
-    const block = document.createElement("i");
-    block.className = "fa fa-ban";
-    block.style = "font-size:24px;color:red";
-    block.onclick = blockUser();
-    blockBtn.type = "submit";
-    blockBtn.appendChild(block);
-    tdBlock.appendChild(blockBtn);
+    } else {
+      //name
+      const tdName = document.createElement("td");
+      tdName.innerText = user.username;
+      //tip
+      const tdTip = document.createElement("td");
+      tdTip.innerText = "+1"; //tdTip.innerHTML = "<span> +1 <span>";
+      const coinBtn = document.createElement("button");
+      const coin = document.createElement("i");
+      coin.className = "fas fa-coins";
+      coin.style = "font-size:24px;color:gray";
+      coin.onclick = tipUser();
+      coinBtn.type = "submit";
+      coinBtn.appendChild(coin);
+      tdTip.appendChild(coinBtn);
 
-    console.log(friendsList);
+      //block
+      const tdBlock = document.createElement("td");
+      const blockBtn = document.createElement("button");
+      const block = document.createElement("i");
+      block.className = "fa fa-ban";
+      block.style = "font-size:24px;color:red";
+      block.onclick = blockUser();
+      blockBtn.type = "submit";
+      blockBtn.appendChild(block);
+      tdBlock.appendChild(blockBtn);
 
-    //add friend
-    var friendname = user.username;
-    const tdFriend = document.createElement("td");
-    const friendBtn = document.createElement("button");
-    const friend = document.createElement("i");
-    friendBtn.type = "submit";
+      console.log(friendsList);
 
-    friendsList.forEach((friendObj) => {
-      console.log(friendObj);
-      //tdFriend.append(friendObj);
-      if (friendObj == friendname) {
-        friend.className = "fa fa-check";
-        console.log("A friend");
-      } else {
-        friend.className = "fa fa-plus-square";
-        console.log("Not a Friend");
-      }
-    });
+      //add friend
+      var friendname = user.username;
+      const tdFriend = document.createElement("td");
+      const friendBtn = document.createElement("button");
+      const friend = document.createElement("i");
+      friendBtn.type = "submit";
 
-    //friend.className = "fa-circle-plus";
-    //friend.className = "fa-solid fa-user-group";
-    //friend.className = "fas fa-user-friends";
-    friend.style = "font-size:24px;color:green";
-    friend.name = "friend";
-    //friend.onmouseup = "addFriend(" + username + "," + friendname + ")";
-    //friend.onclick = addAnFriend(username, friendname);
-    friendBtn.onclick = addFriend();
-    friendBtn.appendChild(friend);
-    tdFriend.appendChild(friendBtn);
+      // friendsList.forEach((friendObj) => {
+      //   console.log(friendObj);
+      //   //tdFriend.append(friendObj);
+      //   if (friendObj == friendname) {
+      //     friend.className = "fa fa-check";
+      //     console.log("A friend");
+      //   } else {
+      //     friend.className = "fa fa-plus-square";
+      //     console.log("Not a Friend");
+      //   }
+      // });
 
-    const tr = document.createElement("tr");
+      //friend.className = "fa-circle-plus";
+      //friend.className = "fa-solid fa-user-group";
+      //friend.className = "fas fa-user-friends";
+      friend.style = "font-size:24px;color:green";
+      friend.name = "friend";
+      //friend.onmouseup = "addFriend(" + username + "," + friendname + ")";
+      //friend.onclick = addAnFriend(username, friendname);
+      friendBtn.onclick = addFriend();
+      friendBtn.appendChild(friend);
+      tdFriend.appendChild(friendBtn);
 
-    tr.appendChild(tdName);
-    tr.appendChild(tdTip);
-    tr.appendChild(tdFriend);
-    tr.appendChild(tdBlock);
-    //tr.appendChild(friendForm);
-    userList.appendChild(tr);
+      const tr = document.createElement("tr");
 
-    tdTip.addEventListener("click", function () {
-      //alert("Tip me");
-      tipUser(username, tdName.innerText);
-    });
+      tr.appendChild(tdName);
+      tr.appendChild(tdTip);
+      tr.appendChild(tdFriend);
+      tr.appendChild(tdBlock);
+      //tr.appendChild(friendForm);
+      userList.appendChild(tr);
 
-    tdFriend.addEventListener("click", function () {
-      addFriend(username, tdName.innerText);
-    });
+      tdTip.addEventListener("click", function () {
+        //alert("Tip me");
+        tipUser(username, tdName.innerText);
+      });
 
-    tdBlock.addEventListener("click", function () {
-      blockUser(tdName.innerText, room);
-    });
+      tdFriend.addEventListener("click", function () {
+        addFriend(username, tdName.innerText);
+      });
+
+      tdBlock.addEventListener("click", function () {
+        blockUser(tdName.innerText, room);
+      });
+    }
   });
 }
 
@@ -241,27 +243,29 @@ function tipUser(currentUser, tipUser) {
     tipUser: tipUser,
     coins: userJSON[0].coins
   };
-  postData("http://localhost:3001/tip", payload).then((data) => {
+  postData("http://localhost:" + portnum + "/tip", payload).then((data) => {
     //console.log(data);
   });
 }
+
 function addFriend(currentUser, tipUser) {
   // used to follow a user, add them to the friend list once
   payload = {
     currentUser: currentUser,
     tipUser: tipUser
   };
-  postData("http://localhost:3001/follow", payload).then((data) => {
+  postData("http://localhost:" + portnum + "/follow", payload).then((data) => {
     //console.log(data);
   });
 }
+
 function blockUser(tipUser, roomId) {
   // remove friend from follow list and hide thier messages from the chat
   payload = {
     tipUser: tipUser,
     roomId: roomId
   };
-  postData("http://localhost:3001/block", payload).then((data) => {
+  postData("http://localhost:" + portnum + "/block", payload).then((data) => {
     //console.log(data);
   });
 }
@@ -283,3 +287,5 @@ async function postData(url = "", data = {}) {
   });
   return response.json(); // parses JSON response into native JavaScript objects
 }
+
+teamsDisplay();
