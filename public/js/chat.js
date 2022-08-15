@@ -17,7 +17,10 @@ const userJSON = JSON.parse(userJSONtext.innerText);
 //   ignoreQueryPrefix: true,
 // });
 
-const username = document.getElementById("roomuser").innerText;
+console.log("USER JSON: ", userJSON);
+
+const username = userJSON[0]["username"];
+// const username = user.username;
 const room = roomJSON[0]["roomID"];
 const topic = roomJSON[0]["topic"];
 
@@ -35,7 +38,7 @@ const socket = io({
 socket.emit("joinRoom", { username, nickname, points, xp, room });
 
 // Get room and users
-socket.on("roomUsers", ({ room, users}) => {
+socket.on("roomUsers", ({ room, users }) => {
   outputRoomName(topic);
   outputUsers(users);
 });
@@ -82,8 +85,13 @@ function outputMessage(message) {
   if (secretMode == true) {
     p.innerText = "• " + message.nckName; // output nickname
   } else if (secretMode == false) {
-    // output username and nickname
-    p.innerText = "• " + message.username + " AKA " + message.nckName;
+    if (message.nckName == '') {
+      p.innerText = "• " + message.username;
+    } else {
+      // output username and nickname
+      p.innerText = "• " + message.username + " AKA " + message.nckName;
+
+    }
   }
   // out put the team and xp info
   p.innerHTML += `<span > ${" Team: " + message.team + " XP: " + message.xp
@@ -96,15 +104,20 @@ function outputMessage(message) {
   document.querySelector(".chat-messages").appendChild(div);
 }
 
-function teamsDisplay(){
+function teamsDisplay() {
   var teams = document.getElementById("teamnames");
   var teamlist = teams.innerText.split(",");
   teams.innerText = '';
   teamlist.forEach((item, index) => {
     const list = document.createElement("li");
-    list.innerText = index + ". " + item; list.style = "list-style-type: none;";
+    list.style = "list-style-type: none;";
+    const listText = document.createElement("a");
+    listText.innerText = item;
+    //list.innerText = item; 
     var btn = document.createElement("button");
-    btn.innerText = "Switch";
+    btn.innerText = "Join";
+    btn.style = "padding-left: 2px; color: black;";
+    list.appendChild(listText);
     list.appendChild(btn);
     teams.appendChild(list);
   })
@@ -115,22 +128,6 @@ function outputRoomName(room) {
   roomName.innerText = room;
 }
 
-// function addFriend(username, friendname){
-// 	var friendList;
-//   var result;
-// 	//connection.query("SELECT friends FROM users WHERE username = ?", [username], function (err, result) {
-// 		//if (err) throw err;
-// 		console.log("Friend: ", result);
-// 		friendList = result;
-// //	});
-// 	//connection.query("UPDATE accounts SET friend = ? WHERE users = ?", [friendList + "," + friendname, username], function (err, addUserResult) {
-// 		//if (err) throw err;
-// 	//	console.log(addUserResult.affectedRows + " record(s) updated");
-// 	//});
-// }
-
-// // Add users to DOM
-
 // Add users to DOM table
 // this supposed to code for the add friend table
 function outputUsers(users) {
@@ -139,7 +136,8 @@ function outputUsers(users) {
     console.log("user.username = ", user.username);
     if (user.username == userJSON[0].username) {
       const tdName = document.createElement("td");
-      tdName.innerText = user.username; 
+      tdName.innerText = user.username;
+      const tr = document.createElement("tr");
       tr.appendChild(tdName);
       userList.appendChild(tr);
 
@@ -154,7 +152,7 @@ function outputUsers(users) {
       const coin = document.createElement("i");
       coin.className = "fas fa-coins";
       coin.style = "font-size:24px;color:gray";
-      coin.onclick = tipUser();
+      // coin.onclick = tipUsers();
       coinBtn.type = "submit";
       coinBtn.appendChild(coin);
       tdTip.appendChild(coinBtn);
@@ -165,7 +163,7 @@ function outputUsers(users) {
       const block = document.createElement("i");
       block.className = "fa fa-ban";
       block.style = "font-size:24px;color:red";
-      block.onclick = blockUser();
+      // block.onclick = blockUser();
       blockBtn.type = "submit";
       blockBtn.appendChild(block);
       tdBlock.appendChild(blockBtn);
@@ -179,17 +177,17 @@ function outputUsers(users) {
       const friend = document.createElement("i");
       friendBtn.type = "submit";
 
-      // friendsList.forEach((friendObj) => {
-      //   console.log(friendObj);
-      //   //tdFriend.append(friendObj);
-      //   if (friendObj == friendname) {
-      //     friend.className = "fa fa-check";
-      //     console.log("A friend");
-      //   } else {
-      //     friend.className = "fa fa-plus-square";
-      //     console.log("Not a Friend");
-      //   }
-      // });
+      friendsList.forEach((item, index) => {
+        console.log(item);
+        //tdFriend.append(friendObj);
+        if (item == friendname) {
+          friend.className = "fa fa-check";
+          console.log("A friend");
+        } else {
+          friend.className = "fa fa-plus-square";
+          console.log("Not a Friend");
+        }
+      });
 
       //friend.className = "fa-circle-plus";
       //friend.className = "fa-solid fa-user-group";
@@ -198,9 +196,25 @@ function outputUsers(users) {
       friend.name = "friend";
       //friend.onmouseup = "addFriend(" + username + "," + friendname + ")";
       //friend.onclick = addAnFriend(username, friendname);
-      friendBtn.onclick = addFriend();
+      // friendBtn.onclick = addFriend();
       friendBtn.appendChild(friend);
       tdFriend.appendChild(friendBtn);
+
+      tdTip.addEventListener("click", function () {
+        alert("Tip me");
+        if (username != tdName.innerText) {
+          tipUsers(username, tdName.innerText);
+          console.log(`${username} Tipped ${tdName.innerText}`);
+        }
+      });
+
+      tdFriend.addEventListener("click", function () {
+        addFriend(username, tdName.innerText);
+      });
+
+      tdBlock.addEventListener("click", function () {
+        blockUser(tdName.innerText, room);
+      });
 
       const tr = document.createElement("tr");
 
@@ -211,18 +225,6 @@ function outputUsers(users) {
       //tr.appendChild(friendForm);
       userList.appendChild(tr);
 
-      tdTip.addEventListener("click", function () {
-        //alert("Tip me");
-        tipUser(username, tdName.innerText);
-      });
-
-      tdFriend.addEventListener("click", function () {
-        addFriend(username, tdName.innerText);
-      });
-
-      tdBlock.addEventListener("click", function () {
-        blockUser(tdName.innerText, room);
-      });
     }
   });
 }
@@ -236,34 +238,51 @@ document.getElementById("leave-btn").addEventListener("click", () => {
   }
 });
 
-function tipUser(currentUser, tipUser) {
-  // take a coin from one user and add to the others account
-  payload = {
-    currentUser: currentUser,
-    tipUser: tipUser,
-    coins: userJSON[0].coins
+// function tipUser(currentUser, tipUser) {
+//   // take a coin from one user and add to the others account
+//   payload = {
+//     currentUser: currentUser,
+//     tipUser: tipUser,
+//     coins: userJSON[0].coins
+//   };
+//   postData("http://localhost:" + portnum + "/tip", payload).then((data) => {
+//     //console.log(data);
+//   });
+// }
+
+
+async function tipUsers(currentUser, userToTip) {
+  var payload = {
+    "currentUser": currentUser,
+    "userToTip": userToTip,
+    // coins: userJSON[0].coins
   };
-  postData("http://localhost:" + portnum + "/tip", payload).then((data) => {
-    //console.log(data);
-  });
+  postData("http://localhost:3000/tip", payload);
+  // const res = await fetch("http://localhost:3000/tip", {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-type": "application/json",
+  //   },
+  //   body: payload,
+  // });
 }
 
-function addFriend(currentUser, tipUser) {
+async function addFriend(currentUser, userToFollow) {
   // used to follow a user, add them to the friend list once
-  payload = {
-    currentUser: currentUser,
-    tipUser: tipUser
+  var payload = {
+    "currentUser": currentUser,
+    "userToFollow": userToFollow
   };
   postData("http://localhost:" + portnum + "/follow", payload).then((data) => {
-    //console.log(data);
+    console.log(data);
   });
 }
 
-function blockUser(tipUser, roomId) {
+async function blockUser(userToBlock, roomId) {
   // remove friend from follow list and hide thier messages from the chat
-  payload = {
-    tipUser: tipUser,
-    roomId: roomId
+  var payload = {
+    "userToBlock": userToBlock,
+    "roomId": roomId
   };
   postData("http://localhost:" + portnum + "/block", payload).then((data) => {
     //console.log(data);
@@ -285,6 +304,7 @@ async function postData(url = "", data = {}) {
     referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
     body: JSON.stringify(data) // body data type must match "Content-Type" header
   });
+  console.log("Posted data: ", data);
   return response.json(); // parses JSON response into native JavaScript objects
 }
 

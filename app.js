@@ -21,7 +21,9 @@ const {
 	userJoin,
 	getCurrentUser,
 	userLeave,
-	getRoomUsers
+	getRoomUsers,
+	getActiveUsers,
+	getActiveRoom
 } = require('./utils/users');
 
 var activeRooms = [];
@@ -669,7 +671,6 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 
 	const id = request.params; //params = {id:"000000"} for joining or creating a room 
 	var room = request.query;
-	var thing;
 
 	console.log("Req.params ", id);
 	console.log("Query: ", room);
@@ -678,51 +679,11 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 
 		connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, result) {
 			if (err) throw err;
-			console.log("Previous rooms.SQL: ", result);
-			//var thing1 = JSON.stringify(result);
-			//thing = JSON.parse(thing1);
-			thing = result;
-			//console.log("thing: ", thing);
-
-			var userlist = thing[0]["users"].split(",");
-			var x = (userlist) => userlist.filter((v, i) => userlist.indexOf(v) === i)
-
-			console.log("Output :- " + x(userlist));
-			var duplicate = 0;
-			var outputUserlist;
-			userlist.forEach(myFunction);
-
-			// userlist.forEach(item => {
-			// 	if (item == room.user) {
-			// 		duplicate = 1;
-			// 	}
-			// });
-
-			function myFunction(item, index) {
-				// text += index + ": " + item + "<br>"; 
-				if (item == room.user) {
-					console.log("forEach(Item): ", item);
-					duplicate = 1;
-				}
-			}
-
-			if (duplicate == 1) {
-				outputUserlist = x(userlist);
-			} else {
-				outputUserlist = x(userlist) + "," + room.user;
-			}
-			console.log("Output: ", outputUserlist, " || Duplicate: ", duplicate);
-			connection.query("UPDATE rooms SET users = ? WHERE roomID = ?", [outputUserlist.toString(), room.roomID], function (err, addUserResult) {
-				if (err) throw err;
-				//console.log("thing[users] = ", thing[0]["users"]);
-				// console.log(addUserResult.affectedRows + " record(s) updated");
-			});
 
 			connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, finalresult) {
 				if (err) throw err;
-				// console.log("Post rooms.SQL: ", finalresult);
 				activeRoom = JSON.stringify(finalresult);
-				console.log("Joined Room Info: ", activeRoom);
+				console.log("Joined Room Info: ", finalresult);
 				// Render room templateconsole.log("Post rooms.SQL: ", result);
 
 				connection.query("SELECT * FROM accounts WHERE username = ?", [request.session.account_username], function (err, userStatsResult) {
@@ -740,10 +701,12 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 		var createRoomInfo = room;
 		connection.query('SELECT * FROM rooms WHERE roomID = ?', [room.roomID], function (err, isRoomDuplicated) {
 			if (err) throw err;
-			if (isRoomDuplicated) {
+			console.log("Duplicate: ", isRoomDuplicated);
+			console.log("Length: ", isRoomDuplicated.length);
+			if ((isRoomDuplicated.length > 0)) {
 				console.log("Error: room with similar ID already exist");
 			} else {
-				connection.query('INSERT INTO rooms (roomID, host, passcode, topic, teams, users, private, watchCost, joinCost, tags) VALUES (?,?,?,?,?,?,?,?,?,?)', [room.roomID, room.host, room.passcode, room.topic, room.teams, room.users, room.private, room.watchcost, room.joincost, room.tags], function (err, result) {
+				connection.query('INSERT INTO rooms (roomID, host, passcode, topic, teams, users, private, watchCost, joinCost, tags) VALUES (?,?,?,?,?,?,?,?,?,?)', [room.roomID, room.host, room.passcode, room.topic, room.teams, { users: room.users }, room.private, room.watchcost, room.joincost, JSON.stringify(room.tags.split(","))], function (err, result) {
 					if (err) throw err;
 					console.log("New room created");
 				});
@@ -1270,6 +1233,8 @@ io.on('connection', socket => {
 			room: user.room,
 			users: getRoomUsers(user.room)
 		});
+
+		ActiveUsers();
 	});
 
 
@@ -1278,7 +1243,6 @@ io.on('connection', socket => {
 	socket.on('chatMessage', msg => {
 		try {
 			const user = getCurrentUser(socket.id);
-
 			io.to(user.room).emit('message', formatMessage(user.username, msg));
 		} catch (e) {
 			console.log(e);
@@ -1288,16 +1252,9 @@ io.on('connection', socket => {
 	// Runs when client disconnects
 	socket.on('disconnect', () => {
 		const user = userLeave(socket.id);
+		console.log("user disconnect event: ", user);
 
-		// connection.query('SELECT * FROM rooms WHERE roomID = ?', [user.room], function (err, result) {
-        //     if (err) {
-        //         throw err;
-        //     }					
-        //     console.log("Fetch all rooms Result: ", result);
-        //     res.json({
-        //         result
-        //     });
-        // });	
+		ActiveUsers();
 
 		if (user) {
 			io.to(user.room).emit(
@@ -1312,21 +1269,54 @@ io.on('connection', socket => {
 			});
 		}
 	});
+
+	function ActiveUsers() {
+		//update users
+		var listOfUsersInRoom = getActiveUsers();
+		var currentRoom = getActiveRoom();
+
+		var data = {
+			room: currentRoom,
+			users: listOfUsersInRoom
+		}
+		console.log("Update Data: ", data);
+		connection.query("UPDATE rooms SET users = ? WHERE roomID = ?", [JSON.stringify(data.users), data.room], (error, updateResults) => {
+			if (error) throw error;
+			console.log("results of update: ", updateResults);
+		});
+	}
 });
 
 app.post('/tip', (request, response) => isLoggedin(request, settings => {
-	console.log(request.body);
-	var tipUser = request.body.tipUser;
-	var currentUser = request.body.currentUser;
-	console.log("tip user => ", tipUser);
+	console.log("tip info: ", request.body);
+	var tipJSON = (request.body);
+	var tippedUser = tipJSON.userToTip;
+	var currentUser = tipJSON.currentUser;
+	var recieverOfCoins; var giverOfCoins; var giveCoins; var recieveCoins;
+	console.log("tip user => ", tippedUser);
 	console.log("current user => ", currentUser);
+	connection.query("SELECT coins FROM accounts WHERE username = ?", [currentUser], (error, coinresults1) => {
+		//giverOfCoins = Object.values(JSON.parse(JSON.stringify(coinresults1)));
+		giverOfCoins = coinresults1;
+		giveCoins = parseInt(giverOfCoins[0]["coins"]);
+		console.log("giverOfCoins: ", giveCoins);
+	});
+	connection.query("SELECT coins FROM accounts WHERE username = ?", [tippedUser], (error, coinresults2) => {
+		recieverOfCoins = coinresults2;
+		// recieverOfCoins = Object.values(JSON.parse(JSON.stringify(coinresults2)));
+		recieveCoins = parseInt(recieverOfCoins[0]["coins"]);
+		console.log("recieverOfCoins: ", recieveCoins);
+	});
+	recieveCoins = recieveCoins + 1;
+	giveCoins = giveCoins - 1;
 	try {
-		connection.query("UPDATE accounts SET coins=coins-1 WHERE username=?", [currentUser], (error, results, fields) => {
+		connection.query("UPDATE accounts SET coins = ? WHERE username = ?", [toString(giveCoins), currentUser], (error, results1) => {
 			if (error) throw error;
-
-			connection.query("UPDATE accounts SET coins=coins+1 WHERE username=?", [tipUser], (error, results, fields) => {
-				if (error) throw error;
-			});
+			console.log("result 1: ", results1);
+		});
+		connection.query("UPDATE accounts SET coins = ? WHERE username = ?", [toString(recieveCoins), tippedUser], (error, results2) => {
+			if (error) throw error;
+			console.log("result 2: ", results2);
 		});
 	} catch (e) {
 		throw e;
@@ -1335,23 +1325,47 @@ app.post('/tip', (request, response) => isLoggedin(request, settings => {
 
 
 app.post('/follow', (request, response) => isLoggedin(request, settings => {
-	var tipUser = request.body.tipUser;
+	var userToBeFollowed = request.body.userToFollow;
 	var currentUser = request.body.currentUser;
-	try {
-		connection.query("UPDATE accounts SET friends=CONCAT(friends, ?) WHERE username=?", ["," + tipUser, currentUser], (error, results, fields) => {
+	var userFriends;
+	connection.query("SELECT friends FROM accounts WHERE username = ?", [currentUser], (error, friendresults1) => {
+		if (error) throw error;
+		console.log("userFriends Results: ", friendresults1);
+		userFriends = JSON.parse(JSON.stringify((friendresults1)));//friendresults1;
+		console.log("userFriends: ", userFriends);
+		setTimeout(doSumn, 500);
+	})
+
+	function doSumn() {
+		try {
+			userFriends.push(userToBeFollowed);
+		} catch (e) {
+			throw e;
+		}
+		connection.query("UPDATE accounts SET friends = ? WHERE username = ?", [JSON.stringify(userFriends), currentUser], (error, results2, fields) => {
 			if (error) throw error;
-			//console.log(results);
+			console.log("Current User Friends: ", friendresults1);
 		});
-	} catch (e) {
-		throw e;
 	}
+
+
+
+
+	// try {
+	// 	connection.query("UPDATE accounts SET friends=CONCAT(friends, ?) WHERE username=?", ["," + tippedUser, currentUser], (error, results, fields) => {
+	// 		if (error) throw error;
+	// 		//console.log(results);
+	// 	});
+	// } catch (e) {
+	// 	throw e;
+	// }
 }));
 
 app.post('/block', (request, response) => isLoggedin(request, settings => {
-	var tipUser = request.body.tipUser;
+	var blockedUser = request.body.userToBlock;
 	var roomId = request.body.roomId;
 	try {
-		connection.query("UPDATE rooms SET users=REPLACE(users,?,'') WHERE roomID=?", [tipUser, roomId], (error, results, fields) => {
+		connection.query("UPDATE rooms SET users=REPLACE(users,?,'') WHERE roomID=?", [blockedUser, roomId], (error, results, fields) => {
 			if (error) throw error;
 			//console.log(results);
 		});

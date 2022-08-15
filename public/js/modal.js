@@ -10,7 +10,10 @@ function roomModal() {
     var numbOfUsers = document.getElementById("NoU");
 
     var activeUsersList = roomModalJSON[0]["users"];
-    const activeUsersArray = activeUsersList.split(",");
+    console.log("Modal Users: ", activeUsersList);
+    //console.log("Modal Users info (parsed): ", JSON.parse(activeUsersList));
+    //const activeUsersArray = activeUsersList.split(",");
+    var activeUsersArray = JSON.parse(activeUsersList);
     var NoU = activeUsersArray.length;
 
     // console.log("Room Modal JSON(topic): ", roomModalJSON[0]["topic"]);
@@ -25,7 +28,8 @@ roomModal();
 var text = "abc, 123, xyz"
 var teams = roomModalJSON[0]["teams"];;
 
-const dropDownItems = teams.split(",");
+// const dropDownItems = teams.split(",");
+const dropDownItems = JSON.parse(teams);
 
 var teamdrpdwn = document.getElementById('teams');
 
