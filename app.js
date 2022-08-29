@@ -663,6 +663,12 @@ app.post('/room', (request, response) => isLoggedin(request, settings => {
 	response.redirect('/');
 }));
 
+app.get('/modal', (request, response) => isLoggedin(request, settings => {
+	
+	response.render('room.html', { roomObj: finalresult, username: request.session.account_username, role: request.session.account_role, userJSON: userStatsResult});
+
+}))
+
 // http://localhost:3000/room - display the room page
 app.get(['/room', '/room:id'], (request, response) => isLoggedin(request, settings => {
 
@@ -686,7 +692,8 @@ app.get(['/room', '/room:id'], (request, response) => isLoggedin(request, settin
 				connection.query("SELECT * FROM accounts WHERE username = ?", [request.session.account_username], function (err, userStatsResult) {
 					if (err) throw err;
 					userStats = JSON.stringify(userStatsResult); //console.log("user Info: ", userStats);
-					response.render('room.html', { roomObj: finalresult, username: request.session.account_username, role: request.session.account_role, userJSON: userStatsResult, jroom: activeRoom, juser: userStats, roomId: room.roomID });
+					response.render('modal.html', {roomObj: finalresult, userJSON: userStatsResult});
+					// response.render('room.html', { roomObj: finalresult, username: request.session.account_username, role: request.session.account_role, userJSON: userStatsResult, jroom: activeRoom, juser: userStats, roomId: room.roomID });
 				});
 			});
 
