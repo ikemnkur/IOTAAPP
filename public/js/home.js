@@ -38,7 +38,7 @@ function listRooms() {
         userslist = rooms[index]["users"];
         // usersArray = userslist.split(",");
         usersArray = JSON.parse(userslist);
-        console.log("Usernames Array: ", usersArray);
+        // console.log("Usernames Array: ", usersArray);
         numberOfUsers = usersArray.length;
         count++;
 

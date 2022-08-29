@@ -15,7 +15,7 @@ function roomModal() {
     //const activeUsersArray = activeUsersList.split(",");
     var activeUsersArray = JSON.parse(activeUsersList);
     var NoU = activeUsersArray.length;
-
+    console.log("Number of Users: ", NoU);
     // console.log("Room Modal JSON(topic): ", roomModalJSON[0]["topic"]);
     //cost2join.innerHTML = roomModalJSON[0]["joinCost"];
     //cost2watch.innerText = roomModalJSON[0]["watchCost"];
@@ -25,13 +25,13 @@ function roomModal() {
 
 roomModal();
 
-var text = "abc, 123, xyz"
+
 var teams = roomModalJSON[0]["teams"];;
 
 // const dropDownItems = teams.split(",");
 const dropDownItems = JSON.parse(teams);
 
-var teamdrpdwn = document.getElementById('teams');
+var teamdrpdwn = document.getElementById('teamSelector');
 
 // for each in the text array add to dropdown list
 dropDownItems.forEach(createDrpDnwList);
@@ -45,17 +45,10 @@ function createDrpDnwList(item, index) {
     teamdrpdwn.appendChild(drpdwnOption);    // Append to body:
 }
 
-function getUserNum() {
-    var text = document.getElementById('NoU').innerText;
-    const userNum = text.split(",");
-    var num = userNum.length;
-    document.getElementById('NoU').innerText = num;
-}
-
 // Loads the Enter room modal at startup
 function loadModal() {
     document.getElementById('id01').style.display = 'block';
 }
 
 loadModal();
-getUserNum();
+// getUserNum();

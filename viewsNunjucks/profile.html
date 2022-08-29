@@ -31,9 +31,30 @@
             {{ account.registered }}
         </div>
 
+        <div class="profile-detail">
+            <strong>Room Creation Config</strong>
+            <table>
+                <tr>
+                    Work In Progress
+                </tr>
+            </table>
+            <p hidden id="data">{{ account.roomConfig }}</p>
+        </div>
+
+        <div class="profile-detail">
+            <strong>Friends</strong>
+            <table id="friendTbl" >
+
+            </table>
+            <p hidden id="friendTblData">{{ account.friends }}</p>
+        </div>
+
         <a class="profile-btn" href="/edit_profile">Edit Details</a>
 
+        
     </div>
 
 </div>
+
+<script src="js/profile.js"></script>
 {% endblock %}

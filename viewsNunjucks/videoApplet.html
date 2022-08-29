@@ -1,0 +1,37 @@
+
+<title>Document</title>
+
+<style>
+  /* #video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 300px);
+    grid-auto-rows: 300px;
+    padding: 10px;
+  } */
+
+  table {
+    border: 5px;
+  }
+/* 
+  video {
+    width: 10%;
+    height: 10%;
+    object-fit: cover;
+  } */
+</style>
+
+<div>
+  <p id="rmID">{{roomId}}</p>
+  <h1>Video PeerJS View</h1>
+  <div id="video-grid">
+    <table id="videoTable"></table>
+  </div>
+</div>
+
+<script>
+  // const ROOM_ID = document.getElementById("rmID").innerText;
+</script>
+
+<script defer src="https://unpkg.com/peerjs@1.2.0/dist/peerjs.min.js"></script>
+<script src="/socket.io/socket.io.js" defer></script>
+<script src="js/video.js" defer></script>

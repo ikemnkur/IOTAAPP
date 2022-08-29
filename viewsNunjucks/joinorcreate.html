@@ -15,16 +15,16 @@
 
             <label for="roomID">Room ID</label>
             <input type="text" placeholder="Enter an unique ID" name="roomID" required>
-            
-            <input hidden type="text" placeholder="{{username}}" name="host" value = "{{username}}">
-            <input hidden type="text" placeholder="{{username}}" name="users" value = "{{username}}">
-            <input hidden type="text" placeholder="0" name="join" value = "0">
-            <input hidden type="text" placeholder="1" name="create" value = "1">
-            <input hidden type="text" placeholder="1" name="private" id="privateBoolean" value = "1">
+
+            <input hidden type="text" placeholder="{{username}}" name="host" value="{{username}}">
+            <input hidden type="text" placeholder="{{username}}" name="users" value="{{username}}">
+            <input hidden type="text" placeholder="0" name="join" value="0">
+            <input hidden type="text" placeholder="1" name="create" value="1">
+            <input hidden type="text" placeholder="1" name="private" id="privateBoolean" value="1">
 
             <label for="passcode">Passcode</label>
             <input type="password" placeholder="Enter Passcode" name="passcode" required>
-            
+
 
             <table style="width:100%;">
                 <tr>
@@ -38,17 +38,18 @@
             </table>
 
             <label for="teams">Teams:</label>
-            <input type="text" placeholder="Enter up to 4 teams" name="teams">
+            <input id="teamsInput" type="text" placeholder="Enter up to 4 teams" name="teams">
 
             <label for="tags">Tags to search with:</label>
-            <input type="text" placeholder="Enter 5 tags using commas" name="tags">
-            
+            <input id="tagsInput" type="text" placeholder="Enter 5 tags using commas" name="tags">
+
             <div style="margin: 5px; padding-bottom: 5px;">
                 <label for="private">Keep Private:</label>
-                <input id="privateBox" type="checkbox" name="private" >
+                <input id="privateBox" type="checkbox" name="private">
+                <label for="private">Save Room Config:</label>
+                <input id="saveConfigBox" type="checkbox" name="saveConfig">
             </div>
-
-            <button type="submit" class="btn" id="create" onclick="checkPrivate()">Create</button>
+            <button type="submit" class="btn" id="create" onclick="submitForm()">Create</button>
             <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
         </form>
     </div>
@@ -63,9 +64,9 @@
             <label for="passcode">Passcode</label>
             <input type="password" placeholder="Enter Passcode" name="passcode" required>
 
-            <input hidden type="text" placeholder="{{username}}" name="user" value = "{{username}}">
-            <input hidden type="text" placeholder="1" name="join" value = "1">
-            <input hidden type="text" placeholder="0" name="create" value = "0">
+            <input hidden type="text" placeholder="{{username}}" name="user" value="{{username}}">
+            <input hidden type="text" placeholder="1" name="join" value="1">
+            <input hidden type="text" placeholder="0" name="create" value="0">
 
             <table style="width:100%; align-content: center;">
                 <tr>
@@ -86,14 +87,25 @@
             document.getElementById("myFormCreate").style.display = "block";
         }
 
-        function checkPrivate(){
+        function submitForm() {
             var value = document.getElementById("privateBox").value;
             console.log("private checkbox: ", value);
-            if (value == true){
+            if (value == true) {
                 document.getElementById("privateBoolean").value = 1;
             } else {
                 document.getElementById("privateBoolean").value = 0;
             }
+            var teams = document.getElementById("teamsInput");
+            var teamArray = teams.value.split(",")
+            teams.value = teamArray;
+            var tags = document.getElementById("tagsInput");
+            var tagArray = tags.value.split(",")
+            tags.value = tagArray;
+            saveRoomConfig();
+        }
+
+        function saveRoomConfig() {
+
         }
 
         function closeForm() {

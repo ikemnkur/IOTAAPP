@@ -1,4 +1,4 @@
-let ajax_form = document.querySelector(".ajax-form");
+et ajax_form = document.querySelector(".ajax-form");
 ajax_form.onsubmit = event => {
     event.preventDefault();
     if (document.querySelector(".g-recaptcha")) {

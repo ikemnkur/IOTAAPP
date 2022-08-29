@@ -66,7 +66,7 @@ const io = require('socket.io')(server)
 app.use(express.static(path.join(__dirname, 'public')));
 
 //botUsername
-const botName = 'ChatCord Bot';
+const botName = 'BOT';
 
 // Set EJS as templating engine
 app.set('view engine', 'ejs');
@@ -519,8 +519,6 @@ app.post('/twofactor', (request, response) => {
 // http://localhost:3000/home - display the home page
 app.get(['/home'], (request, response) => isLoggedin(request, settings => {
 
-
-
 	connection.query("SELECT * FROM rooms", function (err, result) {
 		if (err) throw err;
 		//console.log("List of rooms: ", result);
@@ -530,7 +528,6 @@ app.get(['/home'], (request, response) => isLoggedin(request, settings => {
 
 	let search = request.query.search;
 	console.log("Search Query: ", search);
-
 
 }, () => {
 	// Redirect to login page
@@ -617,7 +614,7 @@ app.post('/edit_profile', (request, response) => isLoggedin(request, settings =>
 				response.render('profile-edit.html', { account: accounts[0], msg: 'Username already exists!', role: request.session.account_role });
 			} else {
 				// Update account with new details
-				connection.query('UPDATE accounts SET username = ?, password = ?, email = ?, activation_code = ? WHERE username = ?', [username, hashedPassword, email, activationCode, request.session.account_username], () => {
+				connection.query('UPDATE accounts SET username = ?, password = ?, email = ?, activation_code = ? WHERE username = ?', [username, hashedPassword, email, activationCode, 00], () => {
 					// Update session with new username
 					request.session.account_username = username;
 					// Output message
@@ -667,9 +664,9 @@ app.post('/room', (request, response) => isLoggedin(request, settings => {
 }));
 
 // http://localhost:3000/room - display the room page
-app.get(['/room'], (request, response) => isLoggedin(request, settings => {
+app.get(['/room', '/room:id'], (request, response) => isLoggedin(request, settings => {
 
-	const id = request.params; //params = {id:"000000"} for joining or creating a room 
+	const id = request.params.id; //params = {id:"000000"} for joining or creating a room 
 	var room = request.query;
 
 	console.log("Req.params ", id);
@@ -689,7 +686,7 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 				connection.query("SELECT * FROM accounts WHERE username = ?", [request.session.account_username], function (err, userStatsResult) {
 					if (err) throw err;
 					userStats = JSON.stringify(userStatsResult); //console.log("user Info: ", userStats);
-					response.render('room.html', { roomObj: finalresult, username: request.session.account_username, role: request.session.account_role, QJSON: userStatsResult, jroom: activeRoom, juser: userStats, roomId: room.roomID });
+					response.render('room.html', { roomObj: finalresult, username: request.session.account_username, role: request.session.account_role, userJSON: userStatsResult, jroom: activeRoom, juser: userStats, roomId: room.roomID });
 				});
 			});
 
@@ -724,6 +721,11 @@ app.get(['/room'], (request, response) => isLoggedin(request, settings => {
 	// Redirect to login page
 	response.redirect('/');
 }));
+
+// app.get('/video:room', (req, res) => {
+// 	console.log("roomID: ", req.params.room)
+// 	res.render('video.html', { roomId: req.params.room })
+// });
 
 // http://localhost:3000/logout - Logout page
 app.get('/logout', (request, response) => {
@@ -1201,15 +1203,26 @@ const timeElapsedString = date => {
 // Run when client connects
 io.on('connection', socket => {
 	//WEBRTC
-	socket.on('join-room', (roomId, username) => {
-		var userId = username;
+	socket.on('join-room', (roomId, userId) => { //socket.on('join-room', (roomId, username) => {
+		console.log("room: ", roomId, ", ", "userId :", userId);
 		socket.join(roomId)
-		socket.to(roomId).broadcast.emit('user-connected', userId)
+		socket.to(roomId).emit('user-connected', userId)
 
 		socket.on('disconnect', () => {
-			socket.to(roomId).broadcast.emit('user-disconnected', userId)
+			socket.to(roomId).emit('user-disconnected', userId)
 		})
 	})
+
+	socket.on('connectNewStream', (roomId, userId, userData) => {
+		console.log("room: ", roomId, ", ", "userId: ", userId);
+		console.log("userData: ", userData);
+		socket.join(roomId)
+		socket.to(roomId).emit('user-connected', userId, userData)
+
+		socket.on('disconnect', () => {
+			socket.to(roomId).emit('user-disconnected', userId)
+		})
+	});
 
 	//LIVE CHAT
 	socket.on('joinRoom', ({ username, room, nickname, points, xp }) => {
@@ -1282,7 +1295,7 @@ io.on('connection', socket => {
 		console.log("Update Data: ", data);
 		connection.query("UPDATE rooms SET users = ? WHERE roomID = ?", [JSON.stringify(data.users), data.room], (error, updateResults) => {
 			if (error) throw error;
-			console.log("results of update: ", updateResults);
+			//console.log("results of update: ", updateResults);
 		});
 	}
 });
@@ -1295,59 +1308,84 @@ app.post('/tip', (request, response) => isLoggedin(request, settings => {
 	var recieverOfCoins; var giverOfCoins; var giveCoins; var recieveCoins;
 	console.log("tip user => ", tippedUser);
 	console.log("current user => ", currentUser);
-	connection.query("SELECT coins FROM accounts WHERE username = ?", [currentUser], (error, coinresults1) => {
+	connection.query("SELECT * FROM accounts WHERE username = ?", [currentUser], (error, coinresults1) => {
 		//giverOfCoins = Object.values(JSON.parse(JSON.stringify(coinresults1)));
-		giverOfCoins = coinresults1;
-		giveCoins = parseInt(giverOfCoins[0]["coins"]);
+		giverOfCoins = coinresults1
+		giveCoins = (giverOfCoins[0]["coins"]) - 1;
 		console.log("giverOfCoins: ", giveCoins);
 	});
 	connection.query("SELECT coins FROM accounts WHERE username = ?", [tippedUser], (error, coinresults2) => {
 		recieverOfCoins = coinresults2;
 		// recieverOfCoins = Object.values(JSON.parse(JSON.stringify(coinresults2)));
-		recieveCoins = parseInt(recieverOfCoins[0]["coins"]);
+
+		recieveCoins = (recieverOfCoins[0]["coins"]) + 1;
 		console.log("recieverOfCoins: ", recieveCoins);
 	});
-	recieveCoins = recieveCoins + 1;
-	giveCoins = giveCoins - 1;
-	try {
-		connection.query("UPDATE accounts SET coins = ? WHERE username = ?", [toString(giveCoins), currentUser], (error, results1) => {
-			if (error) throw error;
-			console.log("result 1: ", results1);
-		});
-		connection.query("UPDATE accounts SET coins = ? WHERE username = ?", [toString(recieveCoins), tippedUser], (error, results2) => {
-			if (error) throw error;
-			console.log("result 2: ", results2);
-		});
-	} catch (e) {
-		throw e;
-	}
-}));
 
+	setTimeout(doSumtin, 1000);
+	// connection.query("UPDATE rooms SET users = ? WHERE roomID = ?", [JSON.stringify(data.users), data.room], (error, updateResults) => {
+	// 	if (error) throw error;
+	// 	console.log("results of update: ", updateResults);
+	// });
+	// try {
+	function doSumtin() {
+		connection.query("UPDATE accounts SET coins = ? WHERE username = ?", [giveCoins, currentUser], (error, results1) => {
+			if (error) throw error;
+			//console.log("result 1: ", results1.affectedRows);
+		});
+		connection.query("UPDATE accounts SET coins = ? WHERE username = ?", [recieveCoins, tippedUser], (error, results2) => {
+			if (error) throw error;
+			//console.log("result 2: ", results2.affectedRows);
+		});
+	}
+
+	// } catch (e) {
+	// 	throw e;
+	// }
+}));
 
 app.post('/follow', (request, response) => isLoggedin(request, settings => {
 	var userToBeFollowed = request.body.userToFollow;
 	var currentUser = request.body.currentUser;
+	var action = request.body.action;
 	var userFriends;
-	connection.query("SELECT friends FROM accounts WHERE username = ?", [currentUser], (error, friendresults1) => {
+	connection.query("SELECT friends FROM accounts WHERE username = ?", [currentUser], (error, friendresults) => {
 		if (error) throw error;
-		console.log("userFriends Results: ", friendresults1);
-		userFriends = JSON.parse(JSON.stringify((friendresults1)));//friendresults1;
+		console.log("userFriends Results: ", friendresults[0]["friends"]);
+		//userFriends = JSON.parse(JSON.stringify((friendresults1)));//friendresults1;
+		try {
+			userFriends = JSON.parse(friendresults[0].friends);
+		} catch (e) {
+			userFriends = [""];
+		}
+		// userFriends = JSON.parse(friendresults[0].friends);
 		console.log("userFriends: ", userFriends);
 		setTimeout(doSumn, 500);
 	})
 
 	function doSumn() {
 		try {
-			userFriends.push(userToBeFollowed);
+			if (action == "fa fa-plus-square") { // add user or remove
+				userFriends.push(userToBeFollowed); // adds to array
+				// filters out duplicates
+				userFriends = userFriends.filter((item, index) => index == userFriends.indexOf(item)); // add a user and remove duplicates
+
+			} else if (action == "fa fa-check") {
+				function removeUser(user) {
+					return userToBeFollowed != user;
+				}
+				userFriends = userFriends.filter(removeUser); // remove a user is added
+			}
+			connection.query("UPDATE accounts SET friends = ? WHERE username = ?", [JSON.stringify(userFriends), currentUser], (error, results2, fields) => {
+				if (error) throw error;
+				//console.log("Current User Friends: ", results2);
+			});
 		} catch (e) {
 			throw e;
 		}
-		connection.query("UPDATE accounts SET friends = ? WHERE username = ?", [JSON.stringify(userFriends), currentUser], (error, results2, fields) => {
-			if (error) throw error;
-			console.log("Current User Friends: ", friendresults1);
-		});
-	}
 
+		console.log("Done Follow Opporation");
+	}
 
 
 
@@ -1363,35 +1401,48 @@ app.post('/follow', (request, response) => isLoggedin(request, settings => {
 
 app.post('/block', (request, response) => isLoggedin(request, settings => {
 	var blockedUser = request.body.userToBlock;
-	var roomId = request.body.roomId;
-	try {
-		connection.query("UPDATE rooms SET users=REPLACE(users,?,'') WHERE roomID=?", [blockedUser, roomId], (error, results, fields) => {
-			if (error) throw error;
-			//console.log(results);
-		});
-	} catch (e) {
-		throw e;
-	}
+	var currentUser = request.body.currentUser;
+	var blockedUsers;
+	connection.query("SELECT blockedUsers FROM accounts WHERE username = ?", [currentUser], (error, blockedUsersresults) => {
+		if (error) throw error;
+		console.log("userFriends Results: ", blockedUsersresults[0]["blockedUsers"]);
+		//userFriends = JSON.parse(JSON.stringify((friendresults1)));//friendresults1;
+		try {
+			blockedUsers = JSON.parse(blockedUsersresults[0]["blockedUsers"]);
+		} catch (e) {
+			blockedUsers = [""];
+		}
+		// userFriends = JSON.parse(friendresults[0].friends);
+		console.log("Blocked Users Array: ", blockedUsers);
+		setTimeout(doSumn, 500);
+	});
+	function doSumn() {
+		try {
+			if (blockedUsers.indexOf(blockedUser) < 0) {
+				console.log("Removing ", blockedUser, " from blocked list");
+				blockedUsers = blockedUsers.filter(blkdUser => blkdUser !== blockedUser);
+			} else {
+				blockedUsers.push(blockedUser); // adds to array
+				// filters out duplicates
+				blockedUsers = blockedUsers.filter((item, index) => index == blockedUsers.indexOf(item));
+				console.log("Adding ", blockedUser, " to blocked list");
+			}
+			connection.query("UPDATE accounts SET blockedUsers = ? WHERE username = ?", [JSON.stringify(blockedUsers), currentUser], (error, results2, fields) => {
+				if (error) throw error;
+				//console.log("Current User Friends: ", results2);
+			});
+		} catch (e) {
+			throw e;
+		}
+		console.log("Done Block Opperation");
+	};
+	// connection.query("UPDATE accounts SET blockedUsers = ? WHERE username = ?", [blockedUser, currentUser], (error, results2, fields) => {
+	// 	if (error) throw error;
+	// 	//console.log("Current User Friends: ", results2);
+	// });
 }));
-
-// // Listen on port 3000 (http://localhost:3003.js/)
-// app.listen(3003, () => {
-// 	console.log("Listen on port 3000 (http://localhost:3003");
-// });
 
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-// const addAnFriend = function addFriend(username, friendname){
-// 	var friendList;
-// 	connection.query("SELECT friends FROM users WHERE username = ?", [username], function (err, result) {
-// 		if (err) throw err;
-// 		console.log("Friend: ", result);
-// 		friendList = result;
-// 	});
-// 	connection.query("UPDATE accounts SET friend = ? WHERE users = ?", [friendList + "," + friendname, username], function (err, addUserResult) {
-// 		if (err) throw err;
-// 		console.log(addUserResult.affectedRows + " record(s) updated");
-// 	});
-// }
