@@ -1,6 +1,7 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
+    
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -86,7 +87,11 @@
 </head>
 
 <body>
-
+    <p hidden id="roomJSON">{{roomOBJ}}</p>
+    <p hidden id="userJSON">{{userJSON}}</p>
+    <p id="nickname">{{nickname}}</p>
+    <p id="secretMode">{{secret}}</p>
+    <p id="team">{{team}}</p> 
     <nav class="navtop">
         <div>
             <h1>Website Title</h1>
@@ -102,7 +107,6 @@
     {% include 'videoApplet.html' %}
     <div></div>
     <!-- MODAL -->
-    <!-- {% include 'modal.html' %} -->
 
     {% include 'chat.html' %}
 
@@ -113,9 +117,8 @@
         </script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/room.js"></script>
-    <script src="js/modal.js"></script>
+    
     <script src="js/chat.js"></script>
    
 </body>
-
 </html>

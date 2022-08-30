@@ -663,11 +663,19 @@ app.post('/room', (request, response) => isLoggedin(request, settings => {
 	response.redirect('/');
 }));
 
-app.get('/modal', (request, response) => isLoggedin(request, settings => {
-	
-	response.render('room.html', { roomObj: finalresult, username: request.session.account_username, role: request.session.account_role, userJSON: userStatsResult});
+app.post('/submitModal', (request, response) => isLoggedin(request, settings => {
+	console.log("Submit Modal Event: ");
+	var roomJSON = request.body.roomOBJ;
+	var userJSON = request.body.userJSON;
+	var nickname = request.body.nickname;
+	var secretMode = request.body.secretMode;
+	var team = request.body.team;
+	app.get(['/newRoom'], (request, response) => isLoggedin(request, settings => {
+		response.render('room.html', { roomObj: roomJSON, roomOBJ: JSON.stringify(roomJSON), userOBJ: userJSON, userJSON: JSON.stringify(userJSON), username: request.session.account_username, role: request.session.account_role, team: team, secretMode: secretMode, nickname: nickname });
+	}))
 
-}))
+	// response.redirect('/room.html', { roomObj: roomJSON, username: request.session.account_username, role: request.session.account_role, userJSON: userJSON, team: team, secretMode: secretMode, nickname: nickname});
+}));
 
 // http://localhost:3000/room - display the room page
 app.get(['/room', '/room:id'], (request, response) => isLoggedin(request, settings => {
@@ -692,8 +700,21 @@ app.get(['/room', '/room:id'], (request, response) => isLoggedin(request, settin
 				connection.query("SELECT * FROM accounts WHERE username = ?", [request.session.account_username], function (err, userStatsResult) {
 					if (err) throw err;
 					userStats = JSON.stringify(userStatsResult); //console.log("user Info: ", userStats);
-					response.render('modal.html', {roomObj: finalresult, userJSON: userStatsResult});
+					response.render('modal.html', { roomObj: finalresult, roomOBJ: JSON.stringify(finalresult), userJSON: JSON.stringify(userStatsResult), userOBJ: userStatsResult });
 					// response.render('room.html', { roomObj: finalresult, username: request.session.account_username, role: request.session.account_role, userJSON: userStatsResult, jroom: activeRoom, juser: userStats, roomId: room.roomID });
+					// app.post('/submitModal', (request, response) => isLoggedin(request, settings => {
+					// 	console.log("Submit Modal Event: ", request.body.secretMode);
+					// 	var roomJSON = request.body.roomOBJ;
+					// 	var userJSON = request.body.userJSON;
+					// 	var nickname = request.body.nickname;
+					// 	var secretMode = request.body.secretMode;
+					// 	var team = request.body.team;
+					// 	//response.send(request.body);
+					// 	//response.status(201).send(request.body);
+					// 	app.get(['/newRoom'], (request, response) => isLoggedin(request, settings => {
+					// 		response.render('room.html', { roomObj: roomJSON, roomOBJ: JSON.stringify(roomJSON), userOBJ: userJSON, userJSON: JSON.stringify(userJSON), username: request.session.account_username, role: request.session.account_role, team: team, secretMode: secretMode, nickname: nickname });
+					// 	}))
+					// }))
 				});
 			});
 
@@ -721,7 +742,8 @@ app.get(['/room', '/room:id'], (request, response) => isLoggedin(request, settin
 
 	} else {
 		// Render room template
-		response.render('room.html', { username: request.session.account_username, role: request.session.account_role, roomInfo: room, roomID: room.roomID });
+		// response.render('room.html', { username: request.session.account_username, role: request.session.account_role, roomInfo: room, roomID: room.roomID });
+		response.render('room.html', { roomObj: finalresult, username: request.session.account_username, role: request.session.account_role, userJSON: userStatsResult, jroom: activeRoom, juser: userStats, roomId: room.roomID });
 	}
 
 }, () => {

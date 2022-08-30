@@ -1,0 +1,130 @@
+<!-- <!DOCTYPE html>
+<html>
+<title>W3.CSS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"> -->
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+<!-- <body> -->
+
+<div class="w3-container">
+  <div id="id01" class="w3-modal">
+    <div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:400px">
+      <p hidden id="roomModalInfo"></p>
+      <header class="w3-container w3-teal">
+        <h2>Enter Room</h2>
+      </header>
+      <div class="w3-center"><br>
+        <span onclick="document.getElementById('id01').style.display='none'"
+          class="w3-button w3-xlarge w3-hover-red w3-display-topright" title="Close Modal">&times;</span>
+      </div>
+
+      <div class="w3-container">
+        <div class="w3-section">
+          <table>
+            <thead>
+              <tr>
+                <th>Cost to Watch</th>
+                <th>Cost to Join</th>
+                <th># of Users</th>
+                <th>Pts. Avail.</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id="CtW">{{roomObj[0]["watchCost"]}} &nbsp;</td>
+                <td id="CtJ">{{roomObj[0]["joinCost"]}}&nbsp;</td>
+                <td id="NoU">&nbsp;</td>
+                <td id="PA">{{userJSON[0]["coins"]}}&nbsp;</td>
+              </tr>
+            </tbody>
+          </table>
+          <label><b>Username</b></label>
+          <input class="w3-input w3-border w3-margin-bottom" type="text" placeholder="Enter Nickname" id="nickname">
+          <div class="w3-input">
+            <label for="teams">Choose a Team:</label>
+            <select name="teams" id="teamSelector">
+            </select>
+            <br><br>
+          </div>
+          <button class="w3-button w3-block w3-green w3-section w3-padding" onclick=sumbitFunc()>Enter</button>
+          <input class="w3-check w3-margin-top" type="checkbox" checked="checked" id="secret"> Secret Mode
+        </div>
+      </div>
+
+      <div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
+        <!-- <button href="/" type="button" class="w3-button w3-red" > Cancel</button> -->
+        <span class="w3-right w3-padding w3-hide-small">Need more points? &nbsp;<a href="#">Get More!</a></span>
+      </div>
+
+      <p id="roomObj">{{roomObj}}</p>
+      <p id="userJSON">{{userJSON}}</p>
+    </div>
+  </div>
+</div>
+<style>
+  table {
+    border: 1px solid #b3adad;
+    border-collapse: collapse;
+    padding: 3px;
+  }
+
+  table th {
+    border: 1px solid #b3adad;
+    padding: 3px;
+    background: #9e9a9a;
+    color: #313030;
+  }
+
+  table td {
+    border: 1px solid #b3adad;
+    text-align: center;
+    padding: 5px;
+    background: #ffffff;
+    color: #313030;
+  }
+</style>
+<script>
+  function sumbitFunc() {
+    submitModalData();
+    document.getElementById('id01').style.display = 'none';
+  }
+
+  async function submitModalData() {
+    // remove friend from follow list and hide thier messages from the chat
+    var payload = {
+      "team": document.getElementById('teamSelector').value,
+      "nickname":  document.getElementById('nickname').value,
+      "secretMode": document.getElementById('secret').checked,
+      "roomOBJ": document.getElementById('roomObj').checked,
+      "userJSON": document.getElementById('userJSON').checked
+    };
+    postData("http://localhost:" + portnum + "/submitModal", payload).then((data) => {
+      //console.log(data);
+    });
+  }
+
+  async function postData(url = "", data = {}) {
+    // Default options are marked with *
+    const response = await fetch(url, {
+      method: "POST", // *GET, POST, PUT, DELETE, etc.
+      mode: "cors", // no-cors, *cors, same-origin
+      cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json"
+        // 'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      redirect: "follow", // manual, *follow, error
+      referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      body: JSON.stringify(data) // body data type must match "Content-Type" header
+    });
+    console.log("Posted data: ", data);
+    return response.json(); // parses JSON response into native JavaScript objects
+  }
+</script>
+
+<!-- </body>
+
+</html>
+
+</html> -->

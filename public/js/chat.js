@@ -18,6 +18,8 @@ const userJSON = JSON.parse(userJSONtext.innerText);
 // });
 
 const username = userJSON[0]["username"];
+const nickname = document.getElementById("nickname");
+const team = document.getElementById("team");
 const room = roomJSON[0]["roomID"];
 const topic = roomJSON[0]["topic"];
 
@@ -69,8 +71,8 @@ chatForm.addEventListener("submit", (e) => {
   if (!msg) {
     return false;
   }
-  var team = document.getElementById("teamSelector").value;
-  var nickname = document.getElementById("nickname").value;
+  var team = document.getElementById("team").innerText;
+  var nickname = document.getElementById("nickname").innerText;
   // Emit message to server
   socket.emit("chatMessage", msg + "ßΓ" + nickname + "ßΓ" + team + "ßΓ" + xp);
 
@@ -86,7 +88,7 @@ function outputMessage(message) {
   const p = document.createElement("p");
   p.classList.add("meta");
   //check for secret mode
-  var secretMode = document.getElementById("secret").checked;
+  var secretMode = document.getElementById("secretMode").checked;
   if (secretMode == true) {
     p.innerText = "• " + message.nckName; // output nickname
   } else if (secretMode == false) {
@@ -258,19 +260,6 @@ document.getElementById("leave-btn").addEventListener("click", () => {
   } else {
   }
 });
-
-// function tipUser(currentUser, tipUser) {
-//   // take a coin from one user and add to the others account
-//   payload = {
-//     currentUser: currentUser,
-//     tipUser: tipUser,
-//     coins: userJSON[0].coins
-//   };
-//   postData("http://localhost:" + portnum + "/tip", payload).then((data) => {
-//     //console.log(data);
-//   });
-// }
-
 
 async function tipUsers(currentUser, userToTip) {
   var payload = {

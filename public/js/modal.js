@@ -1,7 +1,16 @@
-var modalJSONtext = document.getElementById("roomModalJSON");
-const roomModalJSON = JSON.parse(modalJSONtext.innerText);
+var roomJSONtext = document.getElementById("roomObj");
+const roomModalJSON = JSON.parse(roomJSONtext.innerText);
 
 function roomModal() {
+
+    // var numbOfUsers = document.getElementById("NoU");
+    // var activeUsersList = document.getElementById("NoU").innerText;
+    // numbOfUsers.innerText = '';
+    // console.log("Modal Users: ", activeUsersList);
+    // var activeUsersArray = JSON.parse(activeUsersList);
+    // var NoU = activeUsersArray.length;
+    // console.log("Number of Users: ", NoU);
+    // numbOfUsers.innerText = NoU;
 
     var numbOfUsers = document.getElementById("NoU");
     var activeUsersList = roomModalJSON[0]["users"];
@@ -15,7 +24,7 @@ function roomModal() {
 
 roomModal();
 
-var teams = roomModalJSON[0]["teams"];;
+var teams = roomModalJSON[0]["teams"];
 
 const dropDownItems = JSON.parse(teams);
 
@@ -39,4 +48,51 @@ function loadModal() {
 }
 
 loadModal();
-// getUserNum();
+
+async function sumbitFunc() {
+    submitModalData();
+    document.getElementById('id01').style.display = 'none';
+}
+
+async function submitModalData() {
+    // remove friend from follow list and hide thier messages from the chat
+    var payload = {
+        "team": document.getElementById('teamSelector').value,
+        "nickname": document.getElementById('nickname').value,
+        "secretMode": document.getElementById('secret').checked,
+        "roomOBJ": JSON.parse(document.getElementById('roomObj').innerText),
+        "userJSON": JSON.parse(document.getElementById('userJSON').innerText)
+    };
+    postData("http://localhost:3000/submitModal", payload)//.then((data) => {
+    //     console.log(data);
+    //  });
+    const myTimeout = setTimeout(redirectPage, 500);
+
+    function myStopFunction() {
+        clearTimeout(myTimeout);
+    }
+    function redirectPage() {
+        window.location = "../newRoom";
+        myStopFunction();
+    }
+
+}
+
+async function postData(url = "", data = {}) {
+    // Default options are marked with *
+    const response = await fetch(url, {
+        method: "POST", // *GET, POST, PUT, DELETE, etc.
+        mode: "cors", // no-cors, *cors, same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        headers: {
+            "Content-Type": "application/json"
+            // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: JSON.stringify(data) // body data type must match "Content-Type" header
+    });
+    console.log("Posted data: ", data);
+    //return response.text(); // parses JSON response into native JavaScript objects
+}

@@ -14,9 +14,9 @@ myVideo.muted = true
 var action = "change";
 const peers = {}
 var mode = 0, posX = 0;
-var ROOM_ID = room;
+var ROOM_ID = roomJSON[0]["roomID"];
 var userID = username;
-var uname, team;
+var uname, userTeam;
 
 userGraphics = []
 
@@ -50,7 +50,7 @@ myPeer.on('open', id => {
   console.log('Peer Open Id: ', id);
   var userData = {
     "name": userID,
-    "team": document.getElementById("teamSelector").value, // gets this from the modal.html 
+    "userTeam": team.innerText.innerText, // gets this from the modal.html 
     "points": 50,
     "peerjsID": id
   }
@@ -86,9 +86,9 @@ function addVideoStream(video, stream, userData) {
   
   if (userData.name != undefined) {
     uname = userData.name;
-    team = userData.team;
+    userTeam = userData.userTeam;
   } else {
-    team = document.getElementById("teamSelector").value;
+    userTeam = team.innerText; console.log("this user's team.innerText: ", team.innerText);
     uname = userData;
   }
 
@@ -116,8 +116,8 @@ function addVideoStream(video, stream, userData) {
   }, false);
 
   var otherUserTeam = document.createElement("h2");
-  otherUserTeam.id = "teamlabel";
-  otherUserTeam.innerText = team;
+  otherUserTeam.id = "userTeamlabel";
+  otherUserTeam.innerText = userTeam;
   var otherUsername = document.createElement("h3");
   otherUsername.innerText = uname;
   var d = document.createElement("div");
@@ -157,9 +157,6 @@ function draw(video, context, width, height, id) {
     redShape(canvas);
   } else {
     Circle(canvas);
-  }
-  if (document.getElementById('id01').style.display == 'none') {
-    document.getElementById('teamlabel').innerText = document.getElementById("teamSelector").value;
   }
   setTimeout(draw, 10, video, context, width, height, id);
 
