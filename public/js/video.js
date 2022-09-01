@@ -10,89 +10,111 @@ const myPeer = new Peer(undefined, {
   port: '3001'
 })
 const myVideo = document.createElement('video')
+const myCanvas = document.createElement('canvas')
 myVideo.muted = true
 var action = "change";
 const peers = {}
 var mode = 0, posX = 0;
 var ROOM_ID = roomJSON[0]["roomID"];
 var userID = username;
-var uname, userTeam;
+var userData = {
+  "name": userID,
+  "userTeam": team, // gets this from the modal.html 
+  "points": 50,
+};
 
-userGraphics = []
+activeUsersVideo = {};
+
+function delay(time) {
+  return new Promise(resolve => setTimeout(resolve, time));
+}
+
+async function test() {
+  console.log('start timer');
+  await delay(1000);
+  console.log('after 1 second');
+}
+
+async function fetchUsers() {
+  videoSocket.emit('fetchActiveUsers', ROOM_ID, userData);
+  await delay(250);
+}
 
 navigator.mediaDevices.getUserMedia({
   video: true,
   audio: true
 }).then(stream => {
-  addVideoStream(myVideo, stream, userID)
+  addVideoStream(myVideo, stream, userID, myCanvas)
 
   myPeer.on('call', call => {
     call.answer(stream)
     const video = document.createElement('video')
+    const canvas = document.createElement('canvas')
+    console.log('Peer call.answer()');
     call.on('stream', userVideoStream => {
-      addVideoStream(video, userVideoStream, userID) // video stream of the self
-    })
+      console.log('Peer call.on()');
+      addVideoStream(video, userVideoStream, activeUsersVideo[activeUsersVideo.length - 1], canvas) // video stream of the self
+    });
   })
 
   videoSocket.on('user-connected', (userId, userData) => {
     console.log("Connect Event (userId): ", userId);
-    connectToNewUser(userId, stream, userData);
+    fetchUsers();// Set and fetch the active user list
+    connectToNewUser(userId, stream, userData); 
   })
 })
 
 videoSocket.on('user-disconnected', userId => {
   console.log("Disconnect Event (userId): ", userId);
-  if (peers[userId]) peers[userId].close()
-})
+  if (peers[userId]) peers[userId].close();
+});
+
+videoSocket.on('returnActiveUsers', data => { // get the active user in the current room
+  activeUsersVideo = data;
+  console.log("live users: ", activeUsersVideo);
+});
 
 myPeer.on('open', id => {
   // videoSocket.emit('join-room', ROOM_ID, id)
   console.log('Peer Open Id: ', id);
-  var userData = {
-    "name": userID,
-    "userTeam": team.innerText.innerText, // gets this from the modal.html 
-    "points": 50,
-    "peerjsID": id
-  }
-  videoSocket.emit('connectNewStream', ROOM_ID, id, userData);
+  videoSocket.emit('connectNewStream', ROOM_ID, id, userData); //Set up socket.io
+
 })
 
-function connectToNewUser(userId, stream, userData) {
+function connectToNewUser(userId, stream, userData) { //setup connection stream to new user
   const call = myPeer.call(userId, stream)
-  const video = document.createElement('video')
+  const video = document.createElement('video');
+  var canvas = document.createElement("canvas");
   // console.log('call Obj: ', call):
   call.on('stream', userVideoStream => {
-    addVideoStream(video, userVideoStream, userData)
+    addVideoStream(video, userVideoStream, userData, canvas)
   })
   call.on('close', () => {
     video.remove()
+    canvas.remove();
   })
-  //userGraphics.push(userData);
+  // activeUsersVideo.push(userData);
   peers[userId] = call
-}
+};
 
+function addVideoStream(video, stream, userData, canvas) { //Draw video to canvas element then append that to the DOM
+  var uname, userTeam;
 
-// function AVS(video, userVideoStream, userData) {
-//   if (document.getElementById('id01').style.display != 'none') {
-//     clearTimeout(myTimeout);
-//     addVideoStream(video, userVideoStream, userData);
-//   }
-// }
+  var len = activeUsersVideo.length;
+  var data = activeUsersVideo[len - 1];
 
+  console.log("Active Users Video: ", activeUsersVideo);
 
-function addVideoStream(video, stream, userData) {
-
-  console.log("USERDATA: ", userData);
-  
   if (userData.name != undefined) {
-    uname = userData.name;
-    userTeam = userData.userTeam;
+    uname = data.name;
+    userTeam = data.userTeam;
   } else {
-    userTeam = team.innerText; console.log("this user's team.innerText: ", team.innerText);
+    userTeam = team;
     uname = userData;
   }
 
-  var canvas = document.createElement("canvas");
+  console.log("User ", uname, " has joined team: ", userTeam);
+
   canvas.id = 'canvas#' + uname;
   let w = 300, h = 220;
   canvas.width = w;
@@ -100,8 +122,6 @@ function addVideoStream(video, stream, userData) {
   canvas.style.width = w;
   canvas.style.height = h;
   var context = canvas.getContext('2d');
-
-
 
   video.id = "video#" + uname;
   video.srcObject = stream
@@ -116,7 +136,7 @@ function addVideoStream(video, stream, userData) {
   }, false);
 
   var otherUserTeam = document.createElement("h2");
-  otherUserTeam.id = "userTeamlabel";
+  otherUserTeam.id = uname + "#Teamlabel";
   otherUserTeam.innerText = userTeam;
   var otherUsername = document.createElement("h3");
   otherUsername.innerText = uname;
@@ -124,10 +144,10 @@ function addVideoStream(video, stream, userData) {
   d.appendChild(otherUserTeam);
   d.appendChild(otherUsername);
 
-  var trv = document.createElement("td"); trv.className = "tbl";
-  var tdv = document.createElement("td"); tdv.className = "tbl";
-  var trc = document.createElement("tr"); trc.className = "tbl";
-  var tdc = document.createElement("td"); tdv.className = "tbl";
+  // var trv = document.createElement("td"); trv.className = "tbl";
+  // var tdv = document.createElement("td"); tdv.className = "tbl";
+  // var trc = document.createElement("tr"); trc.className = "tbl";
+  var tdc = document.createElement("td"); //tdv.className = "tbl";
 
   var tbl = document.getElementById("videoTable");
 
@@ -137,8 +157,9 @@ function addVideoStream(video, stream, userData) {
   // trv.appendChild(tdv);
   // tdv.appendChild(video);
   // append canvas element
-  tbl.appendChild(trv);
-  trv.appendChild(tdc);
+  // tbl.appendChild(trv);
+  // trv.appendChild(tdc);
+  tbl.appendChild(tdc);
   tdc.appendChild(d);
   tdc.appendChild(video);
   tdc.appendChild(canvas);

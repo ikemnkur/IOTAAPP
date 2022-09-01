@@ -4,8 +4,8 @@
 <head>
 
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
- 
- 
+
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
@@ -123,17 +123,25 @@
                 </tr>
               </tbody>
             </table>
-            <label><b>Username</b></label>
-            <input class="w3-input w3-border w3-margin-bottom" type="text" placeholder="Enter Nickname" id="nickname">
-            <div class="w3-input">
-              <label for="teams">Choose a Team:</label>
-              <p id="teamList"></p>
-              <select name="teams" id="teamSelector">
-              </select>
-              <br><br>
-            </div>
-            <button class="w3-button w3-block w3-green w3-section w3-padding" onclick=sumbitFunc()>Enter</button>
-            <input class="w3-check w3-margin-top" type="checkbox" checked="checked" id="secret"> Secret Mode
+            <form method="POST" action="/room">
+              <label><b>Username</b></label>
+              <input class="w3-input w3-border w3-margin-bottom" type="text" placeholder="Enter Nickname" name="nickname" id="nickname">
+              <div class="w3-input">
+                <label for="teams">Choose a Team:</label>
+                <p id="teamList"></p>
+                <select name="team" id="teamSelector">
+                </select>
+                <br><br>
+              </div>
+              <button id="enter" type="submit" class="w3-button w3-block w3-green w3-section w3-padding"
+                onclick=submission()>Enter</button>
+              <input class="w3-check w3-margin-top" type="checkbox" checked="checked" id="secret" name="secretMode">
+              Secret Mode
+              <input hidden type="text" id="roomOBJInput" name="roomObj">
+              <input hidden type="text" id="userOBJInput" name="userObj">
+              <p hidden id="roomObj">{{roomOBJ}}</p>
+              <p hidden id="userJSON">{{userJSON}}</p>
+            </form>
           </div>
         </div>
 
@@ -142,8 +150,6 @@
           <span class="w3-right w3-padding w3-hide-small">Need more points? &nbsp;<a href="#">Get More!</a></span>
         </div>
 
-        <p hidden id="roomObj">{{roomOBJ}}</p>
-        <p hidden id="userJSON">{{userJSON}}</p>
       </div>
     </div>
   </div>
@@ -171,7 +177,18 @@
   </style>
 
   <script src="js/modal.js"></script>
-
+  <script>
+    // function submission() {
+      var roomObjText = document.getElementById("roomObj").innerText;
+      var userObjText = document.getElementById("userJSON").innerText;
+      var roomOBJ = document.getElementById("roomOBJInput");
+      var userOBJ = document.getElementById("userOBJInput");
+      // roomOBJ.value = roomObjText;
+      // userOBJ.value = userObjText;
+      roomOBJ.value = document.getElementById("roomObj").innerText;
+      userOBJ.value = document.getElementById("userJSON").innerText;
+    // }
+  </script>
 
 </body>
 

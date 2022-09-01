@@ -64,7 +64,7 @@ function listRooms() {
         tableDivWatchCost.innerText = watchCost;
         //hidden form to pass values to Node JS Query, appended to form
         const tableDivJoin = document.createElement("td");
-        const tableDivJoinBtn = document.createElement("form");
+        const tableDivFormBtn = document.createElement("form");
         const tableDivJoinRoomID = document.createElement("Input");
         const tableDivJoinTopic = document.createElement("Input");
         const tableDivJoinUser = document.createElement("Input");
@@ -78,15 +78,16 @@ function listRooms() {
         //join button
         const tableDivJoinButton = document.createElement("button");
         tableDivJoinButton.type = "submit";
-        tableDivJoinBtn.action = "/room?";
+        tableDivFormBtn.action = "/modal";
+        tableDivFormBtn.method = "POST";
         tableDivJoinButton.innerText = "Join";
         tableDivJoinButton.value = "JoinRm";
-        tableDivJoinBtn.appendChild(tableDivJoinButton);
+        tableDivFormBtn.appendChild(tableDivJoinButton);
         // Append hidden form elements to the <form> elem.
-        tableDivJoinBtn.appendChild(tableDivJoinJoin); tableDivJoinBtn.appendChild(tableDivJoinCreate); tableDivJoinBtn.appendChild(tableDivJoinTopic);
-        tableDivJoinBtn.appendChild(tableDivJoinUser); tableDivJoinBtn.appendChild(tableDivJoinRoomID);
+        tableDivFormBtn.appendChild(tableDivJoinJoin); tableDivFormBtn.appendChild(tableDivJoinCreate); tableDivFormBtn.appendChild(tableDivJoinTopic);
+        tableDivFormBtn.appendChild(tableDivJoinUser); tableDivFormBtn.appendChild(tableDivJoinRoomID);
         //Append <td> elem. to <tr>
-        tableDivJoin.appendChild(tableDivJoinBtn);// Append to join div:
+        tableDivJoin.appendChild(tableDivFormBtn);// Append to join div:
         tableRow.appendChild(tableDivIndex);
         tableRow.appendChild(tableDivTopic);
         tableRow.appendChild(tableDivRoomID);

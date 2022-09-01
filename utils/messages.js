@@ -6,7 +6,7 @@ function formatMessage(username, text) {
   var msgText = txtArry[0];
   var team = txtArry[2];
   var xp = txtArry[3];
-  console.log("Message Text: ", txtArry);
+  // console.log("Message Text: ", txtArry);
 
   return {
     username,

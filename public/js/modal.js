@@ -50,7 +50,8 @@ function loadModal() {
 loadModal();
 
 async function sumbitFunc() {
-    submitModalData();
+    // submitModalData();
+    
     document.getElementById('id01').style.display = 'none';
 }
 
@@ -60,10 +61,12 @@ async function submitModalData() {
         "team": document.getElementById('teamSelector').value,
         "nickname": document.getElementById('nickname').value,
         "secretMode": document.getElementById('secret').checked,
-        "roomOBJ": JSON.parse(document.getElementById('roomObj').innerText),
-        "userJSON": JSON.parse(document.getElementById('userJSON').innerText)
+        "join": 1,
+        "create": 0,
+        "roomOBJ": (document.getElementById('roomObj').innerText),
+        "userJSON": (document.getElementById('userJSON').innerText)
     };
-    postData("http://localhost:3000/submitModal", payload)//.then((data) => {
+    postData("http://localhost:3000/room", payload)//.then((data) => {
     //     console.log(data);
     //  });
     const myTimeout = setTimeout(redirectPage, 500);
@@ -72,7 +75,7 @@ async function submitModalData() {
         clearTimeout(myTimeout);
     }
     function redirectPage() {
-        window.location = "../newRoom";
+        // window.location = "../newRoom";
         myStopFunction();
     }
 
@@ -94,5 +97,5 @@ async function postData(url = "", data = {}) {
         body: JSON.stringify(data) // body data type must match "Content-Type" header
     });
     console.log("Posted data: ", data);
-    //return response.text(); // parses JSON response into native JavaScript objects
+    return response.json(); // parses JSON response into native JavaScript objects
 }

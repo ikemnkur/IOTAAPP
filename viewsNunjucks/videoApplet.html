@@ -2,26 +2,31 @@
 <title>Document</title>
 
 <style>
-  /* #video-grid {
-    display: grid;
+  #video-grid {
     grid-template-columns: repeat(auto-fill, 300px);
     grid-auto-rows: 300px;
     padding: 10px;
-  } */
-
+  }
+  #video-table{
+    max-width: 1100px;
+    background: #fff;
+    margin: 30px auto;
+    overflow: hidden;
+    padding: 10px;
+  }
   table {
     border: 5px;
   }
-/* 
+
   video {
-    width: 10%;
-    height: 10%;
+    width: 25%;
+    height: 25%;
     object-fit: cover;
-  } */
+  }
 </style>
 
 <div>
-  <p id="rmID">{{roomObj.roomId}}</p>
+  <p id="rmID">{{roomObj[0]["roomID"]}}</p>
   <h1>Video PeerJS View</h1>
   <div id="video-grid">
     <table id="videoTable"></table>

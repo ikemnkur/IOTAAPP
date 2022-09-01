@@ -18,8 +18,8 @@ const userJSON = JSON.parse(userJSONtext.innerText);
 // });
 
 const username = userJSON[0]["username"];
-const nickname = document.getElementById("nickname");
-const team = document.getElementById("team");
+const nickname = document.getElementById("nickname").innerText;
+const team = document.getElementById("team").innerText;
 const room = roomJSON[0]["roomID"];
 const topic = roomJSON[0]["topic"];
 
@@ -88,8 +88,8 @@ function outputMessage(message) {
   const p = document.createElement("p");
   p.classList.add("meta");
   //check for secret mode
-  var secretMode = document.getElementById("secretMode").checked;
-  if (secretMode == true) {
+  var secretMode = document.getElementById("secretMode").innerText;
+  if (secretMode == 'on') {
     p.innerText = "• " + message.nckName; // output nickname
   } else if (secretMode == false) {
     if (message.nckName == '') {
