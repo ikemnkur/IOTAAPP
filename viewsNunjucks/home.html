@@ -2,21 +2,24 @@
 
 
 {% block title %}Home{% endblock %}
-
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.css" rel="stylesheet" media="all">
+<link rel="stylesheet" href="css/home.css" />
+<link rel="stylesheet" href="css/joinpopup.css" />
 {% block content %}
 <h2>Home Page</h2>
 <p>Welcome back, <a id="userID">{{ username }}</a>!</p>
 
-<div class="content-header links">
-    <a href="/admin/account">Create Account</a>
-    <form action="" method="get" class="filters-form">
-        <Table>
-            <tr style="float: right;">
-                <th style="float: left;">
-                    <div class="filters" onmouseover="sortTable()">
 
-                        <a><i class="fas fa-filter"></i> Filters</a>
-                        <code class="hljs xml" >
+<div >
+    <div class="content-header links" style="all:revert">
+        <form action="" method="get" class="filters-form">
+            <Table>
+                <tr style="float: right;">
+                    <th style="float: left;">
+                        <div class="filters" onmouseover="sortTable()">
+
+                            <a><i class="fas fa-filter"></i> Filters</a>
+                            <code class="hljs xml">
 
                             <select id="selector" onmouseout="sortTable()" name="roomSearchFilter">
                                 <option value="Users">Users</option>
@@ -31,66 +34,55 @@
                                 ASC
                             </p>
                         </code>
-                    </div>
-                </th>
+                        </div>
+                    </th>
 
-                <th>
-                    <i class="fas fa-search"></i>
-                    <label for="search">Search Rooms:</label>
-                    <!-- input tag -->
-                    <input id="searchbar" onkeyup="searchRooms()" type="text" name="search"
-                        placeholder="Search rooms..">
-                </th>
-            </tr>
-        </Table>
-    </form>
-    <div>
-        <p> {{Joke["value"]}}</p>
+                    <th>
+                        <i class="fas fa-search"></i>
+                        <label for="search">Search Rooms:</label>
+                        <!-- input tag -->
+                        <input id="searchbar" onkeyup="searchRooms()" type="text" name="search"
+                            placeholder="Search rooms..">
+                    </th>
+                </tr>
+            </Table>
+        </form>
+        <div>
+            <p> {{Joke["value"]}}</p>
+        </div>
     </div>
-</div>
-<div>
-    <header>header area</header>
+    <div id="tableDiv" >
+        <nav>
+            <p id="roomLists" hidden>{{rooms}}</p>
 
+            <table id="activeRooms">
+            
+            </table>
+        </nav>
+    </div>
     <style>
-        /* nav table {
-            height: 200px;
-            width: 50%;
+        #tableDiv{
+            padding: 5px; 
+            max-height: 500px; 
+            overflow-y: scroll; 
+            border: 1px solid black; 
         }
-
-        nav table {
-            border: 1px solid black;
-            padding: 1px;
+        #activeRooms {
+            margin:auto; 
+            text-align: center; 
+            padding: 0px 5px;
+            background-color: aliceblue;
         }
-
-       
-
-        nav table {
-            overflow: hidden;
-            overflow-y: scroll;
-        } */
-         nav table td {
-            /* border: 1px solid black; */
-            padding: 5px;
-            text-align: center;
+        #activeRooms td{
+            padding: 0px 5px;
+        }
+        #activeRooms tbody tr td{
+            font-weight: bold;
+            font-size: 20px;
+            padding: 0px 5px;
         }
     </style>
-    <nav>
-        <p id="roomLists" hidden>{{rooms}}</p>
 
-        <table id="activeRooms" style="
-            padding: 30px;
-            max-height: 500px;
-            overflow-y: scroll;
-            border: 1px solid black;
-            padding: 1px;
-        ">
-
-        </table>
-    </nav>
-
-
-
-    <footer>footer area</footer>
 </div>
 <script src="js/home.js"></script>
 <script>
@@ -106,7 +98,6 @@
 
 {% include 'joinorcreate.html' %}
 
-<h2></h2>
-<h3>About</h3>
+<h2>About</h2>
 
 {% endblock %}

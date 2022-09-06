@@ -268,7 +268,7 @@ body.loggedin {
   }
   .navtop div a {
     padding: 10px 0;
-    flex-basis: 50%;
+    flex-basis: 15%;
   }
   .content {
     padding: 10px;

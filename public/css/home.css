@@ -1,0 +1,29 @@
+div nav {
+  overflow-y: auto;
+  max-height: 300px;
+  align-self: center;
+  max-width: fit-content;
+  /* align-content: center; */
+  /* align-items: flex-end; */
+  /* display: flex; */
+}
+
+
+
+div nav table {
+    padding: 30px;
+    max-height: 500px;
+    overflow-y: scroll;
+    border: 1px solid black;
+    padding: 1px;
+    margin: auto;
+}
+
+div nav table {
+    border: 1px solid black;
+    padding: 1px;
+}
+
+table{
+    margin: auto;
+}

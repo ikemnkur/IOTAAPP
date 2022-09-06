@@ -12,11 +12,27 @@ const fs = require('fs');
 const fetch = require('node-fetch');
 const { Console } = require('console');
 const http = require('http');
-const socketio = require('socket.io');
+// const socketio = require('socket.io');
 const url = require('url');
+// Initialize express and socket.io
+// const app = express()
+// const server = require('http').Server(app)
+// const { instrument } = require("@socket.io/admin-ui");
+// const io = require('socket.io')(2999, {
+// 	cors: {
+// 		origin: ["http://localhost:3000/", "https://admin.socket.io"]
+// 	},
+// })
+// instrument(io, {
+// 	auth: false
+// });
+//Initialize express and socket.io Old method
+const app = express()
+const server = require('http').Server(app)
+const io = require('socket.io')(server)
+
 const formatMessage = require('./utils/messages');
-// const addFriend = require('./public/js/chat');
-//const roomInfo = require('./public/js/room');
+
 const {
 	userJoin,
 	getCurrentUser,
@@ -27,7 +43,6 @@ const {
 } = require('./utils/users');
 
 var activeRooms = [];
-var activeRoom = [];
 
 // Unique secret key
 const secret_key = 'your secret key';
@@ -51,16 +66,6 @@ const transporter = nodemailer.createTransport({
 		pass: 'xxxxxx'
 	}
 });
-// Initialize express
-//new
-const app = express()
-const server = require('http').Server(app)
-const io = require('socket.io')(server)
-
-//old
-// const app = express();
-// const server = http.createServer(app);
-// const io = socketio(server);
 
 // Set static folder
 app.use(express.static(path.join(__dirname, 'public')));
@@ -673,7 +678,7 @@ app.post('/submitModal', (request, response) => isLoggedin(request, settings => 
 	let team = request.body.team;
 	// response.send(201);
 	// app.get(['/newRoom'], (request, response) => isLoggedin(request, settings => {
-		response.render('room.html', { roomObj: roomJSON, roomOBJ: JSON.stringify(roomJSON), userOBJ: userJSON, userJSON: JSON.stringify(userJSON), username: request.session.account_username, role: request.session.account_role, team: team, secretMode: secretMode, nickname: nickname });
+	response.render('room.html', { roomObj: roomJSON, roomOBJ: JSON.stringify(roomJSON), userOBJ: userJSON, userJSON: JSON.stringify(userJSON), username: request.session.account_username, role: request.session.account_role, team: team, secretMode: secretMode, nickname: nickname });
 	// }))
 
 	// response.render('/room.html', { roomObj: roomJSON, username: request.session.account_username, role: request.session.account_role, userJSON: userJSON, team: team, secretMode: secretMode, nickname: nickname});
@@ -681,7 +686,7 @@ app.post('/submitModal', (request, response) => isLoggedin(request, settings => 
 
 
 // http://localhost:3000/home - display the home page
-app.post(['/modal','/modal:id'], (request, response) => isLoggedin(request, settings => {
+app.post(['/modal', '/modal:id'], (request, response) => isLoggedin(request, settings => {
 	// console.log("Modal Resp:", request.body);
 	const id = request.params.id;
 	let room = request.body;
@@ -719,10 +724,10 @@ app.post(['/room', '/room:id'], (request, response) => isLoggedin(request, setti
 	let userJSON = JSON.parse(request.body.userObj);
 	let nickname = request.body.nickname;
 	let secretMode = request.body.secretMode;
-	let team = request.body.team; 
+	let team = request.body.team;
 	let join = request.body.join;
 	let create = request.body.create;
- 
+
 	if (join == 1) { // if joining room
 
 		// connection.query("SELECT * FROM rooms WHERE roomID = ?", [roomJSON.roomID], function (err, result) {
@@ -1322,65 +1327,96 @@ const timeElapsedString = date => {
 	return Math.floor(seconds) + ' seconds';
 };
 
-
+var rooms = {};
 var activeRoomandUsers = {};
 
 // Run when client connects
 io.on('connection', socket => {
 	//WEBRTC
-	// socket.on('join-room', (roomId, userId) => { //socket.on('join-room', (roomId, username) => {
-	// 	console.log("room: ", roomId, ", ", "userId :", userId);
-	// 	socket.join(roomId)
-	// 	socket.to(roomId).emit('user-connected', userId)
 
-	// 	socket.on('disconnect', () => {
-	// 		socket.to(roomId).emit('user-disconnected', userId)
-	// 	})
-	// })
+	socket.on('setUsers', (roomId, userId) => {
+		if (rooms[roomId] == null) {
+			rooms[roomId] = [];
+		}
+		rooms[roomId].push({ userId });
+		// rooms[roomId] = rooms[roomId].filter(obj => !rooms[roomId][obj.name] && (rooms[roomId][obj.name] = true));
+		const ids = rooms[roomId].map(o => o.name)
+		rooms[roomId] = rooms[roomId].filter(({ id }, index) => !ids.includes(id, index + 1))
+		socket.to(roomId).emit('activeUsers', rooms[roomId]);
+		console.log(`Set Active Users in room ${roomId}:`, rooms[roomId]);
+	});
 
-	// var array = new Set();
-	// array.add(1);
-
+	socket.on('join-room', (roomId, userId) => {
+		socket.join(roomId);
+		socket.to(roomId).emit('user-connected', userId);
+		console.log("join room event");
+		socket.on('disconnect', () => {
+			// filter out disconnected user
+			rooms[roomId] = rooms[roomId].filter(x => x !== userId);
+			console.log("User ", userId, "has left room: ", roomId);
+			io.to(roomId).emit('user-disconnected', userId, rooms[roomId])
+			// rooms[roomId].remove(userData);
+		})
+	})
 
 	socket.on('fetchActiveUsers', (roomId, userData) => {
 		if (activeRoomandUsers[roomId] == null) {
 			activeRoomandUsers[roomId] = [];
 		}
 		activeRoomandUsers[roomId].push(userData);
-		socket.to(roomId).emit('returnActiveUsers', activeRoomandUsers[roomId]);
-		// console.log("activeRoomandUsers: ", activeRoomandUsers);
+		const ids = activeRoomandUsers[roomId].map(o => o.name)
+		activeRoomandUsers[roomId] = activeRoomandUsers[roomId].filter(({ id }, index) => !ids.includes(id, index + 1))
 
+		console.log(`Active Users in room ${roomId}:`, activeRoomandUsers[roomId]);
+		io.to(roomId).emit('returnActiveUsers', activeRoomandUsers[roomId]);
 	});
 
-	socket.on('connectNewStream', (roomId, userId, userData) => {
-		// console.log("room: ", roomId, ", ", "userId: ", userId);
+	socket.on("fetchImages", (roomId, userId) => {
+		var files = fs.readdirSync('./public/images/');
+		console.log("Imgs: ", files);
+		io.to(roomId).emit('fetchImgList', files);
+	})
+
+	socket.on("stupid", (roomId) => {
+		console.log("recieve stupid event");
+		// socket.join(roomId)
+		io.to(roomId).emit('dummy', "retard");
+	})
+
+	socket.on('connectNewStream', (roomId, peerId, userData) => {
+		console.log("room: ", roomId, ", ", "peerId: ", peerId);
 		// console.log("userData: ", userData);
 		socket.join(roomId)
-		socket.to(roomId).emit('user-connected', userId, userData)
+		//const user = getCurrentUser(socket.id);
+		// io.to(user.room).emit('tipEvent', currentUser, tippedUser);
+
+		userData.peerId = peerId;
+		socket.to(roomId).emit('user-connected', userData)
 
 		socket.on('disconnect', () => {
+			// filter out disconnected user
 			activeRoomandUsers[roomId] = activeRoomandUsers[roomId].filter(x => x.name !== userData.name);
 			console.log("User ", userData.name, "has left room: ", roomId);
-			socket.to(roomId).emit('user-disconnected', userId)
+			io.to(roomId).emit('user-disconnected', peerId, activeRoomandUsers[roomId])
 			// activeRoomandUsers[roomId].remove(userData);
 		})
 	});
 
 	//LIVE CHAT
-	socket.on('joinRoom', ({ username, room, nickname, points, xp }) => {
-		const user = userJoin(socket.id, username, nickname, points, xp, room);
+	socket.on('joinRoom', ({ username, room, nickname, points, xp, secretMode }) => {
+		const user = userJoin(socket.id, username, nickname, points, xp, room, secretMode);
 
 		socket.join(user.room);
 
 		// Welcome current user
-		socket.emit('message', formatMessage(botName, 'Welcome to ChatCord!'));
+		socket.emit('message', formatMessage(botName, 'Welcome to ChatCord!', null));
 
 		// Broadcast when a user connects
 		socket.broadcast
 			.to(user.room)
 			.emit(
 				'message',
-				formatMessage(botName, `${user.username} has joined the chat`)
+				formatMessage(botName, `${user.username} has joined the chat`, null)
 			);
 
 		// Send users and room info
@@ -1388,20 +1424,70 @@ io.on('connection', socket => {
 			room: user.room,
 			users: getRoomUsers(user.room)
 		});
-
 		ActiveUsers();
 	});
 
+	// Listen for tipMessgae
+	socket.on('Tip', (currentUser, tippedUser) => {
+		try {
+			const user = getCurrentUser(socket.id);
+			io.to(user.room).emit('tipEvent', currentUser, tippedUser);
+		}
+		catch (e) {
+			console.log(e);
+		}
+	});
 
+	// Listen for chatMessageTo
+	socket.on('chatMessageTo', (msg, toUser) => {
+		try {
+			const user = getCurrentUser(socket.id);
+			io.to(user.room).emit('messageTo', formatMessage(user.username, msg, user.secretMode), toUser);
+		} catch (e) {
+			console.log(e);
+		}
+	});
 
 	// Listen for chatMessage
 	socket.on('chatMessage', msg => {
 		try {
 			const user = getCurrentUser(socket.id);
-			io.to(user.room).emit('message', formatMessage(user.username, msg));
+			io.to(user.room).emit('message', formatMessage(user.username, msg, user.secretMode));
 		} catch (e) {
 			console.log(e);
 		}
+	});
+
+	// Listen for replyMessage
+	socket.on('replyMessage', (msg, replyTo) => {
+		try {
+			const user = getCurrentUser(socket.id);
+			io.to(user.room).emit('message', formatMessage(user.username, msg, user.secretMode), replyTo);
+		} catch (e) {
+			console.log(e);
+		}
+	});
+
+	// Listen for chatVote
+	socket.on('chatVote', (voter, msg_id, vote) => {
+		try {
+			const user = getCurrentUser(socket.id);
+			io.to(user.room).emit('vote', msg_id, vote, voter);
+		} catch (e) {
+			console.log(e);
+		}
+	});
+
+	socket.on('updateStats', (xp, coins, username) => {
+		connection.query("UPDATE accounts SET xp = ? WHERE username = ?", [xp, username], (error, updateResults) => {
+			if (error) throw error;
+			// console.log("results of XP update: ", updateResults);
+		});
+		connection.query("UPDATE accounts SET coins = ? WHERE username = ?", [coins, username], (error, updateResults) => {
+			if (error) throw error;
+			// console.log("results of XP update: ", updateResults);
+		});
+		// console.log(username, "stats updated", " XP: ", xp, "coins: ", coins);
 	});
 
 	// Runs when client disconnects
@@ -1414,7 +1500,7 @@ io.on('connection', socket => {
 		if (user) {
 			io.to(user.room).emit(
 				'message',
-				formatMessage(botName, `${user.username} has left the chat in room: ${user.room}`)
+				formatMessage(botName, `${user.username} has left the chat in room: ${user.room}`, null)
 			);
 
 			// Send users and room info
@@ -1456,29 +1542,35 @@ app.post('/tip', (request, response) => isLoggedin(request, settings => {
 		giveCoins = (giverOfCoins[0]["coins"]) - 1;
 		console.log("giverOfCoins: ", giveCoins);
 	});
-	connection.query("SELECT coins FROM accounts WHERE username = ?", [tippedUser], (error, coinresults2) => {
-		recieverOfCoins = coinresults2;
-		// recieverOfCoins = Object.values(JSON.parse(JSON.stringify(coinresults2)));
+	if (tippedUser == "BOT") {
+		if (Math.ceil(Math.random() * 10) > 9) {
+			let amt = Math.ceil(Math.random() * 100);
+			console.log("reward: ", amt)
+			giveCoins = giveCoins + amt;
+		}
+	} else {
+		connection.query("SELECT coins FROM accounts WHERE username = ?", [tippedUser], (error, coinresults2) => {
+			recieverOfCoins = coinresults2;
+			// recieverOfCoins = Object.values(JSON.parse(JSON.stringify(coinresults2)));
 
-		recieveCoins = (recieverOfCoins[0]["coins"]) + 1;
-		console.log("recieverOfCoins: ", recieveCoins);
-	});
+			recieveCoins = (recieverOfCoins[0]["coins"]) + 1;
+			console.log("recieverOfCoins: ", recieveCoins);
+		});
+	}
 
 	setTimeout(doSumtin, 1000);
-	// connection.query("UPDATE rooms SET users = ? WHERE roomID = ?", [JSON.stringify(data.users), data.room], (error, updateResults) => {
-	// 	if (error) throw error;
-	// 	console.log("results of update: ", updateResults);
-	// });
-	// try {
+
 	function doSumtin() {
 		connection.query("UPDATE accounts SET coins = ? WHERE username = ?", [giveCoins, currentUser], (error, results1) => {
 			if (error) throw error;
 			//console.log("result 1: ", results1.affectedRows);
 		});
-		connection.query("UPDATE accounts SET coins = ? WHERE username = ?", [recieveCoins, tippedUser], (error, results2) => {
-			if (error) throw error;
-			//console.log("result 2: ", results2.affectedRows);
-		});
+		if (tippedUser != "BOT") {
+			connection.query("UPDATE accounts SET coins = ? WHERE username = ?", [recieveCoins, tippedUser], (error, results2) => {
+				if (error) throw error;
+				//console.log("result 2: ", results2.affectedRows);
+			});
+		}
 	}
 
 	// } catch (e) {
@@ -1583,6 +1675,21 @@ app.post('/block', (request, response) => isLoggedin(request, settings => {
 	// 	//console.log("Current User Friends: ", results2);
 	// });
 }));
+
+
+app.post('/imgSearch', (request, response) => isLoggedin(request, settings => {
+	var searchTerm = request.body.searchTerm;
+	var userId = request.body.userId;
+	var roomId = request.body.roomId;
+	// socket.on("fetchImages", (roomId, userId)=>{
+	// 	var files = fs.readdirSync('./public/images/');
+	// 	console.log("Imgs: ", files);
+	// 	io.to(roomId).emit('fetchImgList', files);
+	// })
+}));
+
+
+
 
 const PORT = process.env.PORT || 3000;
 

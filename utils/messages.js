@@ -1,11 +1,12 @@
 const moment = require('moment');
 
-function formatMessage(username, text) {
+function formatMessage(username, text, secret) {
   var txtArry = text.split("ßΓ");
-  var nckName = txtArry[1];
   var msgText = txtArry[0];
+  var nckName = txtArry[1];
   var team = txtArry[2];
   var xp = txtArry[3];
+  var secretMode = secret;
   // console.log("Message Text: ", txtArry);
 
   return {
@@ -14,7 +15,8 @@ function formatMessage(username, text) {
     msgText,
     team,
     xp,
-    time: moment().format('h:mm:ss a')
+    time: moment().format('h:mm:ss a'),
+    secretMode
   };
 }
 

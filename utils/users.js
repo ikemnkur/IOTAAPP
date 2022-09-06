@@ -2,8 +2,8 @@ const users = [];
 var activeRoom;
 
 // Join user to chat
-function userJoin(id, username, nickname, points, xp, room) {
-  const user = { id, username, nickname, points, xp, room };
+function userJoin(id, username, nickname, points, xp, room, secretMode) {
+  const user = { id, username, nickname, points, xp, room, secretMode };
   activeRoom = user.room;
   users.push(user);
   return user;
@@ -24,6 +24,10 @@ function getActiveUsers(){
 
 function getActiveRoom(){
   return activeRoom;
+}
+
+function getXp(){
+  return xp;
 }
 
 // User leaves chat

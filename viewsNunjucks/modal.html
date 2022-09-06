@@ -10,8 +10,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
     integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
-  <link rel="stylesheet" href="css/chatcord_style.css" />
-  <link rel="stylesheet" href="joinBTN.css">
+  <link rel="stylesheet" href="css/modal.css">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
 
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
@@ -22,72 +21,9 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js">
   </script>
   <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
-  <script defer src="https://unpkg.com/peerjs@1.2.0/dist/peerjs.min.js"></script>
-  <script src="/socket.io/socket.io.js" defer></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-
-  <style>
-    /* Text alignment for body */
-    body {
-      text-align: center;
-    }
-
-    /* Styling h1 tag */
-    h1 {
-      color: green;
-      text-align: center;
-    }
-
-    /* Styling modal */
-    .modal .modal-content {
-      padding: 20px 20px 20px 20px;
-      -webkit-animation-name: modal-animation;
-      -webkit-animation-duration: 0.5s;
-      animation-name: modal-animation;
-      animation-duration: 0.5s;
-    }
-
-    @-webkit-keyframes modal-animation {
-      from {
-        top: -100px;
-        opacity: 0;
-      }
-
-      to {
-        top: 0px;
-        opacity: 1;
-      }
-    }
-
-    @keyframes modal-animation {
-      from {
-        top: -100px;
-        opacity: 0;
-      }
-
-      to {
-        top: 0px;
-        opacity: 1;
-      }
-    }
-  </style>
-  <!-- WEBRTC -->
-  <style>
-    #video-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, 300px);
-      grid-auto-rows: 300px;
-      /* padding: 10px; */
-    }
-
-    video {
-      width: 0%;
-      height: 0%;
-      object-fit: cover;
-    }
-  </style>
-  <title>Enter Room</title>
+  <title>Enter Room: {{roomObj[0]["topic"]}}</title>
 </head>
 
 <body>
@@ -154,26 +90,7 @@
     </div>
   </div>
   <style>
-    table {
-      border: 1px solid #b3adad;
-      border-collapse: collapse;
-      padding: 3px;
-    }
-
-    table th {
-      border: 1px solid #b3adad;
-      padding: 3px;
-      background: #9e9a9a;
-      color: #313030;
-    }
-
-    table td {
-      border: 1px solid #b3adad;
-      text-align: center;
-      padding: 5px;
-      background: #ffffff;
-      color: #313030;
-    }
+    
   </style>
 
   <script src="js/modal.js"></script>
