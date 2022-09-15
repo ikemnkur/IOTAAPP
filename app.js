@@ -1334,32 +1334,33 @@ var activeRoomandUsers = {};
 io.on('connection', socket => {
 	//WEBRTC
 
-	socket.on('setUsers', (roomId, userId) => {
-		if (rooms[roomId] == null) {
-			rooms[roomId] = [];
-		}
-		rooms[roomId].push({ userId });
-		// rooms[roomId] = rooms[roomId].filter(obj => !rooms[roomId][obj.name] && (rooms[roomId][obj.name] = true));
-		const ids = rooms[roomId].map(o => o.name)
-		rooms[roomId] = rooms[roomId].filter(({ id }, index) => !ids.includes(id, index + 1))
-		socket.to(roomId).emit('activeUsers', rooms[roomId]);
-		console.log(`Set Active Users in room ${roomId}:`, rooms[roomId]);
-	});
+	// socket.on('setUsers', (roomId, userId) => {
+	// 	if (rooms[roomId] == null) {
+	// 		rooms[roomId] = [];
+	// 	}
+	// 	rooms[roomId].push({ userId });
+	// 	// rooms[roomId] = rooms[roomId].filter(obj => !rooms[roomId][obj.name] && (rooms[roomId][obj.name] = true));
+	// 	const ids = rooms[roomId].map(o => o.name)
+	// 	rooms[roomId] = rooms[roomId].filter(({ id }, index) => !ids.includes(id, index + 1))
+	// 	socket.to(roomId).emit('activeUsers', rooms[roomId]);
+	// 	console.log(`Set Active Users in room ${roomId}:`, rooms[roomId]);
+	// });
 
-	socket.on('join-room', (roomId, userId) => {
-		socket.join(roomId);
-		socket.to(roomId).emit('user-connected', userId);
-		console.log("join room event");
-		socket.on('disconnect', () => {
-			// filter out disconnected user
-			rooms[roomId] = rooms[roomId].filter(x => x !== userId);
-			console.log("User ", userId, "has left room: ", roomId);
-			io.to(roomId).emit('user-disconnected', userId, rooms[roomId])
-			// rooms[roomId].remove(userData);
-		})
-	})
+	// socket.on('join-room', (roomId, userId) => {
+	// 	socket.join(roomId);
+	// 	socket.to(roomId).emit('user-connected', userId);
+	// 	console.log("join room event");
+	// 	socket.on('disconnect', () => {
+	// 		// filter out disconnected user
+	// 		rooms[roomId] = rooms[roomId].filter(x => x !== userId);
+	// 		console.log("User ", userId, "has left room: ", roomId);
+	// 		io.to(roomId).emit('user-disconnected', userId, rooms[roomId])
+	// 		// rooms[roomId].remove(userData);
+	// 	})
+	// })
 
-	socket.on('fetchActiveUsers', (roomId, userData) => {
+	// get a array object of the users' stats in the room roomId and returns it
+	socket.on('setActiveUsers', (roomId, userData) => {
 		if (activeRoomandUsers[roomId] == null) {
 			activeRoomandUsers[roomId] = [];
 		}
@@ -1368,48 +1369,57 @@ io.on('connection', socket => {
 		activeRoomandUsers[roomId] = activeRoomandUsers[roomId].filter(({ id }, index) => !ids.includes(id, index + 1))
 
 		console.log(`Active Users in room ${roomId}:`, activeRoomandUsers[roomId]);
-		io.to(roomId).emit('returnActiveUsers', activeRoomandUsers[roomId]);
+		io.emit('getActiveUsers', activeRoomandUsers[roomId]);
 	});
-
+	// Run once when connecting to room for each user to get list of sounds and images
 	socket.on("fetchImages", (roomId, userId) => {
 		var files = fs.readdirSync('./public/images/');
-		console.log("Imgs: ", files);
-		io.to(roomId).emit('fetchImgList', files);
-	})
-
-	socket.on("stupid", (roomId) => {
-		console.log("recieve stupid event");
-		// socket.join(roomId)
-		io.to(roomId).emit('dummy', "retard");
+		console.log("Imgs to room:", roomId, "by user:", userId);
+		io.emit('fetchImgList', files);
 	})
 
 	socket.on('connectNewStream', (roomId, peerId, userData) => {
+		console.log("New User connected:");
 		console.log("room: ", roomId, ", ", "peerId: ", peerId);
-		// console.log("userData: ", userData);
+		console.log("userData: ", userData);
 		socket.join(roomId)
-		//const user = getCurrentUser(socket.id);
-		// io.to(user.room).emit('tipEvent', currentUser, tippedUser);
 
-		userData.peerId = peerId;
-		socket.to(roomId).emit('user-connected', userData)
+		// userData.id = socketid;
+
+		if (activeRoomandUsers[roomId] == null) {
+			activeRoomandUsers[roomId] = [];
+		}
+
+		activeRoomandUsers[roomId].push(userData);
+		const ids = activeRoomandUsers[roomId].map(o => o.name)
+		activeRoomandUsers[roomId] = activeRoomandUsers[roomId].filter(({ id }, index) => !ids.includes(id, index + 1))
+
+		console.log(`Active Users in room ${roomId}:`, activeRoomandUsers[roomId]);
+
+		io.emit('userConnected', activeRoomandUsers[roomId], roomId, userData);
+		io.emit('getActiveUsers', roomId, activeRoomandUsers[roomId]);
 
 		socket.on('disconnect', () => {
 			// filter out disconnected user
-			activeRoomandUsers[roomId] = activeRoomandUsers[roomId].filter(x => x.name !== userData.name);
+			
+			var disconnectedUser = activeRoomandUsers[roomId].find(user => user.id === socket.id);
+			  
+			console.log("ActiveRoomandUsers[roomId]:", activeRoomandUsers[roomId])
+			if (activeRoomandUsers[roomId] != undefined) // if not empty
+				activeRoomandUsers[roomId] = activeRoomandUsers[roomId].filter(x => x.name !== userData.name);
 			console.log("User ", userData.name, "has left room: ", roomId);
-			io.to(roomId).emit('user-disconnected', peerId, activeRoomandUsers[roomId])
-			// activeRoomandUsers[roomId].remove(userData);
+			io.emit('user-disconnected', disconnectedUser.peerId, activeRoomandUsers[roomId], roomId, userData)
 		})
 	});
 
 	//LIVE CHAT
-	socket.on('joinRoom', ({ username, room, nickname, points, xp, secretMode }) => {
-		const user = userJoin(socket.id, username, nickname, points, xp, room, secretMode);
+	socket.on('joinRoom', ({ username, room, nickname, points, xp, secretMode, team }) => {
+		const user = userJoin(socket.id, username, nickname, points, xp, room, secretMode, team);
 
 		socket.join(user.room);
 
 		// Welcome current user
-		socket.emit('message', formatMessage(botName, 'Welcome to ChatCord!', null));
+		socket.emit('message', formatMessage(botName, `Welcome in ${user.username}, you joined the room: ${user.room} and are on team: ${user.team}!`, null));
 
 		// Broadcast when a user connects
 		socket.broadcast
@@ -1582,7 +1592,8 @@ app.post('/follow', (request, response) => isLoggedin(request, settings => {
 	var userToBeFollowed = request.body.userToFollow;
 	var currentUser = request.body.currentUser;
 	var action = request.body.action;
-	var userFriends;
+	var userFriends; var otherUserFollowersList;
+
 	connection.query("SELECT friends FROM accounts WHERE username = ?", [currentUser], (error, friendresults) => {
 		if (error) throw error;
 		console.log("userFriends Results: ", friendresults[0]["friends"]);
@@ -1594,23 +1605,48 @@ app.post('/follow', (request, response) => isLoggedin(request, settings => {
 		}
 		// userFriends = JSON.parse(friendresults[0].friends);
 		console.log("userFriends: ", userFriends);
+
+		connection.query("SELECT follower FROM accounts WHERE username = ?", [userToBeFollowed], (error, followedUser) => {
+			if (error) throw error;
+			console.log("Follower Results: ", followedUser[0]["followers"]);
+			//userFriends = JSON.parse(JSON.stringify((friendresults1)));//friendresults1;
+			try {
+				otherUserFollowersList = JSON.parse(followedUser[0]["followers"]);
+			} catch (e) {
+				otherUserFollowersList = [""];
+			}
+			// userFriends = JSON.parse(friendresults[0].friends);
+			console.log("Followed Users List of Friends: ", otherUserFollowersList);
+		})
+
+
 		setTimeout(doSumn, 500);
 	})
 
 	function doSumn() {
 		try {
 			if (action == "fa fa-plus-square") { // add user or remove
-				userFriends.push(userToBeFollowed); // adds to array
+				// adds to array
+				userFriends.push(userToBeFollowed);
+				otherUserFollowersList.push(currentUser);
 				// filters out duplicates
 				userFriends = userFriends.filter((item, index) => index == userFriends.indexOf(item)); // add a user and remove duplicates
-
+				otherUserFollowersList = otherUserFollowersList.filter((item, index) => index == otherUserFollowersList.indexOf(item));
 			} else if (action == "fa fa-check") {
-				function removeUser(user) {
+				function removeFriend(user) {
 					return userToBeFollowed != user;
 				}
-				userFriends = userFriends.filter(removeUser); // remove a user is added
+				function removeFollower(user) {
+					return currentUser != user;
+				}
+				otherUserFollowersList = otherUserFollowersList.filter(removeFollower)
+				userFriends = userFriends.filter(removeFriend); // remove a user is added
 			}
 			connection.query("UPDATE accounts SET friends = ? WHERE username = ?", [JSON.stringify(userFriends), currentUser], (error, results2, fields) => {
+				if (error) throw error;
+				//console.log("Current User Friends: ", results2);
+			});
+			connection.query("UPDATE accounts SET followers = ? WHERE username = ?", [JSON.stringify(userFriends), userToBeFollowed], (error, results2, fields) => {
 				if (error) throw error;
 				//console.log("Current User Friends: ", results2);
 			});
@@ -1620,17 +1656,6 @@ app.post('/follow', (request, response) => isLoggedin(request, settings => {
 
 		console.log("Done Follow Opporation");
 	}
-
-
-
-	// try {
-	// 	connection.query("UPDATE accounts SET friends=CONCAT(friends, ?) WHERE username=?", ["," + tippedUser, currentUser], (error, results, fields) => {
-	// 		if (error) throw error;
-	// 		//console.log(results);
-	// 	});
-	// } catch (e) {
-	// 	throw e;
-	// }
 }));
 
 app.post('/block', (request, response) => isLoggedin(request, settings => {
@@ -1676,16 +1701,10 @@ app.post('/block', (request, response) => isLoggedin(request, settings => {
 	// });
 }));
 
-
 app.post('/imgSearch', (request, response) => isLoggedin(request, settings => {
 	var searchTerm = request.body.searchTerm;
 	var userId = request.body.userId;
 	var roomId = request.body.roomId;
-	// socket.on("fetchImages", (roomId, userId)=>{
-	// 	var files = fs.readdirSync('./public/images/');
-	// 	console.log("Imgs: ", files);
-	// 	io.to(roomId).emit('fetchImgList', files);
-	// })
 }));
 
 

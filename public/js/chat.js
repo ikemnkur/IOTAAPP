@@ -16,7 +16,7 @@ const userJSON = JSON.parse(userJSONtext.innerText);
 // const {roomID, topic, user } = Qs.parse(location.search, {
 //   ignoreQueryPrefix: true,
 // });
-
+var blockedList = JSON.parse(userJSON[0].blockedUsers);
 const username = userJSON[0]["username"];
 const nickname = document.getElementById("nickname").innerText;
 const team = document.getElementById("team").innerText;
@@ -36,7 +36,7 @@ const socket = io({
 });
 
 // Join chatroom
-socket.emit("joinRoom", { username, nickname, coins, xp, room, secretMode});
+socket.emit("joinRoom", { username, nickname, coins, xp, room, secretMode, team });
 
 // Get room and users
 socket.on("roomUsers", ({ room, users }) => {
@@ -150,28 +150,25 @@ function outputMessage(message, replyTo) {
   const header = document.createElement("div"); topDiv.appendChild(header);
   header.classList.add("meta");
 
-  console.log('message: ', message)
+  // console.log('message: ', message)
   //check for secret mode
-
-  if (message.secretMode == 'on') {
+  if (message.nckName == '')
+    header.innerText = "• " + message.username;
+  else if (message.secretMode == 'on') {
     header.innerText = "• " + message.nckName; // output nickname
-  } else if (message.secretMode == false) {
-    if (message.nckName == '') {
-      header.innerText = "• " + message.username;
-    } else {
-      // output username and nickname
-      header.innerText = "• " + message.username + " AKA " + message.nckName;
-    }
+  } else {
+    // output username and nickname
+    header.innerText = "• " + message.username + " AKA " + message.nckName;
   }
   // out put the team and xp info
   if (message.username == "BOT") {
-    header.innerHTML = `• CHATBOT <i class="fas fa-clock"></i><span> <span>${" " + message.time} </span>`;
+    header.innerHTML = `<div style=""> • CHATBOT <i class="fas fa-clock"></i><span> <span>${" " + message.time} </span> <div>`;
   }
   else {
 
-    header.innerHTML += `<span style="color: black;"> ${" Team: " + message.team}</span>`
-    header.innerHTML += `<span style="color: blue;"> ${" XP: " + message.xp} </span>`
-    header.innerHTML += `<i class="fas fa-clock"></i><span> ${" " + message.time} </span>`
+    header.innerHTML += `<span style="color: black;font-size: 12px"> ${" Team: " + message.team}</span>`
+    header.innerHTML += `<span style="color: blue;font-size: 12px"> ${" XP: " + message.xp} </span>`
+    header.innerHTML += `<i class="fas fa-clock"></i><span style="font-size: 12px> ${" " + message.time} </span>`
     // header.innerHTML += `<span><i class="fas fa-reply-all"></i> </span>`;
     // header.innerHTML += `<i class="fas fa-reply"></i>`;
   }
@@ -189,7 +186,7 @@ function outputMessage(message, replyTo) {
 
   // message text
   const para = document.createElement("div"); para.style = " margin: 0px 20px; display: flex;";
-  const paratext = document.createElement("strong");
+  const paratext = document.createElement("strong"); paratext.style = " margin: 0px;font-size: 12px";
   if (replyTo != null) {
     console.log("replying to", replyTo)
     var replyIcon = document.createElement("i");
@@ -325,8 +322,14 @@ function outputMessage(message, replyTo) {
     const blockBtn = document.createElement("div");
     const block = document.createElement("i");
     block.className = "fas fa-ban";
-    block.style = "font-size:16px;color:red; padding-right: 5px;";
-    // block.onclick = blockUser();
+    block.style = "font-size:16px; color:red; padding: 5px;";
+
+
+    blockedList.forEach((item, index) => {
+      if (message.username == item)
+        block.style = "font-size:16px; color:grey; padding: 5px;";
+    })
+
     blockBtn.appendChild(block);
 
     commentTbl.appendChild(blockBtn);
@@ -448,100 +451,112 @@ function displayUserStats() {
 // this supposed to code for the add friend table
 function outputUsers(users) {
   userList.innerHTML = "";
-  console.log("Output Users: ", users);
+  // console.log("Output Users: ", users);
   users.forEach((user) => {
-    // console.log("user.username = ", user.username);
+
+    const tr = document.createElement("tr");
+    const tdName = document.createElement("td"); const tdBlock = document.createElement("td"); const tdFriend = document.createElement("td"); const tdTip = document.createElement("td");
     if (user.username == userJSON[0].username) {
-      const tdName = document.createElement("td");
+      const tdName = document.createElement("td"); const tdBlock = document.createElement("td"); const tdFriend = document.createElement("td"); const tdTip = document.createElement("td");
       tdName.innerText = user.username;
-      const tr = document.createElement("tr");
+      // const tr = document.createElement("tr");
       tr.appendChild(tdName);
+      tr.appendChild(tdTip);
+      tr.appendChild(tdFriend);
+      tr.appendChild(tdBlock);
       userList.appendChild(tr);
 
     } else {
       //name
       const tdName = document.createElement("td");
       tdName.innerText = user.username;
+      tr.appendChild(tdName);
+
       //tip
-      const tdTip = document.createElement("td");
-      const coinBtn = document.createElement("button");
-      // coinBtn.innerText = "+1";
-      const coin = document.createElement("i");
-      coin.className = "fas fa-coins";
-      coin.style = "font-size:24px;color:gray;padding: 5px;";
-      // coin.onclick = tipUsers();
-      coinBtn.type = "submit";
-      coinBtn.appendChild(coin);
-      tdTip.appendChild(coinBtn);
+      if (1) {
+        const tdTip = document.createElement("td");
+        const coinBtn = document.createElement("button");
+        // coinBtn.innerText = "+1";
+        const coin = document.createElement("i");
+        coin.className = "fas fa-coins";
+        coin.style = "font-size:24px;color:gray;padding: 5px;";
+        // coin.onclick = tipUsers();
+        coinBtn.type = "submit";
+        coinBtn.appendChild(coin);
+        tdTip.appendChild(coinBtn);
+        tr.appendChild(tdTip);
 
-      //block
-      const tdBlock = document.createElement("td");
-      const blockBtn = document.createElement("button");
-      const block = document.createElement("i");
-      block.className = "fas fa-ban";
-      block.style = "font-size:24px;color:red;padding: 5px;";
-      // block.onclick = blockUser();
-      blockBtn.type = "submit";
-      blockBtn.appendChild(block);
-      tdBlock.appendChild(blockBtn);
-
-      // console.log("List of Friends", friendsList);
-
-      //add friend
-      const tdFriend = document.createElement("td");
-      const friendBtn = document.createElement("button");
-      const friendIcon = document.createElement("i");
-      friendBtn.type = "submit";
-
-      if (friendsList.length > 0) {
-        //tdFriend.append(friendObj);
-        for (const [index, val] of friendsList.entries()) {
-          // friendsList.forEach((item, indx) => {
-          if (user.username == val) {
-            friendIcon.className = "fas fa-check";
-            //console.log(val, " is followed");
-            break;
-          } else {
-            friendIcon.className = "fas fa-plus-square";
-            //console.log(val, " is not followed");
+        tdTip.addEventListener("click", function () {
+          alert("Tip me");
+          if (username != tdName.innerText) {
+            tipUsers(username, tdName.innerText);
+            console.log(`${username} Tipped ${tdName.innerText}`);
           }
-        }
-      } else {
-        friendIcon.className = "fas fa-plus-square";
+        });
+
       }
 
+      //add friend
+      if (1) {
+        const tdFriend = document.createElement("td");
+        const friendBtn = document.createElement("button");
+        const friendIcon = document.createElement("i");
+        friendBtn.type = "submit";
 
-      friendIcon.style = "font-size:24px;color:green;padding: 5px;";
-      friendIcon.name = "friend";
-
-      friendBtn.appendChild(friendIcon);
-      tdFriend.appendChild(friendBtn);
-
-      tdTip.addEventListener("click", function () {
-        alert("Tip me");
-        if (username != tdName.innerText) {
-          tipUsers(username, tdName.innerText);
-          console.log(`${username} Tipped ${tdName.innerText}`);
+        if (friendsList.length > 0) {
+          //tdFriend.append(friendObj);
+          for (const [index, val] of friendsList.entries()) {
+            // friendsList.forEach((item, indx) => {
+            if (user.username == val) {
+              friendIcon.className = "fas fa-check";
+              //console.log(val, " is followed");
+              break;
+            } else {
+              friendIcon.className = "fas fa-plus-square";
+              //console.log(val, " is not followed");
+            }
+          }
+        } else {
+          friendIcon.className = "fas fa-plus-square";
         }
-      });
 
-      //var activeFriend = 
+        friendIcon.style = "font-size:24px;color:green;padding: 5px;";
+        friendIcon.name = "friend";
 
-      tdFriend.addEventListener("click", function () {
-        addFriend(username, tdName.innerText, friendIcon.className);
-      });
+        friendBtn.appendChild(friendIcon);
+        tdFriend.appendChild(friendBtn);
 
-      tdBlock.addEventListener("click", function () {
-        blockUser(tdName.innerText, room, username);
-      });
 
-      const tr = document.createElement("tr");
+        tdFriend.addEventListener("click", function () {
+          addFriend(username, tdName.innerText, friendIcon.className);
+        });
 
-      tr.appendChild(tdName);
-      tr.appendChild(tdTip);
-      tr.appendChild(tdFriend);
-      tr.appendChild(tdBlock);
-      //tr.appendChild(friendForm);
+        tr.appendChild(tdFriend);
+      }
+
+      //Add block button
+      if (1) {
+        const tdBlock = document.createElement("td");
+        const blockBtn = document.createElement("button");
+        const block = document.createElement("i");
+        block.className = "fas fa-ban"; block.style = "font-size:24px;color:red;padding: 5px;";
+
+        blockedList.forEach((item, index) => {
+          if (user.username == item)
+            block.style = "font-size:24px;color:grey;padding: 5px;";
+        })
+
+        blockBtn.type = "submit";
+        blockBtn.appendChild(block);
+        tdBlock.appendChild(blockBtn);
+
+        tdBlock.addEventListener("click", function () {
+          blockUser(tdName.innerText, room, username);
+        });
+
+        tr.appendChild(tdBlock);
+      }
+
       userList.appendChild(tr);
 
     }
