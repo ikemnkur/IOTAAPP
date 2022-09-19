@@ -24,43 +24,62 @@ table th {
     background: #9e9a9a;
     color: #313030;
 } */
+/* 
+.videoDiv {
+  border: 3px solid #3c39dd;
+  background: #e6e9ff;
+}
 
 table td {
-    border: 1px solid #b3adad;
-    text-align: center;
-    padding: 5px;
-    background: #e6e9ff;
-    color: #313030;
+  border: 1px solid #b3adad;
+  text-align: center;
+  padding: 3px;
+  background: #e6e9ff;
+  color: #313030;
 }
 
 #video-grid {
-    grid-template-columns: repeat(auto-fill, 300px);
-    grid-auto-rows: 300px;
-    padding: 10px;
-    overflow-x: scroll;
-    margin-left: 10%;
-    margin-right: 10%;
-    margin-bottom: 10px;
-    border: 5px solid #667aff;
-    padding: 5px; 
-    background-color: #e6e9ff; border-radius:5px; 
-  }
-  /* #video-table{
-    max-width: 1100px;
-    background: #fff;
-    margin: 30px auto;
-    overflow: hidden;
-    padding: 10px;
-  } */
-  table {
-    border: 5px;
-  }
+  grid-template-columns: repeat(auto-fill, 300px);
+  grid-auto-rows: 300px;
+  padding: 10px;
+  overflow-x: scroll;
+  margin-left: 10%;
+  margin-right: 10%;
+  margin-bottom: 10px;
+  border: 5px solid #667aff;
+  padding: 5px;
+  background-color: #e6e9ff;
+  border-radius: 5px;
+}
 
-  video {
-    width: 25%;
-    height: 25%;
-    object-fit: cover;
-  }
-  canvas {
-    object-fit: cover;
-  }
+#video-table {
+  max-width: 1100px;
+  background: #fff;
+  margin: 30px auto;
+  overflow: hidden;
+  padding: 10px;
+}
+
+table {
+  border: 5px;
+}
+
+video {
+  width: 10%;
+  height: 10%;
+  object-fit: cover;
+}
+
+#video {
+  width: 25%;
+  height: 25%;
+  object-fit: cover;
+}
+
+canvas {
+  object-fit: cover;
+}
+
+#settingBtn {
+  padding: 3px;
+} */

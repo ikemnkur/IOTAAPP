@@ -15,17 +15,14 @@ var userID = username;
 var focusedCanvas, imgSentToCanvas;
 var currentCall = {};
 var myUserData;
-var peer = new Peer(userID, {
-  // get the peerjs server info
-  host: '/', //localhost:3001
-  port: '3001',
-  // userDatem: myUserData
-});
+var peer;
+var canJoin = false, timer = 60; // for the temporary stream join
+var OUD = {};
+var Room = {};
 
 videoSocket.on("connect", () => {
   console.log(`you connected with socket.id ${videoSocket.id}`);
   socketid = videoSocket.id;
-
 
   myUserData = {
     "id": socketid,
@@ -34,8 +31,16 @@ videoSocket.on("connect", () => {
     "XP": userJSON[0]["xp"],
     "peerId": null,
     "HP": 100,
-    "streamObj": null
+    "streaming": false,
+    "score": 0,
+    "coins":  userJSON[0]["coins"],
   };
+
+  peer = new Peer(userID, {
+    // get the peerjs server info
+    host: '/', //localhost:3001
+    port: '3001',
+  });
 
 
   peer.on('open', (id) => {
@@ -44,60 +49,110 @@ videoSocket.on("connect", () => {
     myUserData.id = socketid;
     myUserData.peerId = id;
 
-    // navigator.mediaDevices.getUserMedia({
-    //   video: true,
-    //   audio: true
-    // }).then(myStream => {
-
-    //   myUserData.streamObj = myStream.toString();
-    //   console.log("Outgoing Stream", myUserData.streamObj);
-    //   addSelfVideoStream(myVideo, myStream, myUserData, myCanvas)
-
-    //   peer.on('call', call => {
-    //     call.answer(myStream);
-    //     var video = document.createElement('video')
-    //     var canvas = document.createElement('canvas')
-    //     console.log('Peer.on("call"):', call.metadata);
-
-    //     call.on('stream', userVideoStream => {
-    //       addOtherVideoStream(video, userVideoStream, myUserData, canvas)
-    //     });
-    //   })
-
     videoSocket.emit('connectNewStream', ROOM_ID, id, myUserData); //Set up socket.io
-    //   console.log("Outgoing Stream", myStream);
-    //   // //emitting from app.js when 
-    //   videoSocket.on('userConnected', (activeUserz, roomID, otherUserData) => {
-    //     if (roomID == ROOM_ID & otherUserData.name != userID) {
-    //       console.log(`Connect Event RM: ${roomID} (peerId): `, otherUserData.peerId);
-    //       // Set and fetch the active user list
-    //       OUD = otherUserData; // console.log("other user data: ", OUD);
-    //       // console.log("Incoming Stream", stream);
-    //       activeUsersVideo = activeUserz; // console.log("AUV: ", activeUsersVideo);
-    //       connectToNewUser(otherUserData.peerId, otherUserData.streamObj, OUD);
-    //     }
-    //   })
-    // })
 
-    // videoSocket.emit('setActiveUsers', ROOM_ID, myUserData);
-    // setTimeout(videoSocket.emit('connectNewStream', ROOM_ID, id, myUserData), 5000);
+    // Answering A Call
+    // When a call is made to our UUID, we receive a call event on our peer object, we can then ask the user if they want to accept the call or not. If they accept the call, we need to grab the user’s video and audio inputs, and send those to the caller. If the call is rejected, we can close the connection.
 
+    peer.on("call", (call) => {
+      console.log("call peer event from ", call.peer)
+      var user = getUserDatabyUserId(call.peer)
+      // if (confirm(`Accept call from ${call.peer}?`)) {
+      if (user.streaming) {
+        // The end stream timer, kick user off stream after X seconds
+        setTimeout(endCall(call.peer), timer * 1000);
+        // grab the camera and mic
+        // navigator.mediaDevices
+        //   .getUserMedia({ video: true, audio: true })
+        //   .then((GUMstream) => {
+        //Take stream from setting and use it to call others
+        const stream = document.getElementById("video").srcObject;
+        // answer the call
+        call.answer(stream);
+        //remove the preview stream
+        // document.getElementById('video').style.display = "none";
+        // save the close function
+        currentCall[call.peer] = call;
+
+        // change to the video view
+        call.on("stream", (remoteStream) => {
+          // add a certain stream
+          var video = document.createElement('video');
+          var canvas = document.createElement("canvas");
+          var userdata = getUserDatabyUserId(call.peer)
+          let title = "video#" + call.peer;
+          if (document.getElementById(title) == null) {
+            addOtherVideoStream(video, remoteStream, userdata, canvas);
+          }
+
+        });
+      } else {
+        // user rejected the call, close it
+        call.close();
+      }
+    });
   })
 })
 
+
+
+
+function updateRoom() {
+  if (Room[0].peerId == userID) {
+    videoSocket.emit("getRoomUpdate", ROOM_ID)
+  }
+  myUserData.coins = coins;// get coins value from Chat.js
+  myUserData.score++;
+  videoSocket.emit("sendUserStatus", ROOM_ID, myUserData);
+  setTimeout(updateRoom, 5000);
+}
+
+// Get current user
+function getUserDatabyUserId(id) {
+  return Room.find(user => user.name === id);
+}
+
+videoSocket.on("streamJoinConfig", (userid, team, time, room) => {
+  console.log("streamJoin event ", userid, "in room: ", room);
+  if (userid == userID & room == ROOM_ID) {
+    timer = time;
+    console.log("Set timer to ", time, " seconds for user: ", userid);
+    canJoin = true;
+    myUserData.userTeam = team;
+    myUserData.streaming = true;
+    // callUser(getUserDatabyUserId(userid));
+    Room.forEach((item, index) => {
+      // if (document.getElementById("video#" + item.userId) == null) {
+        if (item.streaming == true) {
+          console.log("adding video for ", item);
+          callUser(item);
+        }
+      // }
+    })
+  }
+})
+
+
 // //emitting from app.js when 
-videoSocket.on('userConnected', (activeUserz, roomID, otherUserData) => {
-  if (roomID == ROOM_ID & otherUserData.name != userID) {
+videoSocket.on('userConnected', (roomData, roomID, otherUserData) => {
+  if (roomID == ROOM_ID) { //& otherUserData.name != userID) {
     console.log(`Connect Event RM: ${roomID} (peerId): `, otherUserData.peerId);
     // Set and fetch the active user list
     OUD = otherUserData; // console.log("other user data: ", OUD);
     // console.log("Incoming Stream", stream);
-    activeUsersVideo = activeUserz; // console.log("AUV: ", activeUsersVideo);
+    Room = roomData;
+     // console.log("AUV: ", Room);
     // connectToNewUser(otherUserData.peerId, otherUserData.streamObj, OUD);
-    callUser(otherUserData);
+    // Room.forEach((item, index) => {
+    //   if (document.getElementById("video#" + item.userId) == null){
+    //     callUser(item);
+    //     console.log("adding video for ", item);
+    //   }
+
+    // })
+    // callUser(otherUserData);
   }
 })
-
 
 async function callUser(userDATA) {
   // get the id entered by the user
@@ -109,128 +164,89 @@ async function callUser(userDATA) {
   //     audio: true,
   // });
   const stream = document.getElementById("video").srcObject;
-  // switch to the video call and play the camera preview
-  //   document.getElementById("menu").style.display = "none";
-  // document.getElementById("live").style.display = "block";
-  // document.getElementById("local-video").srcObject = stream;
-  // document.getElementById("local-video").play();
-  // make the call
+
+  // make the call to recieve
   const call = peer.call(peerID, stream);
-  call.on("stream", (stream) => {
 
-    let title = "video#" + call.peer;
-    if (document.getElementById(title) == null) { //check for duplicates
-      // when we receive the remote stream, play it
-      let div = document.createElement("div");
-      let video = document.createElement("video");
-      let header = document.createElement("header");
-      header.innerText = title;
-      video.id = title;
-      video.srcObject = stream;
-      video.play();
-      let livefeedDiv = document.getElementById("live");
-      div.appendChild(header);
-      div.appendChild(video);
-      livefeedDiv.appendChild(div);
+  if (call != undefined) {
+    console.log("call successful");
+    if (peerID == userID) { //Add user own stream to DOM elements
+      addSelfVideoStream(stream, userDATA);
     }
-
-
-    // document.getElementById("remote-video").srcObject = stream;
-    // document.getElementById("remote-video").play();
-  });
-  call.on("data", (stream) => {
-    let title = "video#" + call.peer;
-    if (document.getElementById(title) == null) { //check for duplicates
-      // when we receive the remote stream, play it
-      let div = document.createElement("div");
-      let video = document.createElement("video");
-      let header = document.createElement("header");
-      header.innerText = title;
-      video.id = title;
-      video.srcObject = stream;
-      video.play();
-      let livefeedDiv = document.getElementById("live");
-      div.appendChild(header);
-      div.appendChild(video);
-      livefeedDiv.appendChild(div);
-    }
-
-
-    // document.querySelector("#remote-video").srcObject = stream;
-  });
-  call.on("error", (err) => {
-    console.log(err);
-  });
-  call.on('close', () => {
-    endCall(call.peer)
-  })
-  // save the close function
-  currentCall[call.peer] = call;
-}
-
-// Answering A Call
-// When a call is made to our UUID, we receive a call event on our peer object, we can then ask the user if they want to accept the call or not. If they accept the call, we need to grab the user’s video and audio inputs, and send those to the caller. If the call is rejected, we can close the connection.
-
-peer.on("call", (call) => {
-  if (confirm(`Accept call from ${call.peer}?`)) {
-    // grab the camera and mic
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((GUMstream) => {
-        const stream = document.getElementById("video").srcObject;
-        // switch to the video call and play the camera preview
-        // document.getElementById("local-video").srcObject = stream;
-        // document.getElementById("local-video").play();
-        // play the local preview
-        // document.querySelector("#local-video").srcObject = stream;
-        // document.querySelector("#local-video").play();
-        // answer the call
-        call.answer(stream);
-        //remove the preview stream
-        document.getElementById('video').style.display = "none";
-        // save the close function
-        currentCall[call.peer] = call;
-        // change to the video view
-        // document.querySelector("#menu").style.display = "none";
-        // document.querySelector("#live").style.display = "block";
-        call.on("stream", (remoteStream) => {
-          let title = "video#" + call.peer;
-          if (document.getElementById(title) == null) {
-            // when we receive the remote stream, play it
-            let div = document.createElement("div");
-            let video = document.createElement("video");
-            let header = document.createElement("header");
-            header.innerText = title;
-            video.id = title;
-            video.srcObject = remoteStream;
-            video.play();
-            let livefeedDiv = document.getElementById("live");
-            div.appendChild(header);
-            div.appendChild(video);
-            livefeedDiv.appendChild(div);
-          }
-
-
-          //   document.getElementById("remote-video").srcObject = remoteStream;
-          //   document.getElementById("remote-video").play();
-        });
-      })
-      .catch((err) => {
-        console.log("Failed to get local stream:", err);
-      });
+    call.on("stream", (stream) => {
+      console.log("peerJS received a stream from: ", call.peer)
+      var video = document.createElement('video');
+      var canvas = document.createElement("canvas");
+      addOtherVideoStream(video, stream, userDATA, canvas);
+      // let title = "video#" + call.peer;
+      // if (document.getElementById(title) == null) { //check for duplicates
+      //   // when we receive the remote stream, play it
+      //   let div = document.createElement("div");
+      //   let video = document.createElement("video");
+      //   let header = document.createElement("header");
+      //   header.innerText = title;
+      //   video.id = title;
+      //   video.srcObject = stream;
+      //   video.play();
+      //   let livefeedDiv = document.getElementById("videoTable");
+      //   div.appendChild(header);
+      //   div.appendChild(video);
+      //   livefeedDiv.appendChild(div);
+      // }
+    });
+    // call.on("data", (stream) => {
+    //   console.log("peerJS received a (data) stream from: ", call.peer)
+    //   var video = document.createElement('video');
+    //   var canvas = document.createElement("canvas");
+    //   addOtherVideoStream(video, stream, userDATA, canvas);
+    //   // let title = "video#" + call.peer;
+    //   // if (document.getElementById(title) == null) { //check for duplicates
+    //   //   // when we receive the remote stream, play it
+    //   //   let div = document.createElement("div");
+    //   //   let video = document.createElement("video");
+    //   //   let header = document.createElement("header");
+    //   //   header.innerText = title;
+    //   //   video.id = title;
+    //   //   video.srcObject = stream;
+    //   //   video.play();
+    //   //   let livefeedDiv = document.getElementById("videoTable");
+    //   //   div.appendChild(header);
+    //   //   div.appendChild(video);
+    //   //   livefeedDiv.appendChild(div);
+    //   // }
+    //   // document.querySelector("#remote-video").srcObject = stream;
+    // });
+    call.on("error", (err) => {
+      console.log(err);
+    });
+    call.on('close', () => {
+      endCall(call.peer)
+    });
+    // save the close function
+    currentCall[call.peer] = call;
   } else {
-    // user rejected the call, close it
-    call.close();
+    console.log("call failed");
+    addSelfVideoStream(stream, myUserData);
+    // let title = "video#" + call.peer;
+    // let div = document.createElement("div");
+    // let video = document.createElement("video");
+    // let header = document.createElement("header");
+    // header.innerText = title;
+    // video.id = title;
+    // video.srcObject = stream;
+    // video.play();
+    // let livefeedDiv = document.getElementById("videoTable");
+    // div.appendChild(header);
+    // div.appendChild(video);
+    // livefeedDiv.appendChild(div);
   }
-});
+
+}
 
 // Ending The Call
 // When the call is over the user can click the `End call` button to terminate the connection. Then, we can show the menu once again.
 
 function endCall(peerid) {
-  // Go back to the menu
-  // document.querySelector("#menu").style.display = "block";
-  // document.querySelector("#live").style.display = "none";
   // // If there is no current call, return
   if (!currentCall[peerid]) return;
   // Close the call, and reset the function
@@ -238,31 +254,40 @@ function endCall(peerid) {
     currentCall[peerid].close();
   } catch { }
   currentCall[peerid] = undefined;
+  myUserData.streaming = false;
 }
 
 async function delay(time) {
   return new Promise(resolve => setTimeout(resolve, time));
 }
 
-// peer.connect(userID, {metadata: {myUserData}});
 
-var OUD = {};
-activeUsersVideo = {};
+videoSocket.on('user-disconnected', (peerId, data, roomid, userdata) => {
+  console.log("Disconnect Event (peerId): ", userdata.name);
+  Room = data;
 
-videoSocket.on('user-disconnected', ({ peerId, data }) => {
-  console.log("Disconnect Event (peerId): ", peerId);
-  activeUsersVideo = data;
+  let videoDiv = document.getElementById("video#" + peerId)
+  if (videoDiv.parentElement != null)
+    videoDiv.parentElement.remove();
 
   if (peers[peerId]) {
     peers[peerId].close();
-    console.log("User disconnected, live users: ", activeUsersVideo);
+    console.log("User disconnected, live users: ", Room);
+    console.log("Active Peer JS connections: ", peers);
   }
 });
 
 videoSocket.on('getActiveUsers', (roomID, data) => { // get the active user in the current room
   if (roomID == ROOM_ID) {
-    activeUsersVideo = data;
-    console.log("live users recieved: ", activeUsersVideo);
+    Room = data;
+    // console.log("live users recieved: ", Room);
+    Room.forEach((item, index) => {
+      // console.log();
+      if (item.streaming == true) {
+        console.log("adding video for ", item);
+        callUser(item);
+      }
+    })
   }
 });
 
@@ -291,46 +316,39 @@ videoSocket.on('getActiveUsers', (roomID, data) => { // get the active user in t
 //   // connectToNewUser(otherUserData.peerId, stream, OUD);
 // });
 
+setTimeout(updateRoom, 5000);
+
 var showsettings = 1;
 document.getElementById("settingsBtn").addEventListener("click", () => {
   var setting = document.getElementById("settings")
   if (showsettings) {
-    setting.style.display = "block";
+    setting.style.display = "none";
     showsettings = 0;
   } else {
-    setting.style.display = "none"
+    setting.style.display = "block"
     showsettings = 1;
   }
 })
 
-function connectToNewUser(peerId, stream, otherUserData) { //setup connection stream to new user
-  // videoSocket.emit('fetchActiveUsers', ROOM_ID, OUD);
-  // if (streams[otherUserData.name] == null) {
-  //   streams[otherUserData.name] = [];
-  // }
-  // add stream to streams array
-  // streams[otherUserData.name].push({ stream, otherUserData });
+// function connectToNewUser(peerId, userVideoStream, otherUserData) { //setup connection stream to new user
 
-  console.log('connectToNewUser Obj: ', peerId);
-  var call = peer.call(peerId, stream, { metadata: { otherUserData } })
+//   console.log('connectToNewUser Obj: ', peerId);
+//   var video = document.createElement('video');
+//   var canvas = document.createElement("canvas");
+//   addOtherVideoStream(video, userVideoStream, otherUserData, canvas)
+
+// };
+
+
+function addSelfVideoStream(stream, userData) { //Draw video to canvas element then append that to the DOM
+  // var uname = userData.name; 
+  // var userTeam = userData.userTeam;
+
   var video = document.createElement('video');
   var canvas = document.createElement("canvas");
-  // console.log('call Obj: ', call);
-  call.on('stream', userVideoStream => {
-    addOtherVideoStream(video, userVideoStream, otherUserData, canvas)
-  })
-  call.on('close', () => {
-    video.remove()
-    canvas.remove();
-  })
-  peers[peerId] = call
-};
-
-
-function addSelfVideoStream(video, stream, userData, canvas) { //Draw video to canvas element then append that to the DOM
-  var uname = userData.name, userTeam = userData.userTeam;
 
   video.srcObject = stream
+
 
   // console.log("User Data Json: ", userData);
 
@@ -338,11 +356,10 @@ function addSelfVideoStream(video, stream, userData, canvas) { //Draw video to c
 
   canvas.addEventListener("click", () => {
     focusedCanvas = canvas.id;
+    console.log("focusedCanvas = ", canvas.id);
   });
 
-  let joiningUser = activeUsers[activeUsers.length - 1]
-
-  canvas.id = 'canvas#' + joiningUser.username;
+  canvas.id = 'canvas#' + userID;
   let w = 300, h = 220;
   canvas.width = w;
   canvas.height = h;
@@ -350,11 +367,11 @@ function addSelfVideoStream(video, stream, userData, canvas) { //Draw video to c
   canvas.style.height = h;
   var context = canvas.getContext('2d');
 
-  video.id = "video#" + uname;
+  video.id = "video#" + userID;
   // video.srcObject = stream
 
   video.addEventListener('loadedmetadata', () => {
-    console.log("User " + uname + "'s Video play event. ");
+    console.log("User " + userID + "'s Video play event. ");
     video.play();
   })
 
@@ -383,7 +400,6 @@ function addSelfVideoStream(video, stream, userData, canvas) { //Draw video to c
   // videoGrid.append(canvas)
 }
 
-
 function addOtherVideoStream(video, stream, userData, canvas) { //Draw video to canvas element then append that to the DOM
   var uname = userData.name, userTeam = userData.userTeam;
 
@@ -393,13 +409,15 @@ function addOtherVideoStream(video, stream, userData, canvas) { //Draw video to 
 
   console.log("User ", uname, " has joined team: ", userTeam);
 
+  if (document.getElementById('canvas#' + userData.peerId) != null)
+    return 0;
+
   canvas.addEventListener("click", () => {
     focusedCanvas = canvas.id;
+    console.log("focusedCanvas = ", canvas.id);
   });
 
-  let joiningUser = activeUsers[activeUsers.length - 1]
-
-  canvas.id = 'canvas#' + joiningUser.username;
+  canvas.id = 'canvas#' + userData.peerId;
   let w = 300, h = 220;
   canvas.width = w;
   canvas.height = h;
@@ -408,7 +426,6 @@ function addOtherVideoStream(video, stream, userData, canvas) { //Draw video to 
   var context = canvas.getContext('2d');
 
   video.id = "video#" + uname;
-  // video.srcObject = stream
 
   video.addEventListener('loadedmetadata', () => {
     console.log("User " + uname + "'s Video play event. ");
@@ -419,15 +436,6 @@ function addOtherVideoStream(video, stream, userData, canvas) { //Draw video to 
   video.addEventListener('play', function () {
     draw(this, context, 300, 230, canvas.id, userData);
   }, false);
-
-  // var otherUserTeam = document.createElement("h2");
-  // otherUserTeam.id = uname + "#Teamlabel";
-  // otherUserTeam.innerText = userTeam;
-  // var otherUsername = document.createElement("h3");
-  // otherUsername.innerText = uname;
-  // var d = document.createElement("div");
-  // d.appendChild(otherUserTeam);
-  // d.appendChild(otherUsername);
 
   var tbl = document.getElementById("videoTable");
   var tdc = document.createElement("td");
@@ -451,12 +459,15 @@ function draw(video, context, width, height, id, userData) {
   } else {
     Circle(canvas);
   }
-  canvas.addEventListener("click", () => {
-    focusedCanvas = canvas.id;
-    console.log("focusedCanvas = ", canvas.id)
-    // removeEventListener("click", () => { });
-    removeEventListener("click");
-  })
+  // var hold = false;
+  // canvas.addEventListener("click", () => {
+  //   if (hold == false) {
+  //     focusedCanvas = canvas.id;
+  //     console.log("focusedCanvas = ", canvas.id)
+  //     canvas.removeEventListener("click", () => { });
+  //   }
+  //   setTimeout(() => { hold = true }, 200)
+  // })
   drawHUD(canvas, userData);
   if (imgSentToCanvas != null)
     imgSentToCanvas.update();
@@ -472,9 +483,16 @@ function drawHUD(canvas, userData) {
   var context = canvas.getContext('2d');
   var centerX = canvas.width / 2;
   var centerY = canvas.height / 2;
+  let len = userData.name.length;
 
-  context.font = '24px Arial';
-  context.fillText(userData.userTeam, 10, 24);
+  context.strokeStyle = '#003300';
+  context.font = '16px Arial';
+  context.fillText(userData.userTeam, (canvas.width / 2) - (6 * len), 25);
+
+  context.font = '12px Arial';
+  context.strokeStyle = '#303300';
+
+  context.fillText(userData.name, 10, 24);
 
 }
 
@@ -604,31 +622,88 @@ if (1) {
 
   function previewImg(searchTerm) {
     if (searchTerm.length >= 3) {
-      let matches = searchImages(searchTerm);
       var imagePrevDiv = document.getElementById("imgPrevDiv");
-      if (focusedCanvas == null)
-        focusedCanvas = myCanvas.id;
       var targetCanvas = document.getElementById(focusedCanvas);
+      let matches, cntrCvnX = 125 - 8, cntrCvnY = 150 - 16;
+
+      if (modeToggle == "library") {
+        matches = searchLibrary(searchTerm, "images");
+      } else {
+        matches = searchImages(searchTerm);
+      }
+
+      if (focusedCanvas == null) {
+        focusedCanvas = myCanvas.id;
+        targetCanvas = document.getElementById(focusedCanvas);
+      } else {
+        cntrCvnX = targetCanvas.width / 2 - 32;
+        cntrCvnY = targetCanvas.height / 2 - 32;
+      }
+
       removeAllChildNodes(imagePrevDiv);
       matches.forEach(match => {
         if (match != null) {
           // var imageP = document.getElementById("previewImg").src =`../images/${match}` ;
-          var image = document.createElement("img");
-          image.src = `../images/${match}`;
-          image.height = 64;
-          image.width = 64;
-          imagePrevDiv.appendChild(image);
-          image.style = "padding: 2px"
+          if (modeToggle == "library") {
+            var image = match;
+            image.height = 64;
+            image.width = 64;
+            imagePrevDiv.appendChild(image);
+            image.style = "padding: 2px"
+            image.addEventListener("click", () => {
+              console.log("adding image to from Library to screen: ", image);
+              imgSentToCanvas = new component(64, 64, `${image.src}`, cntrCvnX, cntrCvnY, "image", targetCanvas);
+              imgSentToCanvas.update();
+            })
+          } else {
+            var image = document.createElement("img");
+            image.src = `../images/${match}`;
+            image.height = 64;
+            image.width = 64;
+            imagePrevDiv.appendChild(image);
+            image.style = "padding: 2px"
 
-          cntrCvnX = targetCanvas.width / 2 - 32;
-          cntrCvnY = targetCanvas.height / 2 - 32;
-          image.addEventListener("click", () => {
-            console.log("adding image to target canvas: ", targetCanvas);
-            imgSentToCanvas = new component(64, 64, `${image.src}`, cntrCvnX, cntrCvnY, "image", targetCanvas);
-            imgSentToCanvas.update();
-          })
+            image.addEventListener("dblclick", () => {
+              console.log("adding image to target canvas: ", targetCanvas);
+              imgSentToCanvas = new component(64, 64, `${image.src}`, cntrCvnX, cntrCvnY, "image", targetCanvas);
+              imgSentToCanvas.update();
+            })
+            image.addEventListener("click", () => {
+              console.log("adding image to library: ", image);
+              library["images"].push(image);
+            })
+          }
         }
       });
+    } else {
+      let errorMSG = document.createElement("strong")
+      errorMSG.innerText = "Type more than 3 characters to start search";
+      imagePrevDiv.appendChild(errorMSG)
+      delay(1000);
+      errorMSG.remove();
+    }
+  }
+  // JavaScript code
+  function searchLibrary(search, type) {
+    // var search = document.getElementById("imgSearch").value;
+    // let search = document.getElementById('searchbar').value
+    search = search.toLowerCase();
+    // let x = document.getElementsByClassName('rooms');
+    let x = library[type];
+    var matches = [];
+    // console.log("searching for: ", search, " in ", fullImgList);
+    for (i = 0; i < x.length; i++) {
+      if (x[i].src.toLowerCase().includes(search)) {
+        // x[i].style.display = "none";
+        matches.push(x[i]);
+        // x[i].style.display = "";
+      }
+    }
+    console.log("Matching Search Results: ", matches)
+    if (matches != null) {
+      return matches;
+    } else {
+      return null;
     }
   }
 
@@ -656,4 +731,40 @@ if (1) {
     }
   }
 
+  var library = {};
+  library["images"] = [];
+
+  var modeToggle = "search";
+  var modeToggleBtn = document.getElementById("searchMode")
+  var addBtn = document.getElementById("addToLibBtn")
+
+  modeToggleBtn.addEventListener("click", () => {
+    var imagePrevDiv = document.getElementById("imgPrevDiv");
+    var imgSearchBar = document.getElementById("imgSearch");
+
+    if (modeToggle == "search") {
+      modeToggle = "library";
+      modeToggleBtn.innerText = "Library";
+      removeAllChildNodes(imagePrevDiv);
+      imgSearchBar.placeholder = "Search Your Library";
+      if (library["images"] != []) {
+        library["images"].forEach(img => {
+          imagePrevDiv.append(img);
+        });
+      }
+      imgSearchBar.value = "";
+      delay(500);
+    } else {// (modeToggle == "library") {
+      modeToggle = "search";
+      imgSearchBar.placeholder = "Search For Images";
+      modeToggleBtn.innerText = "Find";
+      imgSearchBar.value = "";
+      removeAllChildNodes(imagePrevDiv);
+    }
+    delay(100);
+  })
+
+  // addBtn.addEventListener("click", () => {
+
+  // })
 }

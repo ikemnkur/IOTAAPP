@@ -1360,17 +1360,38 @@ io.on('connection', socket => {
 	// })
 
 	// get a array object of the users' stats in the room roomId and returns it
-	socket.on('setActiveUsers', (roomId, userData) => {
+	socket.on('sendUserStatus', (roomId, userData) => {
 		if (activeRoomandUsers[roomId] == null) {
 			activeRoomandUsers[roomId] = [];
 		}
-		activeRoomandUsers[roomId].push(userData);
-		const ids = activeRoomandUsers[roomId].map(o => o.name)
-		activeRoomandUsers[roomId] = activeRoomandUsers[roomId].filter(({ id }, index) => !ids.includes(id, index + 1))
+		
+		let objIndex = activeRoomandUsers[roomId].findIndex((obj =>  obj.name == userData.name ))
+		// console.log(`user: ${userData.name} in room: ${roomId}"`, "old: ", userData.streaming, "|| new: ", activeRoomandUsers[roomId][objIndex]);
+		
+		// console.log("index: ", objIndex);
+		activeRoomandUsers[roomId][objIndex] = userData;
+		// activeRoomandUsers[roomId].push(userData);
+		// const ids = activeRoomandUsers[roomId].map(o => o.name)
+		// activeRoomandUsers[roomId] = activeRoomandUsers[roomId].filter(({ id }, index) => !ids.includes(id, index + 1))
 
-		console.log(`Active Users in room ${roomId}:`, activeRoomandUsers[roomId]);
-		io.emit('getActiveUsers', activeRoomandUsers[roomId]);
+
+		// console.log(`user status sent from user: ${userData.name} in room: ${roomId}`);
+		// console.log(`Active Users in room ${roomId}:`, activeRoomandUsers[roomId]);
+		// io.emit('getActiveUsers', activeRoomandUsers[roomId]);
 	});
+
+	// send an array object of the users' stats in the room roomId 
+	socket.on('getRoomUpdate', (roomId) => {
+		if (activeRoomandUsers[roomId] == null) {
+			activeRoomandUsers[roomId] = [];
+		}
+
+		// console.log(`sending update for room: ${roomId}`);
+		io.emit('getActiveUsers', roomId, activeRoomandUsers[roomId]);
+	});
+
+
+
 	// Run once when connecting to room for each user to get list of sounds and images
 	socket.on("fetchImages", (roomId, userId) => {
 		var files = fs.readdirSync('./public/images/');
@@ -1384,27 +1405,41 @@ io.on('connection', socket => {
 		console.log("userData: ", userData);
 		socket.join(roomId)
 
-		// userData.id = socketid;
-
 		if (activeRoomandUsers[roomId] == null) {
 			activeRoomandUsers[roomId] = [];
 		}
+		// userData.id = socketid;
+		// console.log(`activeRoomandUsers[roomId].length: ${activeRoomandUsers[roomId].length}`)
+		// if (activeRoomandUsers[roomId].length == 1) {
+		// 	// setInterval(() => {
+		// 	// 	io.emit('getActiveUsers', roomId, activeRoomandUsers[roomId]);
+		// 	// 	console.log(`sending updates to room: ${roomId}`)
+		// 	// }, 5000);
+		// 	updateRoom();
+		// }
 
+		// function updateRoom() {
+		// 	// if (activeRoomandUsers[roomId].length == 1) {
+		// 		io.emit('getActiveUsers', roomId, activeRoomandUsers[roomId]);
+		// 		console.log(`sending updates to room: ${roomId}`)
+		// 	// }
+		// 	setTimeout(updateRoom, 5000);
+		// }
 		activeRoomandUsers[roomId].push(userData);
 		const ids = activeRoomandUsers[roomId].map(o => o.name)
 		activeRoomandUsers[roomId] = activeRoomandUsers[roomId].filter(({ id }, index) => !ids.includes(id, index + 1))
 
-		console.log(`Active Users in room ${roomId}:`, activeRoomandUsers[roomId]);
+		console.log(`Active Users in room: ${roomId}:`, activeRoomandUsers[roomId]);
 
 		io.emit('userConnected', activeRoomandUsers[roomId], roomId, userData);
-		io.emit('getActiveUsers', roomId, activeRoomandUsers[roomId]);
+		// io.emit('getActiveUsers', roomId, activeRoomandUsers[roomId]);
 
 		socket.on('disconnect', () => {
 			// filter out disconnected user
-			
+
 			var disconnectedUser = activeRoomandUsers[roomId].find(user => user.id === socket.id);
-			  
-			console.log("ActiveRoomandUsers[roomId]:", activeRoomandUsers[roomId])
+
+			console.log(`ActiveRoomandUsers[${roomId}]:`, activeRoomandUsers[roomId])
 			if (activeRoomandUsers[roomId] != undefined) // if not empty
 				activeRoomandUsers[roomId] = activeRoomandUsers[roomId].filter(x => x.name !== userData.name);
 			console.log("User ", userData.name, "has left room: ", roomId);
@@ -1437,11 +1472,18 @@ io.on('connection', socket => {
 		ActiveUsers();
 	});
 
+	socket.on("setStreamJoinConfig", (userid, team, time, room) => {
+		const user = getCurrentUser(socket.id);
+		console.log("setStreamJoinConfig Event by:", userid)
+		io.emit("streamJoinConfig", userid, team, time, room)
+	})
+
 	// Listen for tipMessgae
-	socket.on('Tip', (currentUser, tippedUser) => {
+	socket.on('Tip', (currentUser, tippedUser, coins) => {
 		try {
 			const user = getCurrentUser(socket.id);
-			io.to(user.room).emit('tipEvent', currentUser, tippedUser);
+			io.emit('tipEvent', currentUser, tippedUser, coins, user.room);
+			// io.to(user.room).emit('tipEvent', currentUser, tippedUser, coins);
 		}
 		catch (e) {
 			console.log(e);
@@ -1489,12 +1531,16 @@ io.on('connection', socket => {
 	});
 
 	socket.on('updateStats', (xp, coins, username) => {
+		const user = getCurrentUser(socket.id);
+		// rooms[user.rom]
 		connection.query("UPDATE accounts SET xp = ? WHERE username = ?", [xp, username], (error, updateResults) => {
 			if (error) throw error;
+			// console.log("Set " + username + " xp to: " + xp);
 			// console.log("results of XP update: ", updateResults);
 		});
 		connection.query("UPDATE accounts SET coins = ? WHERE username = ?", [coins, username], (error, updateResults) => {
 			if (error) throw error;
+			// console.log("Set " + username + " coin to: " + coins);
 			// console.log("results of XP update: ", updateResults);
 		});
 		// console.log(username, "stats updated", " XP: ", xp, "coins: ", coins);
@@ -1503,16 +1549,14 @@ io.on('connection', socket => {
 	// Runs when client disconnects
 	socket.on('disconnect', () => {
 		const user = userLeave(socket.id);
-		console.log("user disconnect event: ", user);
-
-		ActiveUsers();
 
 		if (user) {
+			ActiveUsers();
 			io.to(user.room).emit(
 				'message',
 				formatMessage(botName, `${user.username} has left the chat in room: ${user.room}`, null)
 			);
-
+			console.log("user disconnect event: ", user.username);
 			// Send users and room info
 			io.to(user.room).emit('roomUsers', {
 				room: user.room,
@@ -1701,11 +1745,6 @@ app.post('/block', (request, response) => isLoggedin(request, settings => {
 	// });
 }));
 
-app.post('/imgSearch', (request, response) => isLoggedin(request, settings => {
-	var searchTerm = request.body.searchTerm;
-	var userId = request.body.userId;
-	var roomId = request.body.roomId;
-}));
 
 
 

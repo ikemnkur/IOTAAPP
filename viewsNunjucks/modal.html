@@ -8,12 +8,12 @@
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
-    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
-  <link rel="stylesheet" href="css/modal.css">
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" -->
+  <!-- integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" /> -->
+  <!-- <link rel="stylesheet" href="css/modal.css"> -->
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
 
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
     integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js">
@@ -21,7 +21,7 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js">
   </script>
   <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> -->
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <title>Enter Room: {{roomObj[0]["topic"]}}</title>
 </head>
@@ -41,7 +41,7 @@
 
         <div class="w3-container">
           <div class="w3-section">
-            <table>
+            <table id="modalTable">
               <thead>
                 <tr>
                   <th>Cost to Watch</th>
@@ -61,7 +61,8 @@
             </table>
             <form method="POST" action="/room">
               <label><b>Username</b></label>
-              <input class="w3-input w3-border w3-margin-bottom" type="text" placeholder="Enter Nickname" name="nickname" id="nickname">
+              <input class="w3-input w3-border w3-margin-bottom" type="text" placeholder="Enter Nickname"
+                name="nickname" id="nickname">
               <div class="w3-input">
                 <label for="teams">Choose a Team:</label>
                 <p id="teamList"></p>
@@ -89,24 +90,89 @@
       </div>
     </div>
   </div>
-  <style>
-    
-  </style>
 
   <script src="js/modal.js"></script>
   <script>
     // function submission() {
-      var roomObjText = document.getElementById("roomObj").innerText;
-      var userObjText = document.getElementById("userJSON").innerText;
-      var roomOBJ = document.getElementById("roomOBJInput");
-      var userOBJ = document.getElementById("userOBJInput");
-      // roomOBJ.value = roomObjText;
-      // userOBJ.value = userObjText;
-      roomOBJ.value = document.getElementById("roomObj").innerText;
-      userOBJ.value = document.getElementById("userJSON").innerText;
+    var roomObjText = document.getElementById("roomObj").innerText;
+    var userObjText = document.getElementById("userJSON").innerText;
+    var roomOBJ = document.getElementById("roomOBJInput");
+    var userOBJ = document.getElementById("userOBJInput");
+    // roomOBJ.value = roomObjText;
+    // userOBJ.value = userObjText;
+    roomOBJ.value = document.getElementById("roomObj").innerText;
+    userOBJ.value = document.getElementById("userJSON").innerText;
     // }
   </script>
 
+  <style>
+    /* Text alignment for body */
+    body {
+      text-align: center;
+    }
+
+    /* Styling h1 tag */
+    h1 {
+      color: green;
+      text-align: center;
+    }
+
+    /* Styling modal */
+    .modal .modal-content {
+      padding: 20px 20px 20px 20px;
+      -webkit-animation-name: modal-animation;
+      -webkit-animation-duration: 0.5s;
+      animation-name: modal-animation;
+      animation-duration: 0.5s;
+    }
+
+    @-webkit-keyframes modal-animation {
+      from {
+        top: -100px;
+        opacity: 0;
+      }
+
+      to {
+        top: 0px;
+        opacity: 1;
+      }
+    }
+
+    @keyframes modal-animation {
+      from {
+        top: -100px;
+        opacity: 0;
+      }
+
+      to {
+        top: 0px;
+        opacity: 1;
+      }
+    }
+
+    table {
+      border: 3px solid #4b4b4b;
+      border-collapse: collapse;
+      padding: 3px;
+      margin: auto;
+    }
+
+    table th {
+      border: 3px solid #4b4b4b;
+      padding: 3px;
+      text-align: center;
+      background: #9e9a9a;
+      color: #313030;
+    }
+
+    table td {
+      border: 1px solid #b3adad;
+      text-align: center;
+      padding: 5px;
+      background: #ffffff;
+      color: #313030;
+    }
+  </style>
 </body>
 
 </html>

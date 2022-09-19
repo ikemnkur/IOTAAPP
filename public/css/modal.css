@@ -42,21 +42,19 @@ h1 {
   }
 }
 
-table {
-  border: 1px solid #b3adad;
+.modalTable.child > table {
+  border: 3px solid #b3adad;
   border-collapse: collapse;
   padding: 3px;
   margin: auto;
 }
-
-table th {
+.modalTable.child > table > th {
   border: 1px solid #b3adad;
-  padding: 3px;
+  padding: 3px; text-align: center;
   background: #9e9a9a;
   color: #313030;
 }
-
-table td {
+.modalTable.child > table > td {
   border: 1px solid #b3adad;
   text-align: center;
   padding: 5px;
