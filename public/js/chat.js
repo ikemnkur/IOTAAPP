@@ -19,13 +19,15 @@ const userJSON = JSON.parse(userJSONtext.innerText);
 var blockedList = JSON.parse(userJSON[0].blockedUsers);
 const username = userJSON[0]["username"];
 const nickname = document.getElementById("nickname").innerText;
-const team = document.getElementById("team").innerText;
+var team = document.getElementById("team").innerText;
+const teams = JSON.parse(document.getElementById("teamnames").innerText);
 const room = roomJSON[0]["roomID"];
 const topic = roomJSON[0]["topic"];
 
 var secretMode = document.getElementById("secretMode").innerText;
 var coins = userJSON[0].coins;
 var xp = userJSON[0].xp;
+var score = 0, scores = {};
 var friendsList = JSON.parse(userJSON[0].friends);
 const blocked = userJSON[0].blockedUsers;
 var activeUsers;
@@ -78,9 +80,17 @@ socket.on("vote", (msg_ID, vote, msg_username) => {
   }
 });
 
+socket.on("Scores", (roomName, scoreData) => {
+  console.log("Scores Event: ", scoreData)
+  // if (room == roomName)
+  scores = scoreData;
+});
+
 function updates() {
-  socket.emit('updateStats', xp, coins, username);
+  socket.emit('updateStats', xp, coins, username, 50, team, room);
+  // socket.emit('updateStats', xp, coins, username, myUserData.score, team, room);
   displayUserStats();
+  // myUserData.score++;
   setTimeout(updates, 10000);
 }
 
@@ -167,10 +177,10 @@ function outputMessage(message, replyTo) {
   }
   // Output the team and xp info
   if (message.username == "BOT") {
-
     header.innerHTML = `<div style="font-size: 12px; float: left; padding: 3px"> • CHATBOT  <i class="fas fa-clock"></i><span> <span>${" " + message.time} </span> </div>`;
   } else {
-    header.innerHTML += `<div style="float: left;"><span style="color: black;font-size: 12px; padding: 3px;"> ${" Team: " + message.team}</span>`
+    header.innerHTML += `<div style="font-size: 12px; float: left; padding: 3px"> ${"• " + message.username}`
+      + `<span style="color: black;font-size: 12px; padding: 3px;"> ${" Team: " + message.team}</span>`
       + `<span style="color: blue;font-size: 12px"> ${" XP: " + message.xp} </span>`
       + `<i class="fas fa-clock"></i><span style="font-size: 12px;"> ${" " + message.time} </span></div>`;
     // header.innerHTML += `<span><i class="fas fa-reply-all"></i> </span>`;
@@ -204,12 +214,29 @@ function outputMessage(message, replyTo) {
     para.appendChild(paratext);
     paratext.innerHTML += `<strong style="color:blue;"> REPLY: ${replyTo}: </strong>`;
   }
-  paratext.innerHTML += `<strong style="color:blue;"> ${uname}: </strong>`;
+  paratext.innerHTML += `<strong> ${uname} </strong>`;
   paratext.innerText = message.msgText; //output the message text
   para.appendChild(paratext);
 
   const commentTbl = document.createElement("div");
   commentTbl.className = "chat-commentTbl";
+
+  //add the video chat button
+  if ( (username != message.username & message.username != "BOT") ) {
+    const cmtJoinUserLive = document.createElement("div")
+    const cmtJoinUserLiveIcon = document.createElement("i")
+    cmtJoinUserLiveIcon.className = "fas fa-video";
+    cmtJoinUserLive.id = "joinUserLive";
+    cmtJoinUserLive.cmt = "color: grey;";
+    cmtJoinUserLive.appendChild(cmtJoinUserLiveIcon);
+    commentTbl.appendChild(cmtJoinUserLive);
+    cmtJoinUserLive.addEventListener("click", function joinUserLive() {
+      if (username != message.username & message.username != "BOT") {
+        videoCallUser(message.username);
+        console.log("joining user live");
+      }
+    })
+  }
 
   //like and react in chat Button
   if (1) {
@@ -409,8 +436,6 @@ function outputMessage(message, replyTo) {
     div.addEventListener('click', function (evt) {
       // var o = this,
       // ot = this.textContent;
-
-
       if (!throttle && evt.detail === 3) {
         // this.textContent = 'Triple-clicked!';
 
@@ -441,6 +466,7 @@ function outputMessage(message, replyTo) {
   document.querySelector(".chat-messages").appendChild(div);
 }
 
+// Display the teasm button table
 function teamsDisplay() {
   var teamBox = document.getElementById("teamnames");
   var teams = JSON.parse(teamBox.innerText);
@@ -451,7 +477,7 @@ function teamsDisplay() {
   let th1 = document.createElement("th");
   let th2 = document.createElement("th");
   let th3 = document.createElement("th");
-  th1.innerHTML = `<strong>Team Name</strong>`;
+  th1.innerHTML = `<strong>TeamName</strong>`;
   th2.innerHTML = `<strong>Score</strong>`;
   th3.innerHTML = `<strong>+</strong>`;
   thead.appendChild(th1);
@@ -461,20 +487,26 @@ function teamsDisplay() {
 
   teams.forEach((item, index) => {
     //console.log(`teams Obj: ${index}. ${item}`);
-    let score = Math.ceil(Math.random() * 1000);;
+    // let score = Math.ceil(Math.random() * 1000);
+    scores[item] = 0;
     let tr = document.createElement("tr");
     let tdName = document.createElement("td");
     let tdScore = document.createElement("td");
+    tdScore.id = item + "#Score";
     let tdBtn = document.createElement("td");
+
     var btn = document.createElement("button");
     btn.id = "join" + item + "Team";
-    btn.innerText = "Join"; btn.style = "padding: 0px 5px; color: black;";
+    btn.innerText = "Join";
+    btn.style = "padding: 0px 5px; color: black;";
     btn.addEventListener("click", () => {
+      team = item;
       tipUsers(username, "BOT", roomJSON[0]["joinCost"]);
-      socket.emit("setStreamJoinConfig", username, item, 30, room); //item = team
+      socket.emit("setStreamJoinConfig", username, item, 30, room, "FFF", teams); //item = team
     })
+
     tdName.innerText = item;
-    tdScore.innerHTML = `<strong>${score}</strong>`;
+    tdScore.innerHTML = `<strong>${scores[item]}</strong>`;
     tdBtn.append(btn);
     tr.appendChild(tdName);
     tr.appendChild(tdScore);
@@ -488,10 +520,18 @@ function teamsDisplay() {
 
 // Add room name to DOM
 function displayUserStats() {
-  if (myUserData.score != null)
-    UserStats.innerText = "XP: " + xp + " / Coins: " + coins + " / Score: " + myUserData.score;
-  else
+  try {
+
+
+    // if (myUserData.score != null)
+    //   UserStats.innerText = "XP: " + xp + " / Coins: " + coins + " / Score: " + myUserData.score;
+    // else
     UserStats.innerText = "XP: " + xp + " / Coins: " + coins;
+    // teams.forEach((item, index) => {
+    //   let teamScore = document.getElementById(item + "#Score")
+    //   teamScore.innerText = scores[item];
+    // })
+  } catch { }
 }
 
 // Add users to DOM table
@@ -522,11 +562,11 @@ function outputUsers(users) {
       //tip
       if (1) {
         const tdTip = document.createElement("td");
-        const coinBtn = document.createElement("button");
+        const coinBtn = document.createElement("div");
         // coinBtn.innerText = "+1";
         const coin = document.createElement("i");
         coin.className = "fas fa-coins";
-        coin.style = "font-size:24px;color:gray;padding: 5px;";
+        coin.style = "font-size:24px;color:gray;padding: 2px;";
         // coin.onclick = tipUsers();
         coinBtn.type = "submit";
         coinBtn.appendChild(coin);
@@ -546,7 +586,7 @@ function outputUsers(users) {
       //add friend
       if (1) {
         const tdFriend = document.createElement("td");
-        const friendBtn = document.createElement("button");
+        const friendBtn = document.createElement("div");
         const friendIcon = document.createElement("i");
         friendBtn.type = "submit";
 
@@ -567,7 +607,7 @@ function outputUsers(users) {
           friendIcon.className = "fas fa-plus-square";
         }
 
-        friendIcon.style = "font-size:24px;color:green;padding: 5px;";
+        friendIcon.style = "font-size:24px;color:green;padding: 2px;";
         friendIcon.name = "friend";
 
         friendBtn.appendChild(friendIcon);
@@ -584,13 +624,13 @@ function outputUsers(users) {
       //Add block button
       if (1) {
         const tdBlock = document.createElement("td");
-        const blockBtn = document.createElement("button");
+        const blockBtn = document.createElement("div");
         const block = document.createElement("i");
-        block.className = "fas fa-ban"; block.style = "font-size:24px;color:red;padding: 5px;";
+        block.className = "fas fa-ban"; block.style = "font-size:24px;color:red;padding: 2px;";
 
         blockedList.forEach((item, index) => {
           if (user.username == item)
-            block.style = "font-size:24px;color:grey;padding: 5px;";
+            block.style = "font-size:24px;color:grey;padding: 2px;";
         })
 
         blockBtn.type = "submit";

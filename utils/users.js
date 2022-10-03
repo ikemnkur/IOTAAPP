@@ -2,8 +2,8 @@ const users = [];
 var activeRoom;
 
 // Join user to chat
-function userJoin(id, username, nickname, points, xp, room, secretMode, team) {
-  const user = { id, username, nickname, points, xp, room, secretMode, team };
+function userJoin(id, username, nickname, points, xp, room, secretMode, team, score) {
+  const user = { id, username, nickname, points, xp, room, secretMode, team, score };
   activeRoom = user.room;
   users.push(user);
   return user;

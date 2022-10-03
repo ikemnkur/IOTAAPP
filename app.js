@@ -1327,47 +1327,23 @@ const timeElapsedString = date => {
 	return Math.floor(seconds) + ' seconds';
 };
 
-var rooms = {};
+var roomScores = {};
 var activeRoomandUsers = {};
+
 
 // Run when client connects
 io.on('connection', socket => {
 	//WEBRTC
-
-	// socket.on('setUsers', (roomId, userId) => {
-	// 	if (rooms[roomId] == null) {
-	// 		rooms[roomId] = [];
-	// 	}
-	// 	rooms[roomId].push({ userId });
-	// 	// rooms[roomId] = rooms[roomId].filter(obj => !rooms[roomId][obj.name] && (rooms[roomId][obj.name] = true));
-	// 	const ids = rooms[roomId].map(o => o.name)
-	// 	rooms[roomId] = rooms[roomId].filter(({ id }, index) => !ids.includes(id, index + 1))
-	// 	socket.to(roomId).emit('activeUsers', rooms[roomId]);
-	// 	console.log(`Set Active Users in room ${roomId}:`, rooms[roomId]);
-	// });
-
-	// socket.on('join-room', (roomId, userId) => {
-	// 	socket.join(roomId);
-	// 	socket.to(roomId).emit('user-connected', userId);
-	// 	console.log("join room event");
-	// 	socket.on('disconnect', () => {
-	// 		// filter out disconnected user
-	// 		rooms[roomId] = rooms[roomId].filter(x => x !== userId);
-	// 		console.log("User ", userId, "has left room: ", roomId);
-	// 		io.to(roomId).emit('user-disconnected', userId, rooms[roomId])
-	// 		// rooms[roomId].remove(userData);
-	// 	})
-	// })
 
 	// get a array object of the users' stats in the room roomId and returns it
 	socket.on('sendUserStatus', (roomId, userData) => {
 		if (activeRoomandUsers[roomId] == null) {
 			activeRoomandUsers[roomId] = [];
 		}
-		
-		let objIndex = activeRoomandUsers[roomId].findIndex((obj =>  obj.name == userData.name ))
+
+		let objIndex = activeRoomandUsers[roomId].findIndex((obj => obj.name == userData.name))
 		// console.log(`user: ${userData.name} in room: ${roomId}"`, "old: ", userData.streaming, "|| new: ", activeRoomandUsers[roomId][objIndex]);
-		
+
 		// console.log("index: ", objIndex);
 		activeRoomandUsers[roomId][objIndex] = userData;
 		// activeRoomandUsers[roomId].push(userData);
@@ -1381,7 +1357,7 @@ io.on('connection', socket => {
 	});
 
 	// send an array object of the users' stats in the room roomId 
-	socket.on('getRoomUpdate', (roomId) => {
+	socket.on('askForRoomUpdate', (roomId) => {
 		if (activeRoomandUsers[roomId] == null) {
 			activeRoomandUsers[roomId] = [];
 		}
@@ -1443,13 +1419,46 @@ io.on('connection', socket => {
 			if (activeRoomandUsers[roomId] != undefined) // if not empty
 				activeRoomandUsers[roomId] = activeRoomandUsers[roomId].filter(x => x.name !== userData.name);
 			console.log("User ", userData.name, "has left room: ", roomId);
-			io.emit('user-disconnected', disconnectedUser.peerId, activeRoomandUsers[roomId], roomId, userData)
+			try {
+				io.emit('user-disconnected', disconnectedUser.peerId, activeRoomandUsers[roomId], roomId, userData)
+			} catch (error) {
+				io.emit('user-disconnected', userData.name , activeRoomandUsers[roomId], roomId, userData)
+			}
+			
 		})
 	});
+	
+	var roomTeamStreams = {};
+	socket.on("setStreamJoinConfig", (userid, team, time, room, mode, teams) => {
+
+		if (mode == "FFF") {
+			const user = getCurrentUser(socket.id);
+			console.log("FFA Event by:", userid)
+			user.team = team;
+			io.emit("streamJoinConfig", userid, team, time, room)
+		}
+		if (mode == "1perTeam") {
+			if (roomTeamStreams[room] == null) {
+				teams.forEach((item, index) => {
+					roomTeamStreams[room][item] = []
+				});
+			}
+			const user = getCurrentUser(socket.id);
+			if (roomTeamStreams[room][team] == []) {
+				roomTeamStreams[room][team] = [userid]
+				setTimeout(() => {
+					roomTeamStreams[room][team] = []
+				}, 30000)
+				console.log("setStreamJoinConfig Event by:", userid)
+				user.team = team;
+				io.emit("streamJoinConfig", userid, team, time, room)
+			}
+		}
+	})
 
 	//LIVE CHAT
-	socket.on('joinRoom', ({ username, room, nickname, points, xp, secretMode, team }) => {
-		const user = userJoin(socket.id, username, nickname, points, xp, room, secretMode, team);
+	socket.on('joinRoom', ({ username, room, nickname, points, xp, secretMode, team, score }) => {
+		const user = userJoin(socket.id, username, nickname, points, xp, room, secretMode, team, score);
 
 		socket.join(user.room);
 
@@ -1469,14 +1478,17 @@ io.on('connection', socket => {
 			room: user.room,
 			users: getRoomUsers(user.room)
 		});
+
+		// // update scores array
+		// if (roomScores[room] == null)
+		// 	roomScores[room] = [];
+		// if (roomScores[room][team] == null)
+		// 	roomScores[room][team] = 0;
+
+
 		ActiveUsers();
 	});
 
-	socket.on("setStreamJoinConfig", (userid, team, time, room) => {
-		const user = getCurrentUser(socket.id);
-		console.log("setStreamJoinConfig Event by:", userid)
-		io.emit("streamJoinConfig", userid, team, time, room)
-	})
 
 	// Listen for tipMessgae
 	socket.on('Tip', (currentUser, tippedUser, coins) => {
@@ -1530,9 +1542,21 @@ io.on('connection', socket => {
 		}
 	});
 
-	socket.on('updateStats', (xp, coins, username) => {
+	socket.on('updateStats', (xp, coins, username, score, team, room) => {
 		const user = getCurrentUser(socket.id);
 		// rooms[user.rom]
+		// update scores array
+		// if (roomScores[room] == null)
+		// 	roomScores[room] = [];
+		// if (roomScores[room][team] == null)
+		// 	roomScores[room][team] = 20;
+
+		// roomScores[room][team] += score;
+
+		// console.log("RmS:", roomScores)
+
+		// socket.emit("Scores", room, roomScores[room]);
+
 		connection.query("UPDATE accounts SET xp = ? WHERE username = ?", [xp, username], (error, updateResults) => {
 			if (error) throw error;
 			// console.log("Set " + username + " xp to: " + xp);
