@@ -1,5 +1,5 @@
 // Include the dependencies
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
@@ -48,13 +48,14 @@ var activeRooms = [];
 const secret_key = 'your secret key';
 // Update the below details with your own MySQL connection details
 var connection = mysql.createConnection({
-	host: 'localhost',
-	user: 'root',
-	// port: 8889,
-	password: '',//,password: 'root',
-	database: 'nodelogin',
-	multipleStatements: true,
-	bigNumberStrings: true,
+	// host: '34.136.59.230:3306',
+	host: '139.144.34.246',
+	port: 3306,
+	user: 'remote_user',
+	password: 'Password!*',//,password: 'root',
+	database: 'IOTA',
+	// multipleStatements: true,
+	// bigNumberStrings: true,
 });
 // Mail settings: Update the username and passowrd below to your email and pass, the current mail host is set to gmail, but you can change that if you want.
 const transporter = nodemailer.createTransport({
