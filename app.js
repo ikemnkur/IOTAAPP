@@ -1,5 +1,6 @@
 // Include the dependencies
-const mysql = require('mysql2');
+const mysql = require('mysql');
+const mysql2 = require('mysql2');
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
@@ -47,7 +48,17 @@ var activeRooms = [];
 // Unique secret key
 const secret_key = 'your secret key';
 // Update the below details with your own MySQL connection details
-var connection = mysql.createConnection({
+var connection = mysql2.createConnection({
+	// host: '34.136.59.230:3306',
+	host: '139.144.34.246',
+	port: 3306,
+	user: 'remote_user',
+	password: 'Password!*',//,password: 'root',
+	database: 'IOTA',
+	// multipleStatements: true,
+	// bigNumberStrings: true,
+});
+var connection2 = mysql.createConnection({
 	// host: '34.136.59.230:3306',
 	host: '139.144.34.246',
 	port: 3306,
@@ -871,7 +882,7 @@ app.get('/admin/', (request, response) => isAdmin(request, settings => {
 	// Retrieve statistical data
 	connection.query('SELECT * FROM accounts WHERE cast(registered as DATE) = cast(now() as DATE) ORDER BY registered DESC; SELECT COUNT(*) AS total FROM accounts LIMIT 1; SELECT COUNT(*) AS total FROM accounts WHERE last_seen < date_sub(now(), interval 1 month) LIMIT 1; SELECT * FROM accounts WHERE last_seen > date_sub(now(), interval 1 day) ORDER BY last_seen DESC; SELECT COUNT(*) AS total FROM accounts WHERE last_seen > date_sub(now(), interval 1 month) LIMIT 1', (error, results, fields) => {
 		// Render dashboard template
-		response.render('admin/dashboard.html', { selected: 'dashboard', accounts: results[0], accounts_total: results[1][0], inactive_accounts: results[2][0], active_accounts: results[3], active_accounts2: results[4][0], timeElapsedString: timeElapsedString });
+		response.render('admin/dashboard.html', { selected: 'dashboard', accounts: results?.[0], accounts_total: results?.[1][0], inactive_accounts: results?.[2][0], active_accounts: results?.[3], active_accounts2: results?.[4][0], timeElapsedString: timeElapsedString });
 	});
 }, () => {
 	// Redirect to login page

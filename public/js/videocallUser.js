@@ -157,10 +157,13 @@ document.getElementById("settingsBtn").addEventListener("click", () => {
     if (showsettings) {
         setting.style.display = "none";
         showsettings = 0;
+        document.getElementById("video").muted = true;
     } else {
         setting.style.display = "block"
         showsettings = 1;
+        document.getElementById("video").muted = false;
     }
+    
 })
 
 
@@ -323,6 +326,7 @@ function addSelfVideoStream(stream, userData) { //Draw video to canvas element t
 
     if (document.getElementById("canvas#" + userData.name) != null)
         return 0;
+
     var video = document.createElement('video');
     var canvas = document.createElement("canvas");
 
@@ -340,7 +344,6 @@ function addSelfVideoStream(stream, userData) { //Draw video to canvas element t
             canvas.style = sty;
         else
             canvas.style = "";
-
         console.log("focusedCanvas = ", canvas.id);
     });
 
@@ -351,8 +354,8 @@ function addSelfVideoStream(stream, userData) { //Draw video to canvas element t
     canvas.style.width = w;
     canvas.style.height = h;
     var context = canvas.getContext('2d');
-
-    video.id = "video#" + userID;
+    var videoID;
+    video.id = videoID = "video#" + userData.name;
     // video.srcObject = stream
 
     video.addEventListener('loadedmetadata', () => {
@@ -367,11 +370,35 @@ function addSelfVideoStream(stream, userData) { //Draw video to canvas element t
 
     var tbl = document.getElementById("videoTable");
     var tdc = document.createElement("td");
-    tbl.appendChild(tdc);
-    // tdc.appendChild(d);
-    tdc.appendChild(video);
-    tdc.appendChild(canvas);
+    var muteBtn = document.createElement("button");
+    muteBtn.innerText = "Mute";
+    var removeBtn = document.createElement("button");
+    removeBtn.innerText = "Remove";
+    var buttonDiv = document.createElement("div");
+    
+    muteBtn.addEventListener("click", function (userData) {
+        let video = document.getElementById("video#"+userData.name);
+        if(video.muted == false)
+            video.muted = true;
+        else 
+            video.muted = false;
+    })
 
+    removeBtn.addEventListener("click", function(){
+        
+        tdc.remove();
+    })
+
+    buttonDiv.appendChild(removeBtn);
+    buttonDiv.appendChild(muteBtn);
+    
+    
+    // tdc.appendChild(d);
+    tdc.id = "td#"+userData.name;
+    tdc.appendChild(video);
+    tdc.appendChild(buttonDiv)
+    tdc.appendChild(canvas);
+    tbl.appendChild(tdc);
 }
 
 //added these functions below
