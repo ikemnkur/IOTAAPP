@@ -1354,18 +1354,9 @@ io.on('connection', socket => {
 		}
 
 		let objIndex = activeRoomandUsers[roomId].findIndex((obj => obj.name == userData.name))
-		// console.log(`user: ${userData.name} in room: ${roomId}"`, "old: ", userData.streaming, "|| new: ", activeRoomandUsers[roomId][objIndex]);
 
-		// console.log("index: ", objIndex);
 		activeRoomandUsers[roomId][objIndex] = userData;
-		// activeRoomandUsers[roomId].push(userData);
-		// const ids = activeRoomandUsers[roomId].map(o => o.name)
-		// activeRoomandUsers[roomId] = activeRoomandUsers[roomId].filter(({ id }, index) => !ids.includes(id, index + 1))
 
-
-		// console.log(`user status sent from user: ${userData.name} in room: ${roomId}`);
-		// console.log(`Active Users in room ${roomId}:`, activeRoomandUsers[roomId]);
-		// io.emit('getActiveUsers', activeRoomandUsers[roomId]);
 	});
 
 	// send an array object of the users' stats in the room roomId 
@@ -1373,12 +1364,15 @@ io.on('connection', socket => {
 		if (activeRoomandUsers[roomId] == null) {
 			activeRoomandUsers[roomId] = [];
 		}
-
 		// console.log(`sending update for room: ${roomId}`);
 		io.emit('getActiveUsers', roomId, activeRoomandUsers[roomId]);
 	});
 
-
+	socket.on("sendImageToCanvas", (imagesrc, targetCanvas, roomId, userId) => {
+		var files = fs.readdirSync('./public/images/');
+		console.log("Imgs to room:", roomId, "by user:", userId);
+		io.emit('drawImageToCanvas', imagesrc, targetCanvas, roomId, userId);
+	})
 
 	// Run once when connecting to room for each user to get list of sounds and images
 	socket.on("fetchImages", (roomId, userId) => {
@@ -1434,12 +1428,12 @@ io.on('connection', socket => {
 			try {
 				io.emit('user-disconnected', disconnectedUser.peerId, activeRoomandUsers[roomId], roomId, userData)
 			} catch (error) {
-				io.emit('user-disconnected', userData.name , activeRoomandUsers[roomId], roomId, userData)
+				io.emit('user-disconnected', userData.name, activeRoomandUsers[roomId], roomId, userData)
 			}
-			
+
 		})
 	});
-	
+
 	var roomTeamStreams = {};
 	socket.on("setStreamJoinConfig", (userid, team, time, room, mode, teams) => {
 

@@ -142,10 +142,11 @@ videoSocket.on('getActiveUsers', (roomID, data) => { // get the active user in t
     }
 });
 
-videoSocket.on('drawImageToCanvas', (image, trgtCanvas) => {
+videoSocket.on('drawImageToCanvas', (imagesrc, trgtCanvas) => {
+    console.log("drawing image on canvas: ", focusedCanvas)
     cntrCvnX = trgtCanvas.width / 2 - 32;
     cntrCvnY = trgtCanvas.height / 2 - 32;
-    imgSentToCanvas = new component(64, 64, `${image.src}`, cntrCvnX, cntrCvnY, "image", targetCanvas);
+    imgSentToCanvas = new component(64, 64, `${imagesrc}`, cntrCvnX, cntrCvnY, "image", targetCanvas);
     imgSentToCanvas.update();
 })
 
@@ -608,7 +609,7 @@ if (1) {
                         image.style = "padding: 2px"
                         image.addEventListener("click", () => {
                             console.log("adding image to from Library to screen: ", image);
-                            videoSocket.emit("drawImageToCanvas", image, focusedCanvas)
+                            videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID)
                             imgSentToCanvas = new component(64, 64, `${image.src}`, cntrCvnX, cntrCvnY, "image", targetCanvas);
                             imgSentToCanvas.update();
                         })
@@ -621,7 +622,7 @@ if (1) {
                         image.style = "padding: 2px"
 
                         image.addEventListener("dblclick", () => {
-                            videoSocket.emit("drawImageToCanvas", image, focusedCanvas);
+                            videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID);
                             targetCanvas = document.getElementById(focusedCanvas);
                             console.log("adding image to target canvas: ", document.getElementById(focusedCanvas));
                             imgSentToCanvas = new component(64, 64, `${image.src}`, cntrCvnX, cntrCvnY, "image", targetCanvas);
