@@ -1345,7 +1345,54 @@ var activeRoomandUsers = {};
 
 // Run when client connects
 io.on('connection', socket => {
-	//WEBRTC
+
+	socket.on('user joined room', ({ roomId, username, item, time, room, mode, teams }) => {
+		const teamroom = io.sockets.adapter.rooms.get(roomId);
+		console.log("joining room", room)
+		if (teamroom && teamroom.size === 4) {
+			socket.emit('server is full');
+			return;
+		}
+
+		const otherUsers = [];
+
+		if (teamroom) {
+			teamroom.forEach(id => {
+				otherUsers.push(id);
+			})
+		}
+
+		socket.join(roomId);
+		socket.emit('all other users', otherUsers);
+	});
+
+	socket.on('peer connection request', ({ userIdToCall, sdp }) => {
+		io.to(userIdToCall).emit("connection offer", { sdp, callerId: socket.id });
+	});
+
+	socket.on('connection answer', ({ userToAnswerTo, sdp }) => {
+		io.to(userToAnswerTo).emit('connection answer', { sdp, answererId: socket.id })
+	});
+
+	socket.on('ice-candidate', ({ target, candidate }) => {
+		io.to(target).emit('ice-candidate', { candidate, from: socket.id });
+	});
+
+	socket.on('disconnecting', () => {
+		socket.rooms.forEach(room => {
+			socket.to(room).emit('user disconnected', socket.id);
+		});
+	});
+
+	socket.on('hide remote cam', targetId => {
+		io.to(targetId).emit('hide cam');
+	});
+
+	socket.on('show remote cam', targetId => {
+		io.to(targetId).emit('show cam')
+	})
+
+	//WEBRTC Video Call User
 
 	// get a array object of the users' stats in the room roomId and returns it
 	socket.on('sendUserStatus', (roomId, userData) => {

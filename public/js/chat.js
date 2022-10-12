@@ -502,7 +502,8 @@ function teamsDisplay() {
     btn.addEventListener("click", () => {
       team = item;
       tipUsers(username, "BOT", roomJSON[0]["joinCost"]);
-      socket.emit("setStreamJoinConfig", username, item, 30, room, "FFF", teams); //item = team
+      socket.emit("user joined room", room , username, item, 30, room, "FFF", teams); //item = team
+      // socket.emit("setStreamJoinConfig", username, item, 30, room, "FFF", teams); //item = team
     })
 
     tdName.innerText = item;

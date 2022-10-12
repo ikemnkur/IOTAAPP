@@ -378,11 +378,12 @@ function addSelfVideoStream(stream, userData) { //Draw video to canvas element t
     var buttonDiv = document.createElement("div");
     
     muteBtn.addEventListener("click", function (userData) {
-        let video = document.getElementById("video#"+userData.name);
-        if(video.muted == false)
-            video.muted = true;
+        let videoAudio = document.getElementById("video#"+userData.name);
+        
+        if(videoAudio.muted == false)
+            videoAudio.muted = true;
         else 
-            video.muted = false;
+            videoAudio.muted = false;
     })
 
     removeBtn.addEventListener("click", function(){
