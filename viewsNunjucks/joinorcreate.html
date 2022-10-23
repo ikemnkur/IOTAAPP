@@ -5,34 +5,36 @@
             <th><button class="open-buttonJoin" onclick="openFormJoin()">Join Room</button></th>
         </tr>
     </table>
-    
+
     <div class="form-popup" id="myFormCreate">
         <form action="/modal?create" class="form-container">
             <h1 style="margin-left: 50px;">Create Room</h1>
 
             <label for="topic">Topic</label>
-            <input type="text" placeholder="Enter an Topic" name="topic" required>
+            <input type="text" placeholder="Enter an Topic" name="topic" id="topic" required>
 
             <label for="roomID">Room ID</label>
-            <input type="text" placeholder="Enter an unique ID" name="roomID" required>
+            <input type="text" placeholder="Enter an unique ID" name="roomID" id="roomID" required>
 
-            <input hidden type="text" placeholder="{{username}}" name="host" value="{{username}}">
-            <input hidden type="text" placeholder="{{username}}" name="users" value="{{username}}">
+            <input hidden type="text" placeholder="{{username}}" name="host" id="host" value="{{username}}">
+            <input hidden type="text" placeholder="{{username}}" name="users" id="users" value="{{username}}">
             <input hidden type="text" placeholder="0" name="join" value="0">
             <input hidden type="text" placeholder="1" name="create" value="1">
             <input hidden type="text" placeholder="1" name="private" id="privateBoolean" value="1">
 
             <label for="passcode">Passcode</label>
-            <input type="password" placeholder="Enter Passcode" name="passcode" required>
+            <input type="password" placeholder="Enter Passcode" name="passcode" id="passcode" required>
 
 
             <table style="width:100%;">
                 <tr>
                     <th> <label for="costJoin">Cost to Join:</label>
-                        <input type="text" placeholder="Enter amount of points to join Stream" name="joincost" required>
+                        <input type="text" placeholder="Enter amount of points to join Stream" name="joincost"
+                            id="joincost" required>
                     </th>
                     <th> <label for="costWatch">Cost to Watch:</label>
-                        <input type="text" placeholder="Enter smaller amount to join Stream" name="watchcost" required>
+                        <input type="text" placeholder="Enter smaller amount to join Stream" name="watchcost"
+                            id="watchcost" required>
                     </th>
                 </tr>
             </table>
@@ -49,7 +51,7 @@
                 <label for="private">Save Room Config:</label>
                 <input id="saveConfigBox" type="checkbox" name="saveConfig">
             </div>
-            <button type="submit" class="btn" id="create" onclick="submitForm()">Create</button>
+            <button type="button" class="btn" id="create" onclick="createRoom()">Create</button>
             <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
         </form>
     </div>
@@ -62,7 +64,7 @@
             <input id="joinroom#" type="text" placeholder="Enter Room ID #" name="roomID" required>
 
             <label for="passcode">Passcode</label>
-            <input type="password" placeholder="Enter Passcode" name="passcode" required>
+            <input type="password" placeholder="Enter Passcode" name="passcode" id="password" required>
 
             <input hidden type="text" placeholder="{{username}}" name="user" value="{{username}}">
             <input hidden type="text" placeholder="1" name="join" value="1">
@@ -70,8 +72,8 @@
 
             <table style="width:100%; align-content: center;">
                 <tr>
-                    <th><button type="submit" class="btn" onclick="JoinRoom()">Join</button></th>
-                    <th><button type="submit" class="btn" onclick="WatchRoom()">Watch</button></th>
+                    <th><button type="button" class="btn" onclick="joinRoom()">Join</button></th>
+                    <!-- <th><button type="submit" class="btn" onclick="WatchRoom()">Watch</button></th> -->
                 </tr>
             </table>
 
@@ -113,7 +115,7 @@
             document.getElementById("myFormCreate").style.display = "none";
         }
     </script>
-    
+    <script> src = "js/joinorcreate.js" </script>
 </div>
 
 <link rel="stylesheet" href="css/joinpopup.css" />
