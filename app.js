@@ -32,6 +32,10 @@ const app = express()
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
 
+// const { Server } = require('socket.io');
+// const server2 = http.createServer(app);
+// const io = new Server(server2);
+
 const formatMessage = require('./utils/messages');
 
 const {
@@ -1346,13 +1350,13 @@ var activeRoomandUsers = {};
 // Run when client connects
 io.on('connection', socket => {
 
-	socket.on('user joined room', ({ roomId, username, item, time, room, mode, teams }) => {
+	socket.on('user joined room', (roomId, username, item, time, room, mode, teams) => {
 		const teamroom = io.sockets.adapter.rooms.get(roomId);
-		console.log("joining room", room)
-		if (teamroom && teamroom.size === 4) {
-			socket.emit('server is full');
-			return;
-		}
+		console.log("joining room", roomId)
+		// if (teamroom && teamroom.size === 4) {
+		// 	socket.emit('server is full');
+		// 	return;
+		// }
 
 		const otherUsers = [];
 
@@ -1364,14 +1368,16 @@ io.on('connection', socket => {
 
 		socket.join(roomId);
 		socket.emit('all other users', otherUsers);
+		// console.log("joined room: ", roomId);
 	});
 
-	socket.on('peer connection request', ({ userIdToCall, sdp }) => {
+	socket.on('peer connection request', ({userIdToCall, sdp }) => {
 		io.to(userIdToCall).emit("connection offer", { sdp, callerId: socket.id });
 	});
 
 	socket.on('connection answer', ({ userToAnswerTo, sdp }) => {
-		io.to(userToAnswerTo).emit('connection answer', { sdp, answererId: socket.id })
+		// io.to(userToAnswerTo).emit('connection answer', { sdp, answererId: socket.id });
+		io.to(userToAnswerTo).emit('connection answer',  sdp, socket.id)
 	});
 
 	socket.on('ice-candidate', ({ target, candidate }) => {
@@ -1415,10 +1421,10 @@ io.on('connection', socket => {
 		io.emit('getActiveUsers', roomId, activeRoomandUsers[roomId]);
 	});
 
-	socket.on("sendImageToCanvas", (imagesrc, targetCanvas, roomId, userId) => {
-		var files = fs.readdirSync('./public/images/');
+	socket.on("sendImageToCanvas", (imagesrc, targetCanvas, roomId, userId, imgSentToCanvas) => {
+		// var files = fs.readdirSync('./public/images/');
 		console.log("Imgs to room:", roomId, "by user:", userId);
-		io.emit('drawImageToCanvas', imagesrc, targetCanvas, roomId, userId);
+		io.emit('drawImageToCanvas', imagesrc, targetCanvas, roomId, userId, imgSentToCanvas);
 	})
 
 	// Run once when connecting to room for each user to get list of sounds and images
@@ -1437,23 +1443,7 @@ io.on('connection', socket => {
 		if (activeRoomandUsers[roomId] == null) {
 			activeRoomandUsers[roomId] = [];
 		}
-		// userData.id = socketid;
-		// console.log(`activeRoomandUsers[roomId].length: ${activeRoomandUsers[roomId].length}`)
-		// if (activeRoomandUsers[roomId].length == 1) {
-		// 	// setInterval(() => {
-		// 	// 	io.emit('getActiveUsers', roomId, activeRoomandUsers[roomId]);
-		// 	// 	console.log(`sending updates to room: ${roomId}`)
-		// 	// }, 5000);
-		// 	updateRoom();
-		// }
-
-		// function updateRoom() {
-		// 	// if (activeRoomandUsers[roomId].length == 1) {
-		// 		io.emit('getActiveUsers', roomId, activeRoomandUsers[roomId]);
-		// 		console.log(`sending updates to room: ${roomId}`)
-		// 	// }
-		// 	setTimeout(updateRoom, 5000);
-		// }
+	
 		activeRoomandUsers[roomId].push(userData);
 		const ids = activeRoomandUsers[roomId].map(o => o.name)
 		activeRoomandUsers[roomId] = activeRoomandUsers[roomId].filter(({ id }, index) => !ids.includes(id, index + 1))

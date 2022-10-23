@@ -1,4 +1,4 @@
-const peers = {};
+const teampeer = {};
 
 const chatContainer = document.getElementById('videoTable');
 const remoteVideoContainer = document.getElementById('videoTable');
@@ -6,12 +6,12 @@ const remoteVideoContainer = document.getElementById('videoTable');
 // const remoteVideoContainer = document.getElementById('right');
 
 // const toggleButton = document.getElementById('toggle-cam');
-// const roomId = window.location.pathname.split('/')[2];
+// const rmID = window.location.pathname.split('/')[2];
 
-const roomJSONtext = document.getElementById("roomJSON");
-const roomJSON = JSON.parse(roomJSONtext.innerText);
+let rmJSONtxt = document.getElementById("roomJSON");
+let rmJSON = JSON.parse(rmJSONtxt.innerText);
 
-const roomId = roomJSON[0]["roomID"];
+let rmID = rmJSON[0]["roomID"];
 
 const createUserVideo = document.createElement("video");
 createUserVideo.id = 'user-video';
@@ -21,7 +21,7 @@ chatContainer.appendChild(userTD);
 const userVideo = document.getElementById('user-video');
 let userStream;
 let isAdmin = false;
-const socket = io('/');
+// const socket = io('/');
 
 function callOtherUsers(otherUsers, stream) {
     if (!otherUsers.length) {
@@ -29,7 +29,7 @@ function callOtherUsers(otherUsers, stream) {
     }
     otherUsers.forEach(userIdToCall => {
         const peer = createPeer(userIdToCall);
-        peers[userIdToCall] = peer;
+        teampeer[userIdToCall] = peer;
         stream.getTracks().forEach(track => {
             peer.addTrack(track, stream);
         });
@@ -81,7 +81,7 @@ async function handleNegotiationNeededEvent(peer, userIdToCall) {
 
 async function handleReceiveOffer({ sdp, callerId }, stream) {
     const peer = createPeer(callerId);
-    peers[callerId] = peer;
+    teampeer[callerId] = peer;
     const desc = new RTCSessionDescription(sdp);
     await peer.setRemoteDescription(desc);
 
@@ -102,12 +102,12 @@ async function handleReceiveOffer({ sdp, callerId }, stream) {
 
 function handleAnswer({ sdp, answererId }) {
     const desc = new RTCSessionDescription(sdp);
-    peers[answererId].setRemoteDescription(desc).catch(e => console.log(e));
+    teampeer[answererId].setRemoteDescription(desc).catch(e => console.log(e));
 }
 
 function handleICECandidateEvent(e) {
     if (e.candidate) {
-        Object.keys(peers).forEach(id => {
+        Object.keys(teampeer).forEach(id => {
             const payload = {
                 target: id,
                 candidate: e.candidate,
@@ -119,11 +119,11 @@ function handleICECandidateEvent(e) {
 
 function handleReceiveIce({ candidate, from }) {
     const inComingCandidate = new RTCIceCandidate(candidate);
-    peers[from].addIceCandidate(inComingCandidate);
+    teampeer[from].addIceCandidate(inComingCandidate);
 };
 
 function handleDisconnect(userId) {
-    delete peers[userId];
+    delete teampeer[userId];
     document.getElementById(userId).remove();
 };
 
@@ -165,7 +165,8 @@ async function init() {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         userStream = stream;
         userVideo.srcObject = stream;
-        socket.emit('user joined room', roomId);
+        socket.emit('user joined room', rmID);
+
 
         socket.on('all other users', (otherUsers) => callOtherUsers(otherUsers, stream));
 

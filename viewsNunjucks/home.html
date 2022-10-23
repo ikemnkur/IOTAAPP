@@ -10,14 +10,23 @@
 <p>Welcome back, <a id="userID">{{ username }}</a>!</p>
 
 
-<div >
+<div>
     <div class="content-header links" style="all:revert">
         <form action="" method="get" class="filters-form">
-            <Table>
-                <tr style="float: right;">
-                    <th style="float: left;">
-                        <div class="filters" onmouseover="sortTable()">
+            <Table style="margin: auto;">
+                <tr>
+                    <!-- <th style="float: left;"> -->
+                    <div class="filters">
+                        <td><i class="fas fa-search"></i>
+                            <label for="search">:</label>
+                        </td>
 
+                        <!-- input tag -->
+                        <td>
+                            <input id="searchbar" onkeyup="searchRooms()" type="text" name="search"
+                                placeholder="Search rooms..">
+                        </td>
+                        <td>
                             <a><i class="fas fa-filter"></i> Filters</a>
                             <code class="hljs xml">
 
@@ -28,23 +37,14 @@
                                 <option value="Cost">Cost</option>
                             </select>
                             <label for="Sort">Sort:</label>
-                            <a onclick="sortASC()" onmouseout="sortTable()" name="Sort"><i class="fas fa-arrow-up"></i></a>
-                            <a onclick="sortDSC()" onmouseout="sortTable()" name="Sort"><i class="fas fa-arrow-down"></i></a>
+                            <a onclick="sortASC()" name="Sort"><i class="fas fa-arrow-up"></i></a>
+                            <a onclick="sortDSC()" name="Sort"><i class="fas fa-arrow-down"></i></a>
                             <strong id="order">
                                 ASC
                             </strong>
-                        </code>
-                        </div>
-                    </th>
-                </tr>
-                <tr>
-                    <th>
-                        <i class="fas fa-search"></i>
-                        <label for="search">Search Rooms:</label>
-                        <!-- input tag -->
-                        <input id="searchbar" onkeyup="searchRooms()" type="text" name="search"
-                            placeholder="Search rooms..">
-                    </th>
+                            </code>
+                        </td>
+                    </div>
                 </tr>
             </Table>
         </form>
@@ -52,32 +52,35 @@
             <p> {{Joke["value"]}}</p>
         </div>
     </div>
-    <div id="tableDiv" >
+    <div id="tableDiv">
         <nav>
             <p id="roomLists" hidden>{{rooms}}</p>
 
             <table id="activeRooms">
-            
+
             </table>
         </nav>
     </div>
     <style>
-        #tableDiv{
-            padding: 5px; 
-            max-height: 500px; 
-            overflow-y: scroll; 
-            border: 1px solid black; 
+        #tableDiv {
+            padding: 5px;
+            max-height: 500px;
+            overflow-y: scroll;
+            border: 1px solid black;
         }
+
         #activeRooms {
-            margin:auto; 
-            text-align: center; 
+            margin: auto;
+            text-align: center;
             padding: 0px 5px;
             background-color: aliceblue;
         }
-        #activeRooms td{
+
+        #activeRooms td {
             padding: 0px 5px;
         }
-        #activeRooms tbody tr td{
+
+        #activeRooms tbody tr td {
             font-weight: bold;
             font-size: 20px;
             padding: 0px 5px;
@@ -89,10 +92,12 @@
 <script>
     var sortOrder = document.getElementById("order");
     function sortDSC() {
-        sortOrder.innerText = "DSC"
+        sortOrder.innerText = "DSC";
+        sortTable();
     }
     function sortASC() {
-        sortOrder.innerText = "ASC"
+        sortOrder.innerText = "ASC";
+        sortTable();
     }
 </script>
 

@@ -21,10 +21,200 @@ var canJoin = false, timer = 60; // for the temporary stream join
 var OUD = {};
 var Room = {};
 var streamers = {};
+var sentImages = [];
 
 var user_Peers = {};
 const peerObj = new Peer(userID);
 
+const teampeer = {};
+
+// const chatContainer = document.getElementById('videoTable');
+// const remoteVideoContainer = document.getElementById('videoTable');
+// // const chatContainer = document.getElementById('left');
+// // const remoteVideoContainer = document.getElementById('right');
+
+// // const toggleButton = document.getElementById('toggle-cam');
+// // const ROOM_ID = window.location.pathname.split('/')[2];
+
+// // let rmJSONtxt = document.getElementById("rmJSON");
+// // let rmJSON = JSON.parse(rmJSONtxt.innerText);
+
+// // let ROOM_ID = rmJSON[0]["roomID"];
+
+// const createUserVideo = document.createElement("video");
+// createUserVideo.id = 'user-video';
+// const userTD = document.createElement("td");
+// userTD.appendChild(createUserVideo);
+// chatContainer.appendChild(userTD);
+// const userVideo = document.getElementById('user-video');
+// let userStream;
+// let isAdmin = false;
+// // const socket = io('/');
+
+// function callOtherUsers(otherUsers, stream) {
+//     if (!otherUsers.length) {
+//         isAdmin = true;
+//     }
+//     otherUsers.forEach(userIdToCall => {
+//         const peer = createPeer(userIdToCall);
+//         teampeer[userIdToCall] = peer;
+//         stream.getTracks().forEach(track => {
+//             peer.addTrack(track, stream);
+//         });
+//     });
+// }
+
+// function createPeer(userIdToCall) {
+//     const peer = new RTCPeerConnection({
+//         iceServers: [
+//             {
+//                 urls: "stun:stun.stunprotocol.org"
+//             }
+//         ]
+//     });
+//     peer.onnegotiationneeded = () => userIdToCall ? handleNegotiationNeededEvent(peer, userIdToCall) : null;
+//     peer.onicecandidate = handleICECandidateEvent;
+//     peer.ontrack = (e) => {
+//         const container = document.createElement('div');
+//         container.classList.add('remote-video-container');
+//         const video = document.createElement('video');
+//         video.srcObject = e.streams[0];
+//         video.autoplay = true;
+//         video.playsInline = true;
+//         video.classList.add("remote-video");
+//         container.appendChild(video);
+//         if (isAdmin) {
+//             const button = document.createElement("button");
+//             button.innerHTML = `Hide user's cam`;
+//             button.classList.add('button');
+//             button.setAttribute('user-id', userIdToCall);
+//             container.appendChild(button);
+//         }
+//         container.id = userIdToCall;
+//         remoteVideoContainer.appendChild(container);
+//     }
+//     return peer;
+// }
+
+// async function handleNegotiationNeededEvent(peer, userIdToCall) {
+//     const offer = await peer.createOffer();
+//     await peer.setLocalDescription(offer);
+//     const payload = {
+//         sdp: peer.localDescription,
+//         userIdToCall,
+//     };
+
+//     socket.emit('peer connection request', payload);
+// }
+
+// async function handleReceiveOffer({ sdp, callerId }, stream) {
+//     const peer = createPeer(callerId);
+//     teampeer[callerId] = peer;
+//     const desc = new RTCSessionDescription(sdp);
+//     await peer.setRemoteDescription(desc);
+
+//     stream.getTracks().forEach(track => {
+//         peer.addTrack(track, stream);
+//     });
+
+//     const answer = await peer.createAnswer();
+//     await peer.setLocalDescription(answer);
+
+//     const payload = {
+//         userToAnswerTo: callerId,
+//         sdp: peer.localDescription,
+//     };
+
+//     socket.emit('connection answer', payload);
+// }
+
+// function handleAnswer({ sdp, answererId }) {
+//     const desc = new RTCSessionDescription(sdp);
+//     teampeer[answererId].setRemoteDescription(desc).catch(e => console.log(e));
+// }
+
+// function handleICECandidateEvent(e) {
+//     if (e.candidate) {
+//         Object.keys(teampeer).forEach(id => {
+//             const payload = {
+//                 target: id,
+//                 candidate: e.candidate,
+//             }
+//             socket.emit("ice-candidate", payload);
+//         });
+//     }
+// }
+
+// function handleReceiveIce({ candidate, from }) {
+//     const inComingCandidate = new RTCIceCandidate(candidate);
+//     teampeer[from].addIceCandidate(inComingCandidate);
+// };
+
+// function handleDisconnect(userId) {
+//     delete teampeer[userId];
+//     document.getElementById(userId).remove();
+// };
+
+// // Mute/Hide Vide&Audio Function
+// // toggleButton.addEventListener('click', () => {
+// //     const videoTrack = userStream.getTracks().find(track => track.kind === 'video');
+// //     if (videoTrack.enabled) {
+// //         videoTrack.enabled = false;
+// //         toggleButton.innerHTML = 'Show cam'
+// //     } else {
+// //         videoTrack.enabled = true;
+// //         toggleButton.innerHTML = "Hide cam"
+// //     }
+// // });
+
+// // Mute Remote Video&Audio Function
+// // remoteVideoContainer.addEventListener('click', (e) => {
+// //     if (e.target.innerHTML.includes('Hide')) {
+// //         e.target.innerHTML = 'show remote cam';
+// //         socket.emit('hide remote cam', e.target.getAttribute('user-id'));
+// //     } else {
+// //         e.target.innerHTML = `Hide user's cam`;
+// //         socket.emit('show remote cam', e.target.getAttribute('user-id'));
+// //     }
+// // })
+
+// function hideCam() {
+//     const videoTrack = userStream.getTracks().find(track => track.kind === 'video');
+//     videoTrack.enabled = false;
+// }
+
+// function showCam() {
+//     const videoTrack = userStream.getTracks().find(track => track.kind === 'video');
+//     videoTrack.enabled = true;
+// }
+
+// async function init() {
+//     socket.on('connect', async () => {
+//         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+//         userStream = stream;
+//         userVideo.srcObject = stream;
+//         socket.emit('user joined room', ROOM_ID);
+
+//         socket.on('all other users', (otherUsers) => callOtherUsers(otherUsers, stream));
+
+//         socket.on("connection offer", (payload) => handleReceiveOffer(payload, stream));
+
+//         // socket.on('connection answer', handleAnswer);
+//         socket.on('connection answer', (sdp, answererId) => handleAnswer(sdp, answererId));
+
+//         socket.on('ice-candidate', handleReceiveIce);
+
+//         socket.on('user disconnected', (userId) => handleDisconnect(userId));
+
+//         socket.on('hide cam', hideCam);
+
+//         socket.on("show cam", showCam);
+
+//         socket.on('server is full', () => alert("chat is full"));
+//     });
+// }
+
+// init();
 
 async function delay(time) {
     return new Promise(resolve => setTimeout(resolve, time));
@@ -113,7 +303,7 @@ videoSocket.on('user-disconnected', (peerId, data, roomid, userdata) => {
         if (videoDiv.parentElement != null)
             videoDiv.parentElement.remove();
     } catch (e) {
-        console.log(e);
+        // console.log(e);
     }
 
     if (peers[peerId]) {
@@ -142,12 +332,22 @@ videoSocket.on('getActiveUsers', (roomID, data) => { // get the active user in t
     }
 });
 
-videoSocket.on('drawImageToCanvas', (imagesrc, trgtCanvas) => {
-    console.log("drawing image on canvas: ", focusedCanvas)
-    cntrCvnX = trgtCanvas.width / 2 - 32;
-    cntrCvnY = trgtCanvas.height / 2 - 32;
-    imgSentToCanvas = new component(64, 64, `${imagesrc}`, cntrCvnX, cntrCvnY, "image", targetCanvas);
-    imgSentToCanvas.update();
+videoSocket.on('drawImageToCanvas', (imagesrc, trgtCanvas, roomId, userId, imageSent2Canvas) => {
+    if (ROOM_ID == roomId && userID != userId) {
+         let x = imageSent2Canvas.x;
+        let y = imageSent2Canvas.y;
+        let w = 64, h = 64; 
+        let targetCanvas = document.getElementById(trgtCanvas);
+        
+        console.log("IS2C", imageSent2Canvas);
+        console.log("image sent by: ", userId);
+        console.log("drawing image:", imagesrc, " on canvas: ", trgtCanvas, "at :", `(${x},${y})`);
+        console.log("Target canvas: ", targetCanvas);
+       
+        imgSentToCanvas = new component(w, h, `${imagesrc}`, x - w / 2, y - h / 2, "image", targetCanvas, userID);
+        imgSentToCanvas.update();
+        sentImages.push(imgSentToCanvas);
+    }
 })
 
 setTimeout(updateRoom, 5000);
@@ -164,7 +364,7 @@ document.getElementById("settingsBtn").addEventListener("click", () => {
         showsettings = 1;
         document.getElementById("video").muted = false;
     }
-    
+
 })
 
 
@@ -334,10 +534,23 @@ function addSelfVideoStream(stream, userData) { //Draw video to canvas element t
     video.srcObject = stream
 
     canvas.clicked = false;
+    canvas.id = 'canvas#' + userData.name;
+    let w = 300, h = 220;
+    canvas.width = w;
+    canvas.height = h;
+    canvas.style.width = w;
+    canvas.style.height = h;
+    canvas.xcursor = w / 2;
+    canvas.ycursor = h / 2;
+    var context = canvas.getContext('2d');
+    focusedCanvas = canvas.id;
 
-    canvas.addEventListener("click", () => {
-        if (focusedCanvas != null)
+    canvas.addEventListener("click", (e) => {
+        console.log("Old focusedCanvas = ", focusedCanvas);
+        if (focusedCanvas != null || focusedCanvas != "") {
             document.getElementById(focusedCanvas).style = "";
+        }
+        getClickedSpot(canvas, e);
         focusedCanvas = canvas.id;
         canvas.clicked = !canvas.clicked;
         let sty = "border-left: 5px solid #E3555E; padding: 5px; background-color: #d1f7fa; color: #434343;"
@@ -345,16 +558,10 @@ function addSelfVideoStream(stream, userData) { //Draw video to canvas element t
             canvas.style = sty;
         else
             canvas.style = "";
-        console.log("focusedCanvas = ", canvas.id);
+        console.log("New focusedCanvas = ", canvas.id);
     });
 
-    canvas.id = 'canvas#' + userData.name;
-    let w = 300, h = 220;
-    canvas.width = w;
-    canvas.height = h;
-    canvas.style.width = w;
-    canvas.style.height = h;
-    var context = canvas.getContext('2d');
+
     var videoID;
     video.id = videoID = "video#" + userData.name;
     // video.srcObject = stream
@@ -376,59 +583,63 @@ function addSelfVideoStream(stream, userData) { //Draw video to canvas element t
     var removeBtn = document.createElement("button");
     removeBtn.innerText = "Remove";
     var buttonDiv = document.createElement("div");
-    
+
     muteBtn.addEventListener("click", function (userData) {
-        let videoAudio = document.getElementById("video#"+userData.name);
-        
-        if(videoAudio.muted == false)
+        let videoAudio = document.getElementById("video#" + userData.name);
+
+        if (videoAudio.muted == false)
             videoAudio.muted = true;
-        else 
+        else
             videoAudio.muted = false;
     })
 
-    removeBtn.addEventListener("click", function(){
-        
+    removeBtn.addEventListener("click", function () {
+
         tdc.remove();
     })
 
     buttonDiv.appendChild(removeBtn);
     buttonDiv.appendChild(muteBtn);
-    
-    
+
+
     // tdc.appendChild(d);
-    tdc.id = "td#"+userData.name;
+    tdc.id = "td#" + userData.name;
     tdc.appendChild(video);
     tdc.appendChild(buttonDiv)
     tdc.appendChild(canvas);
     tbl.appendChild(tdc);
 }
 
+function getClickedSpot(canvas, event) {
+    let rect = canvas.getBoundingClientRect();
+    let x = event.clientX - rect.left;
+    let y = event.clientY - rect.top;
+    canvas.xcursor = Math.round(x);
+    canvas.ycursor = Math.round(y);
+    console.log("Coordinate x: " + x, "Coordinate y: " + y);
+}
+
 //added these functions below
 function draw(video, context, width, height, id, userData) {
-    // if (video.id == "remote-video") {
+
     var canvas = document.getElementById(id);
     var ctxt = canvas.getContext('2d');
     ctxt.drawImage(video, 0, 0, width, height);
-    if (action == "change") {
-        redShape(canvas);
-    } else {
-        Circle(canvas);
+
+    if (sentImages.length > 6){
+        sentImages[0].remove();
     }
-    // var hold = false;
-    // canvas.addEventListener("click", () => {
-    //   if (hold == false) {
-    //     focusedCanvas = canvas.id;
-    //     console.log("focusedCanvas = ", canvas.id)
-    //     canvas.removeEventListener("click", () => { });
-    //   }
-    //   setTimeout(() => { hold = true }, 200)
-    // })
+    Circle(canvas)
+
+    sentImages.forEach((item, index) => {
+        item.update();
+    })
+
     drawHUD(canvas, userData);
-    if (imgSentToCanvas != null)
+    if (imgSentToCanvas != null){
         imgSentToCanvas.update();
-    // var img = document.getElementById(id);
-    // var myGamePiece = new component(30, 30, "../images/smiley.gif", 100 + posX / 2, 120, "image", canvas);
-    // myGamePiece.update();
+    }
+   
     setTimeout(draw, 10, video, context, width, height, id, userData);
 
 }
@@ -439,7 +650,7 @@ function drawHUD(canvas, userData) {
     var centerX = canvas.width / 2;
     var centerY = canvas.height / 2;
     let len = userData.name.length;
-
+    
     context.strokeStyle = '#003300';
     context.font = '16px Arial';
     context.fillText(userData.userTeam, (canvas.width / 2) - (6 * len), 25);
@@ -450,12 +661,30 @@ function drawHUD(canvas, userData) {
     context.fillText(userData.name, 10, 24);
 }
 
+function updateAnimation(){
+    if (mode == 0) {
+        posX--;
+    }
+    else if (mode == 1) {
+        posX++;
+    }
+
+    if (posX > 10) {
+        mode = 0;
+    }
+    if (posX < -10) {
+        mode = 1;
+    }
+    setTimeout(updateAnimation, 25);
+}
+updateAnimation();
+
 function Circle(canvas) {
-    //var canvas = document.getElementById('canvas');
+
     var context = canvas.getContext('2d');
-    var centerX = canvas.width / 2 + posX;
-    var centerY = canvas.height / 2 + 50 * Math.sin(posX / 10);
-    var radius = 10;
+    var centerX = canvas.xcursor;
+    var centerY = canvas.ycursor;
+    var radius = 10+posX/2;
 
     context.beginPath();
     context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
@@ -465,55 +694,11 @@ function Circle(canvas) {
     context.strokeStyle = '#003300';
     context.stroke();
 
-    if (mode == 0) {
-        posX--;
-    }
-    else if (mode == 1) {
-        posX++;
-    }
-
-    if (posX > 100) {
-        mode = 0;
-    }
-    if (posX < -100) {
-        mode = 1;
-    }
+    
 
 }
 
-function redShape(canvas) {
-    //var canvas = document.getElementById('canvas');
-    var context = canvas.getContext('2d');
-    var centerX = canvas.width / 2 + posX;
-    var centerY = canvas.height / 2 + 50 * Math.sin(posX / 20);
-    var radius = 20;
-
-    context.beginPath();
-    context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-    context.fillStyle = 'red';
-    context.fill();
-    context.lineWidth = 5;
-    context.strokeStyle = '#003300';
-    context.stroke();
-
-    if (mode == 0) {
-        posX--;
-    }
-    else if (mode == 1) {
-        posX++;
-    }
-
-
-    if (posX > 100) {
-        mode = 0;
-    }
-    if (posX < -100) {
-        mode = 1;
-    }
-
-}
-
-function component(width, height, color, x, y, type, canvas) {
+function component(width, height, color, x, y, type, canvas, from) {
     this.type = type;
     if (type == "image") {
         this.image = new Image();
@@ -525,13 +710,20 @@ function component(width, height, color, x, y, type, canvas) {
     this.speedY = 0;
     this.x = x;
     this.y = y;
+    if(from == null) this.from = "";
+    else this.from = from;
+    console.log("canvas: ", canvas)
     this.update = function () {
         ctx = canvas.getContext('2d');
         if (type == "image") {
-            ctx.drawImage(this.image,
-                this.x,
-                this.y,
-                this.width, this.height);
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+            if(from != null){
+                context.fillStyle = 'white';
+                ctx.strokeStyle = '#003300';
+                ctx.font = '10px Arial';
+                ctx.fillText(from, x-width/2, y+height);
+            }
+                
         } else {
             ctx.fillStyle = color;
             ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -546,7 +738,6 @@ function component(width, height, color, x, y, type, canvas) {
 if (1) {
 
     var search = document.getElementById("imgSearch");
-    // var searchBtn = document.getElementById("searchBtn");
     var searchForm = document.getElementById("searchForm");
     var fullImgList = {}; // list of imgs
 
@@ -558,10 +749,6 @@ if (1) {
         else
             previewImg(search.value);
     });
-
-    // searchBtn.addEventListener("click", () => {
-    //   videoSocket.emit("fetchImages", (ROOM_ID, username));
-    // });
 
     videoSocket.on("fetchImgList", (data) => {
         fullImgList = data;
@@ -595,45 +782,51 @@ if (1) {
                     cntrCvnX = targetCanvas.width / 2 - 32;
                     cntrCvnY = targetCanvas.height / 2 - 32;
                 }
-
             }
 
             removeAllChildNodes(imagePrevDiv);
             matches.forEach(match => {
                 if (match != null) {
-                    // var imageP = document.getElementById("previewImg").src =`../images/${match}` ;
-                    if (modeToggle == "library") {
-                        var image = match;
-                        image.height = 64;
-                        image.width = 64;
-                        imagePrevDiv.appendChild(image);
-                        image.style = "padding: 2px"
-                        image.addEventListener("click", () => {
-                            console.log("adding image to from Library to screen: ", image);
-                            videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID)
-                            imgSentToCanvas = new component(64, 64, `${image.src}`, cntrCvnX, cntrCvnY, "image", targetCanvas);
-                            imgSentToCanvas.update();
-                        })
-                    } else {
-                        var image = document.createElement("img");
-                        image.src = `../images/${match}`;
-                        image.height = 64;
-                        image.width = 64;
-                        imagePrevDiv.appendChild(image);
-                        image.style = "padding: 2px"
+                    var image = document.createElement("img");
+                    image.src = `../images/${match}`;
+                    image.height = 64;
+                    image.width = 64;
+                    imagePrevDiv.appendChild(image);
+                    image.style = "padding: 2px"
 
-                        image.addEventListener("dblclick", () => {
-                            videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID);
+                    image.addEventListener("dblclick", () => {
+                        if (document.getElementById(focusedCanvas) == null) {
+                            console.log("Click a video stream first")
+                        } else {
                             targetCanvas = document.getElementById(focusedCanvas);
-                            console.log("adding image to target canvas: ", document.getElementById(focusedCanvas));
-                            imgSentToCanvas = new component(64, 64, `${image.src}`, cntrCvnX, cntrCvnY, "image", targetCanvas);
+
+                            console.log("adding image to target canvas: ", focusedCanvas);
+                            console.log("TRGT_CANVAS: ", targetCanvas)
+
+                            imgSentToCanvas = new component(64, 64, `${image.src}`, targetCanvas.xcursor, targetCanvas.ycursor, "image", targetCanvas, userID);
                             imgSentToCanvas.update();
-                        })
-                        image.addEventListener("click", () => {
-                            // console.log("adding image to library: ", image);
+                            videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID, imgSentToCanvas);
+                        }
+                    })
+                    image.addEventListener("click", () => {
+                        if (modeToggle == "library") {
+
+                            console.log("adding image to from Library to screen: ", image);
+                            if (document.getElementById(focusedCanvas) == null) {
+                                console.log("Click a video stream first")
+                            } else {
+                                let w = h = 64;
+                                targetCanvas = document.getElementById(focusedCanvas);
+                                imgSentToCanvas = new component(w, h, `${image.src}`, targetCanvas.xcursor-w/2, targetCanvas.ycursor-h/2, "image", targetCanvas, userID);
+                                imgSentToCanvas.update();
+                                videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID, imgSentToCanvas)
+                            }
+                        } else {
+                            console.log("adding image to library: ", image);
                             library["images"].push(image);
-                        })
-                    }
+                        }
+
+                    })
                 }
             });
         } else {
@@ -725,7 +918,4 @@ if (1) {
         delay(100);
     })
 
-    // addBtn.addEventListener("click", () => {
-
-    // })
 }

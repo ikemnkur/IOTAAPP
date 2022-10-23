@@ -123,7 +123,6 @@ function sortTable() {
     var table, rows, switching, i, x, y, shouldSwitch;
     table = document.getElementById("activeRooms");
     search = document.getElementById("selector").value;
-    var sortOrder = document.getElementById("order");
     switching = true;
     var select = 0;
     /*Make a loop that will continue until
@@ -139,38 +138,29 @@ function sortTable() {
         if (search == "Alphabetical") select = 1;
         if (search == "Cost") select = 5;
 
-        if (document.getElementById("order").innerText == "ASC") {
-            for (i = 1; i < (rows.length - 1); i++) {
-                //start by saying there should be no switching:
-                shouldSwitch = false;
-                /*Get the two elements you want to compare,
-                one from current row and one from the next:*/
-                x = rows[i].getElementsByTagName("TD")[select];
-                y = rows[i + 1].getElementsByTagName("TD")[select];
-                //check if the two rows should switch place:
+
+        for (i = 1; i < (rows.length - 1); i++) {
+            //start by saying there should be no switching:
+            shouldSwitch = false;
+            /*Get the two elements you want to compare,
+            one from current row and one from the next:*/
+            x = rows[i].getElementsByTagName("TD")[select];
+            y = rows[i + 1].getElementsByTagName("TD")[select];
+            //check if the two rows should switch place:
+            if (document.getElementById("order").innerText == "ASC") {
                 if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
                     //if so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;
                 }
-            }
-        } else if (document.getElementById("order").innerText == "DSC") {
-            for (i = (rows.length - 2); i >= 1; i--) {
-                //start by saying there should be no switching:
-                shouldSwitch = false;
-                /*Get the two elements you want to compare,
-                one from current row and one from the next:*/
-                x = rows[i].getElementsByTagName("TD")[select];
-                y = rows[i + 1].getElementsByTagName("TD")[select];
-                //check if the two rows should switch place:
-                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            } else if (document.getElementById("order").innerText == "DSC") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
                     //if so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;
                 }
             }
         }
-
         if (shouldSwitch) {
             /*If a switch has been marked, make the switch
             and mark that a switch has been done:*/
