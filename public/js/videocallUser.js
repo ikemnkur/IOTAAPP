@@ -220,11 +220,9 @@ async function delay(time) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
 
-
 peerObj.on("open", function (id) {
     console.log("peerObj open event (id):", id);
 });
-
 
 videoSocket.on("connect", () => {
     console.log(`you connected with socket.id ${videoSocket.id}`);
@@ -245,7 +243,6 @@ videoSocket.on("connect", () => {
     videoSocket.emit('connectNewStream', ROOM_ID, userID, myUserData); //Set up socket.io
 
 })
-
 
 function updateRoom() {
     if (Room.length > 0) {
@@ -334,16 +331,16 @@ videoSocket.on('getActiveUsers', (roomID, data) => { // get the active user in t
 
 videoSocket.on('drawImageToCanvas', (imagesrc, trgtCanvas, roomId, userId, imageSent2Canvas) => {
     if (ROOM_ID == roomId && userID != userId) {
-         let x = imageSent2Canvas.x;
+        let x = imageSent2Canvas.x;
         let y = imageSent2Canvas.y;
-        let w = 64, h = 64; 
+        let w = 64, h = 64;
         let targetCanvas = document.getElementById(trgtCanvas);
-        
+
         console.log("IS2C", imageSent2Canvas);
         console.log("image sent by: ", userId);
         console.log("drawing image:", imagesrc, " on canvas: ", trgtCanvas, "at :", `(${x},${y})`);
         console.log("Target canvas: ", targetCanvas);
-       
+
         imgSentToCanvas = new component(w, h, `${imagesrc}`, x - w / 2, y - h / 2, "image", targetCanvas, userID);
         imgSentToCanvas.update();
         sentImages.push(imgSentToCanvas);
@@ -626,7 +623,7 @@ function draw(video, context, width, height, id, userData) {
     var ctxt = canvas.getContext('2d');
     ctxt.drawImage(video, 0, 0, width, height);
 
-    if (sentImages.length > 6){
+    if (sentImages.length > 6) {
         sentImages[0].remove();
     }
     Circle(canvas)
@@ -636,10 +633,10 @@ function draw(video, context, width, height, id, userData) {
     })
 
     drawHUD(canvas, userData);
-    if (imgSentToCanvas != null){
+    if (imgSentToCanvas != null) {
         imgSentToCanvas.update();
     }
-   
+
     setTimeout(draw, 10, video, context, width, height, id, userData);
 
 }
@@ -650,7 +647,7 @@ function drawHUD(canvas, userData) {
     var centerX = canvas.width / 2;
     var centerY = canvas.height / 2;
     let len = userData.name.length;
-    
+
     context.strokeStyle = '#003300';
     context.font = '16px Arial';
     context.fillText(userData.userTeam, (canvas.width / 2) - (6 * len), 25);
@@ -661,7 +658,7 @@ function drawHUD(canvas, userData) {
     context.fillText(userData.name, 10, 24);
 }
 
-function updateAnimation(){
+function updateAnimation() {
     if (mode == 0) {
         posX--;
     }
@@ -684,7 +681,7 @@ function Circle(canvas) {
     var context = canvas.getContext('2d');
     var centerX = canvas.xcursor;
     var centerY = canvas.ycursor;
-    var radius = 10+posX/2;
+    var radius = 10 + posX / 2;
 
     context.beginPath();
     context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
@@ -694,7 +691,7 @@ function Circle(canvas) {
     context.strokeStyle = '#003300';
     context.stroke();
 
-    
+
 
 }
 
@@ -710,20 +707,20 @@ function component(width, height, color, x, y, type, canvas, from) {
     this.speedY = 0;
     this.x = x;
     this.y = y;
-    if(from == null) this.from = "";
+    if (from == null) this.from = "";
     else this.from = from;
     console.log("canvas: ", canvas)
     this.update = function () {
         ctx = canvas.getContext('2d');
         if (type == "image") {
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-            if(from != null){
+            if (from != null) {
                 context.fillStyle = 'white';
                 ctx.strokeStyle = '#003300';
                 ctx.font = '10px Arial';
-                ctx.fillText(from, x-width/2, y+height);
+                ctx.fillText(from, x - width / 2, y + height);
             }
-                
+
         } else {
             ctx.fillStyle = color;
             ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -817,7 +814,7 @@ if (1) {
                             } else {
                                 let w = h = 64;
                                 targetCanvas = document.getElementById(focusedCanvas);
-                                imgSentToCanvas = new component(w, h, `${image.src}`, targetCanvas.xcursor-w/2, targetCanvas.ycursor-h/2, "image", targetCanvas, userID);
+                                imgSentToCanvas = new component(w, h, `${image.src}`, targetCanvas.xcursor - w / 2, targetCanvas.ycursor - h / 2, "image", targetCanvas, userID);
                                 imgSentToCanvas.update();
                                 videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID, imgSentToCanvas)
                             }

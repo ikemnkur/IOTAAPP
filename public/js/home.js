@@ -36,8 +36,13 @@ function listRooms() {
         watchCost = rooms[index]["watchCost"];
         joinCost = rooms[index]["joinCost"];
         userslist = rooms[index]["users"];
-        // usersArray = userslist.split(",");
-        usersArray = JSON.parse(userslist);
+        
+        try {
+            usersArray = JSON.parse(userslist);
+        } catch (error) {
+            usersArray = userslist.split(",");
+        }
+        
         // console.log("Usernames Array: ", usersArray);
         numberOfUsers = usersArray.length;
         count++;

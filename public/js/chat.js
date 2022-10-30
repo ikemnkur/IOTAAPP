@@ -28,8 +28,17 @@ var secretMode = document.getElementById("secretMode").innerText;
 var coins = userJSON[0].coins;
 var xp = userJSON[0].xp;
 var score = 0, scores = {};
-var friendsList = JSON.parse(userJSON[0].friends);
-const blocked = userJSON[0].blockedUsers;
+try {
+  var friendsList = JSON.parse(userJSON[0].friends);
+} catch (error) {
+  var friendsList = userJSON[0].friends.split(",");
+}
+try{
+  var blocked = userJSON[0].blockedUsers;
+} catch(error){
+  // const blocked = userJSON[0].blockedUsers;
+}
+
 var activeUsers;
 
 var colors = ["green", "cyan", "pink", "gold", "agua", "red", "thistle", "lightcyan", "salmon", "crismon", "springgreen", "sykblue", "seagreen", "greenyellow", "fuschia", "lavender", "magenta"]

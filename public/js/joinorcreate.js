@@ -1,3 +1,9 @@
+// const { delay } = require("bluebird");
+
+async function delay(time) {
+    return new Promise(resolve => setTimeout(resolve, time));
+}
+
 var portnum = 3000;
 
 function createRoom() {
@@ -20,8 +26,8 @@ function createRoom() {
         "passcode": passcode,
         "joinCost": joinCost,
         "watchCost": watchCost,
-        "teams": teams,
-        "tags": tags,
+        "teams": teams.split(","),
+        "tags": tags.split(","),
         "private": private,
         "saveRmCfg": saveRmCfg,
         "host": host,
@@ -36,14 +42,26 @@ async function joinRoom() {
 
     roomID = document.getElementById("joinroom#").value;
     passcode = document.getElementById("password").value;
-    userID = document.getElementById("users").value;
+    userID = document.getElementById("host").value;
     var payload = {
         "roomID": roomID,
         "passcode": passcode,
         "userID": userID
     };
-
+    // console.log("Data: ", payload)
     postData("http://localhost:" + portnum + "/joinRoom", payload)
+
+    // payload = {
+    //     "roomID": roomID,
+    // }
+
+    delay(3000).then(() => {
+            // console.log("redirecting...");
+            // postData("http://localhost:" + portnum + "/modal", payload);
+            // window.location.href = "/joinRoom";
+        }
+    );
+    
 }
 
 async function postData(url = "", data = {}) {
@@ -62,5 +80,6 @@ async function postData(url = "", data = {}) {
         body: JSON.stringify(data) // body data type must match "Content-Type" header
     });
     console.log("Posted data: ", data);
-    return response.json(); // parses JSON response into native JavaScript objects
+    window.location.href = "/joinRoom";
+    // return response.json(); // parses JSON response into native JavaScript objects
 }
