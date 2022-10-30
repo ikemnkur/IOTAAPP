@@ -52,13 +52,23 @@ var activeRooms = [];
 // Unique secret key
 const secret_key = 'your secret key';
 // Update the below details with your own MySQL connection details
+// var connection = mysql2.createConnection({
+// 	// host: '34.136.59.230:3306',
+// 	host: 'localhost',
+// 	port: 3306,
+// 	user: 'root',
+// 	password: '',//,password: 'root',
+// 	database: 'nodelogin',
+// 	// multipleStatements: true,
+// 	// bigNumberStrings: true,
+// });
 var connection = mysql2.createConnection({
 	// host: '34.136.59.230:3306',
-	host: 'localhost',
+	host: '139.144.34.246',
 	port: 3306,
-	user: 'root',
-	password: '',//,password: 'root',
-	database: 'nodelogin',
+	user: 'remote_user',
+	password: 'Password!*',//,password: 'root',
+	database: 'iotadb',
 	// multipleStatements: true,
 	// bigNumberStrings: true,
 });
