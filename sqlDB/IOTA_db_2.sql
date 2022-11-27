@@ -12,7 +12,7 @@ START TRANSACTION;
 SET time_zone = "+00:00";
 
 --
--- Database: `nodelogin`
+-- Database: `iotadb`
 --
 
 -- --------------------------------------------------------
@@ -36,11 +36,11 @@ CREATE TABLE `accounts` (
   `ip` varchar(255) NOT NULL DEFAULT '',
   `coins` int(11) NOT NULL DEFAULT 100,
   `xp` int(11) NOT NULL DEFAULT 0,
-  `friends` text NOT NULL DEFAULT '\'[]\'',
-  `roomConfig` mediumtext NOT NULL DEFAULT '\'{"room": []}\'',
-  `blockedUsers` text NOT NULL DEFAULT '[]',
-  `followers` text NOT NULL DEFAULT '[]'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `friends` text NOT NULL,
+  `roomConfig` mediumtext NOT NULL,
+  `blockedUsers` text NOT NULL,
+  `followers` text NOT NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `accounts`
@@ -85,7 +85,7 @@ CREATE TABLE `rooms` (
   `topic` varchar(100) NOT NULL,
   `createDate` datetime NOT NULL DEFAULT current_timestamp(),
   `teams` varchar(255) NOT NULL DEFAULT '[]',
-  `users` text NOT NULL DEFAULT '[]',
+  `users` text NOT NULL,
   `private` int(1) NOT NULL DEFAULT 0,
   `watchCost` int(11) NOT NULL DEFAULT 0,
   `joinCost` int(11) NOT NULL DEFAULT 1,

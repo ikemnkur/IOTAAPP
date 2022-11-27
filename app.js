@@ -64,11 +64,11 @@ const secret_key = 'your secret key';
 // });
 var connection = mysql2.createConnection({
 	// host: '34.136.59.230:3306',
-	host: '139.144.34.246',
+	host: 'remotemysql.com',
 	port: 3306,
-	user: 'remote_user',
-	password: 'Password!*',//,password: 'root',
-	database: 'iotadb',
+	user: 'tnlcK70z3M',
+	password: 'ltHsANPgZX',//,password: 'root',
+	database: 'tnlcK70z3M',
 	// multipleStatements: true,
 	// bigNumberStrings: true,
 });
@@ -1424,12 +1424,19 @@ io.on('connection', socket => {
 		console.log("Imgs to room:", roomId, "by user:", userId);
 		io.emit('drawImageToCanvas', imagesrc, targetCanvas, roomId, userId, imgSentToCanvas);
 	})
+	
+	socket.on("sendSoundToCanvas", (soundsrc, targetCanvas, roomId, userId, msg) => {
+		// var files = fs.readdirSync('./public/images/');
+		console.log("Sound to room:", roomId, "by user:", userId);
+		io.emit('soundToCanvas', soundsrc, targetCanvas, roomId, userId, msg);
+	})
 
 	// Run once when connecting to room for each user to get list of sounds and images
-	socket.on("fetchImages", (roomId, userId) => {
-		var files = fs.readdirSync('./public/images/');
+	socket.on("fetchMedia", (roomId, userId) => {
+		var Imgfiles = fs.readdirSync('./public/images/');
+		var Sndfiles = fs.readdirSync('./public/sounds/');
 		console.log("Imgs to room:", roomId, "by user:", userId);
-		io.emit('fetchImgList', files);
+		io.emit('fetchMediaList', Imgfiles, Sndfiles);
 	})
 
 	socket.on('connectNewStream', (roomId, peerId, userData) => {

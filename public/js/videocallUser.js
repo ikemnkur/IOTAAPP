@@ -1,3 +1,5 @@
+// const e = require("express");
+
 const videoSocket = io('/');
 
 const videoGrid = document.getElementById('video-grid')
@@ -9,7 +11,7 @@ var action = "change";
 var peers = {};
 var streams = {};
 var socketid = "";
-var mode = 0, posX = 0;
+var mode = 0, posX = 0, step = 0;
 var ROOM_ID = roomJSON[0]["roomID"];
 var userID = username;
 var focusedCanvas, imgSentToCanvas;
@@ -244,6 +246,13 @@ videoSocket.on("connect", () => {
 
 })
 
+//Sounds
+function playSound(sound) {
+    var audio = new Audio(`/sounds/${sound}`);
+    // var audio = new Audio(`sounds/GameStart.mp3`);
+    audio.play();
+}
+
 function updateRoom() {
     if (Room.length > 0) {
         if (Room[0].peerId == userID) {
@@ -329,21 +338,51 @@ videoSocket.on('getActiveUsers', (roomID, data) => { // get the active user in t
     }
 });
 
-videoSocket.on('drawImageToCanvas', (imagesrc, trgtCanvas, roomId, userId, imageSent2Canvas) => {
-    if (ROOM_ID == roomId && userID != userId) {
+videoSocket.on('drawImageToCanvas', (imagesrc, trgtCanvas, roomId, fromUserId, imageSent2Canvas) => {
+    if (ROOM_ID == roomId) {
         let x = imageSent2Canvas.x;
         let y = imageSent2Canvas.y;
         let w = 64, h = 64;
         let targetCanvas = document.getElementById(trgtCanvas);
+        if (targetCanvas != null) {
+            console.log("IS2C", imageSent2Canvas);
+            console.log("image sent by: ", fromUserId);
+            console.log("drawing image:", imagesrc, " on canvas: ", trgtCanvas, "at :", `(${x},${y})`);
+            console.log("Target canvas: ", targetCanvas);
 
-        console.log("IS2C", imageSent2Canvas);
-        console.log("image sent by: ", userId);
-        console.log("drawing image:", imagesrc, " on canvas: ", trgtCanvas, "at :", `(${x},${y})`);
-        console.log("Target canvas: ", targetCanvas);
+            imgSentToCanvas = new component(w, h, `${imagesrc}`, x - w / 2, y - h / 2, "image", targetCanvas, fromUserId, "N/A", 10000);
+            imgSentToCanvas.update();
+            if (sentImages.length == 5) {
+                sentImages[0] = sentImages[1];
+                sentImages[1] = sentImages[2];
+                sentImages[2] = sentImages[3];
+                sentImages[3] = sentImages[4];
+                // sentImages[4] = sentImages[5];
+            }
+            if (sentImages.length < 5)
+                sentImages.push(imgSentToCanvas);
+            else
+                sentImages[5] = imgSentToCanvas;
+        }
+    }
+})
 
-        imgSentToCanvas = new component(w, h, `${imagesrc}`, x - w / 2, y - h / 2, "image", targetCanvas, userID);
-        imgSentToCanvas.update();
-        sentImages.push(imgSentToCanvas);
+videoSocket.on('soundToCanvas', (soundsrc, trgtCanvas, roomId, fromUserId, msg) => {
+    if (ROOM_ID == roomId) {
+        let targetCanvas = document.getElementById(trgtCanvas);
+        if (targetCanvas != null) {
+            let x = 15, w = 32, h = 32;;
+            let y = targetCanvas.height - h;
+            console.log("sound sent by: ", fromUserId);
+            console.log("playing sound:", soundsrc, " on canvas: ", trgtCanvas, "at :", `(${x},${y})`);
+            console.log("Target canvas: ", targetCanvas);
+
+            imgSentToCanvas = new component(w, h, `/images/soundIcon.png`, x - w / 2, y - h / 2, "image", targetCanvas, fromUserId, msg, 3000);
+            imgSentToCanvas.update();
+            sentImages.push(imgSentToCanvas);
+
+            playSound(soundsrc);
+        }
     }
 })
 
@@ -355,15 +394,13 @@ document.getElementById("settingsBtn").addEventListener("click", () => {
     if (showsettings) {
         setting.style.display = "none";
         showsettings = 0;
-        document.getElementById("video").muted = true;
+        // document.getElementById("video").muted = true;
     } else {
         setting.style.display = "block"
         showsettings = 1;
-        document.getElementById("video").muted = false;
+        // document.getElementById("video").muted = false;
     }
-
 })
-
 
 async function videoCallUser(peerObjId) { //other user's peerObjid is automaticall passed in as arguement
 
@@ -430,7 +467,6 @@ async function videoCallUser(peerObjId) { //other user's peerObjid is automatica
     // save the close function
     user_Peers[call.peer] = call;
 }
-
 
 peerObj.on("call", (call) => {
     if (confirm(`Accept call from ${call.peer}?`)) {
@@ -502,7 +538,6 @@ peerObj.on("call", (call) => {
     }
 });
 
-
 function endCall(peerObjid) {
     // Go Delete ended user element
     let title = "video#" + peerObjid;
@@ -516,7 +551,6 @@ function endCall(peerObjid) {
     } catch { }
     user_Peers[peerObjid] = undefined;
 }
-
 
 function addSelfVideoStream(stream, userData) { //Draw video to canvas element then append that to the DOM
     // var uname = userData.name; 
@@ -558,9 +592,8 @@ function addSelfVideoStream(stream, userData) { //Draw video to canvas element t
         console.log("New focusedCanvas = ", canvas.id);
     });
 
-
-    var videoID;
-    video.id = videoID = "video#" + userData.name;
+    var videoID = "video#" + userData.name;;
+    video.id = videoID;
     // video.srcObject = stream
 
     video.addEventListener('loadedmetadata', () => {
@@ -579,25 +612,37 @@ function addSelfVideoStream(stream, userData) { //Draw video to canvas element t
     muteBtn.innerText = "Mute";
     var removeBtn = document.createElement("button");
     removeBtn.innerText = "Remove";
+    var clearBtn = document.createElement("button");
+    clearBtn.innerText = "Clear";
     var buttonDiv = document.createElement("div");
 
     muteBtn.addEventListener("click", function (userData) {
-        let videoAudio = document.getElementById("video#" + userData.name);
+        let videoAudio = document.getElementById(videoID);
 
-        if (videoAudio.muted == false)
+        if (videoAudio.muted == false) {
             videoAudio.muted = true;
-        else
+            console.log(videoID, "has been muted");
+            muteBtn.innerText = "Unmute";
+        }
+        else {
+            console.log(videoID, "has been unmuted");
             videoAudio.muted = false;
+            muteBtn.innerText = "Mute";
+        }
+
     })
 
     removeBtn.addEventListener("click", function () {
-
         tdc.remove();
+    })
+
+    clearBtn.addEventListener("click", function () {
+        sentImages = [];
     })
 
     buttonDiv.appendChild(removeBtn);
     buttonDiv.appendChild(muteBtn);
-
+    buttonDiv.appendChild(clearBtn);
 
     // tdc.appendChild(d);
     tdc.id = "td#" + userData.name;
@@ -623,10 +668,7 @@ function draw(video, context, width, height, id, userData) {
     var ctxt = canvas.getContext('2d');
     ctxt.drawImage(video, 0, 0, width, height);
 
-    if (sentImages.length > 6) {
-        sentImages[0].remove();
-    }
-    Circle(canvas)
+    Circle(canvas);
 
     sentImages.forEach((item, index) => {
         item.update();
@@ -638,7 +680,6 @@ function draw(video, context, width, height, id, userData) {
     }
 
     setTimeout(draw, 10, video, context, width, height, id, userData);
-
 }
 
 function drawHUD(canvas, userData) {
@@ -647,12 +688,12 @@ function drawHUD(canvas, userData) {
     var centerX = canvas.width / 2;
     var centerY = canvas.height / 2;
     let len = userData.name.length;
-
+    context.fillStyle = 'white';
     context.strokeStyle = '#003300';
     context.font = '16px Arial';
     context.fillText(userData.userTeam, (canvas.width / 2) - (6 * len), 25);
 
-    context.font = '12px Arial';
+    context.font = '14px Arial';
     context.strokeStyle = '#303300';
 
     context.fillText(userData.name, 10, 24);
@@ -672,6 +713,10 @@ function updateAnimation() {
     if (posX < -10) {
         mode = 1;
     }
+
+    step++;
+    step = step % 10;
+
     setTimeout(updateAnimation, 25);
 }
 updateAnimation();
@@ -681,22 +726,20 @@ function Circle(canvas) {
     var context = canvas.getContext('2d');
     var centerX = canvas.xcursor;
     var centerY = canvas.ycursor;
-    var radius = 10 + posX / 2;
+    var radius = 5 + posX / 4;
 
     context.beginPath();
     context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-    context.fillStyle = 'green';
-    context.fill();
-    context.lineWidth = 5;
-    context.strokeStyle = '#003300';
+    // context.fillStyle = 'white';
+    context.lineWidth = 2;
+    context.strokeStyle = `#${step * 5 + 10}${99 - step * 4}${50 + step * 2}`;
     context.stroke();
-
-
 
 }
 
-function component(width, height, color, x, y, type, canvas, from) {
+function component(width, height, color, x, y, type, canvas, from, msg, time) {
     this.type = type;
+    this.msg = msg;
     if (type == "image") {
         this.image = new Image();
         this.image.src = color;
@@ -707,48 +750,80 @@ function component(width, height, color, x, y, type, canvas, from) {
     this.speedY = 0;
     this.x = x;
     this.y = y;
+    this.kill = false;
+    // const d = new Date();
+    // this.time = d.getTime();
+    // // Calculate milliseconds in a year
+    // const second = 1000;
+    // const minute = second * 60;
+    // const hour = minute * 60;
+    // const day = hour * 24;
+    // const year = day * 365;
+    // let secondOfCreation = Math.round(d.getTime() / second);
+
+    setTimeout(() => {
+        this.kill = true;
+    }, time)
+
     if (from == null) this.from = "";
     else this.from = from;
     console.log("canvas: ", canvas)
     this.update = function () {
+        if (this.kill == true)
+            return 0;
         ctx = canvas.getContext('2d');
         if (type == "image") {
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
             if (from != null) {
-                context.fillStyle = 'white';
+                ctx.fillStyle = 'white';
                 ctx.strokeStyle = '#003300';
-                ctx.font = '10px Arial';
-                ctx.fillText(from, x - width / 2, y + height);
+                ctx.font = '12px Arial';
+                ctx.fillText(from, x + width / 4, y + height + 8);
             }
-
         } else {
             ctx.fillStyle = color;
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
+
     }
     this.newPos = function () {
         this.x += this.speedX;
         this.y += this.speedY;
     }
+
 }
 
 if (1) {
 
-    var search = document.getElementById("imgSearch");
+    var search = document.getElementById("mediaSearch");
     var searchForm = document.getElementById("searchForm");
     var fullImgList = {}; // list of imgs
+    var fullSndList = {};
+    var library = {};
+    library["images"] = [];
+    library["sounds"] = [];
 
-    searchForm.addEventListener("submit", (e) => {
-        e.preventDefault();
+    var modeToggle = "search", mediaType = "Image";
+    var mediaTypeBtn = document.getElementById("addToLibBtn")
+    var mediaTypeText = document.getElementById("addToLibText")
+    var modeToggleBtn = document.getElementById("searchModeBtn")
+    var modeToggleText = document.getElementById("searchModeText")
+    var addBtn = document.getElementById("addToLibBtn")
+    var imagePrevDiv = document.getElementById("imgPrevDiv");
+
+    if (fullImgList.length == undefined || fullSndList.length == undefined) {
+        videoSocket.emit("fetchMedia", ROOM_ID, userID);
+    }
+
+    search.addEventListener("keyup", () => {
         console.log("searching....");
-        if (fullImgList.length == undefined)
-            videoSocket.emit("fetchImages", ROOM_ID, userID);
-        else
-            previewImg(search.value);
-    });
+        previewImg(search.value);
+    })
 
-    videoSocket.on("fetchImgList", (data) => {
-        fullImgList = data;
+
+    videoSocket.on("fetchMediaList", (img, snd) => {
+        fullImgList = img;
+        fullSndList = snd;
         previewImg(search.value);
     })
 
@@ -760,14 +835,16 @@ if (1) {
 
     function previewImg(searchTerm) {
         var imagePrevDiv = document.getElementById("imgPrevDiv");
+
         if (searchTerm.length >= 3) {
             var targetCanvas = document.getElementById(focusedCanvas);
-            let matches, cntrCvnX = 125 - 8, cntrCvnY = 150 - 16;
+            let matches;
+            let cntrCvnX = 125 - 8, cntrCvnY = 150 - 16;
 
             if (modeToggle == "library") {
-                matches = searchLibrary(searchTerm, "images");
+                matches = searchLibrary(searchTerm, mediaTypeText.innerText);
             } else {
-                matches = searchImages(searchTerm);
+                matches = searchMedia(searchTerm, mediaTypeText.innerText);
             }
 
             if (focusedCanvas == null) {
@@ -778,80 +855,143 @@ if (1) {
                     console.log("Focused on Canvas: ", targetCanvas);
                     cntrCvnX = targetCanvas.width / 2 - 32;
                     cntrCvnY = targetCanvas.height / 2 - 32;
+                } else {
+                    console.log("Error with the focused Canvas: ", targetCanvas);
                 }
             }
 
             removeAllChildNodes(imagePrevDiv);
-            matches.forEach(match => {
-                if (match != null) {
-                    var image = document.createElement("img");
-                    image.src = `../images/${match}`;
-                    image.height = 64;
-                    image.width = 64;
-                    imagePrevDiv.appendChild(image);
-                    image.style = "padding: 2px"
+            if (matches != 0) {
+                console.log(matches)
+                matches.forEach(match => {
+                    var btnActionTXT = document.getElementById("addToLibText")
+                    if (btnActionTXT.innerText == "Image") {
+                        if (match != null) {
+                            var image = document.createElement("img");
+                            image.src = `../images/${match}`;
+                            image.height = 64;
+                            image.width = 64;
+                            imagePrevDiv.appendChild(image);
+                            image.style = "padding: 2px"
 
-                    image.addEventListener("dblclick", () => {
-                        if (document.getElementById(focusedCanvas) == null) {
-                            console.log("Click a video stream first")
-                        } else {
-                            targetCanvas = document.getElementById(focusedCanvas);
+                            image.addEventListener("dblclick", () => {
+                                if (document.getElementById(focusedCanvas) == null) {
+                                    console.log("Click a video stream first");
+                                    errorMSG("Click a video stream first");
+                                } else {
+                                    targetCanvas = document.getElementById(focusedCanvas);
 
-                            console.log("adding image to target canvas: ", focusedCanvas);
-                            console.log("TRGT_CANVAS: ", targetCanvas)
+                                    console.log("adding image to target canvas: ", focusedCanvas);
+                                    console.log("TRGT_CANVAS: ", targetCanvas)
 
-                            imgSentToCanvas = new component(64, 64, `${image.src}`, targetCanvas.xcursor, targetCanvas.ycursor, "image", targetCanvas, userID);
-                            imgSentToCanvas.update();
-                            videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID, imgSentToCanvas);
+                                    imgSentToCanvas = new component(64, 64, `${image.src}`, targetCanvas.xcursor, targetCanvas.ycursor, "image", targetCanvas, userID, "N/A", 10000);
+                                    imgSentToCanvas.update();
+                                    videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID, imgSentToCanvas);
+                                }
+                            })
+
+                            image.addEventListener("click", () => {
+                                if (modeToggle == "library") {
+                                    console.log("adding image to from Library to screen: ", image);
+                                    if (document.getElementById(focusedCanvas) == null) {
+                                        console.log("Click a video stream first")
+                                    } else {
+                                        let w = h = 64;
+                                        targetCanvas = document.getElementById(focusedCanvas);
+                                        imgSentToCanvas = new component(w, h, `${image.src}`, targetCanvas.xcursor - w / 2, targetCanvas.ycursor - h / 2, "image", targetCanvas, userID, `from:${userID} `, 10000);
+                                        imgSentToCanvas.update();
+                                        videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID, imgSentToCanvas)
+                                    }
+                                } else {
+                                    console.log("adding image to library: ", image);
+                                    library["images"].push(image);
+                                }
+                            })
                         }
-                    })
-                    image.addEventListener("click", () => {
-                        if (modeToggle == "library") {
+                    } else {
+                        // sound manipulation
+                        if (match != null) {
+                            var thing = document.getElementById("soundElem");
 
-                            console.log("adding image to from Library to screen: ", image);
-                            if (document.getElementById(focusedCanvas) == null) {
-                                console.log("Click a video stream first")
+                            var soundElmt = document.createElement("div");
+                            soundElmt = thing.cloneNode(true);
+                            soundElmt.id = match;
+                            let playbtn = soundElmt.querySelector('#playSnd');
+                            let sendBtn = soundElmt.querySelector('#sendSnd');
+                            let addToLibBtn = soundElmt.querySelector('#addToLib');
+                            let soundName = soundElmt.querySelector('#sndName');
+                            soundName.innerText = match;
+                            let snd = match;
+
+                            if (modeToggle == "library") {
+                                addToLibBtn.hidden = true;
+                                addToLibBtn.remove();
                             } else {
-                                let w = h = 64;
-                                targetCanvas = document.getElementById(focusedCanvas);
-                                imgSentToCanvas = new component(w, h, `${image.src}`, targetCanvas.xcursor - w / 2, targetCanvas.ycursor - h / 2, "image", targetCanvas, userID);
-                                imgSentToCanvas.update();
-                                videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID, imgSentToCanvas)
+                                addToLibBtn.hidden = false;
+                                addToLibBtn.addEventListener("click", () => {
+                                    console.log("adding sound to library: ", snd);
+                                    library["sounds"].push(snd);
+                                })
                             }
-                        } else {
-                            console.log("adding image to library: ", image);
-                            library["images"].push(image);
-                        }
 
-                    })
-                }
-            });
+                            playbtn.addEventListener("click", () => {
+                                playSound(match);
+                            })
+
+                            sendBtn.addEventListener("click", () => {
+                                let msg = `from: ${userID}`;
+                                videoSocket.emit("sendSoundToCanvas", snd, focusedCanvas, ROOM_ID, userID, msg);
+                                console.log("Sending sound: ", snd)
+                            })
+
+                            soundElmt.hidden = false;
+                            thing.hidden = true;
+                            imagePrevDiv.append(soundElmt)
+                        }
+                    }
+                });
+            }
+
         } else {
-            let errorMSG = document.createElement("strong")
-            errorMSG.innerText = "Type more than 3 characters to start search";
-            imagePrevDiv.appendChild(errorMSG)
-            // delay(1000);
-            // errorMSG.remove();
+            showErrorMsg("Type more than 3 characters to start search")
         }
     }
-    // JavaScript code
-    function searchLibrary(search, type) {
-        // var search = document.getElementById("imgSearch").value;
-        // let search = document.getElementById('searchbar').value
-        search = search.toLowerCase();
-        // let x = document.getElementsByClassName('rooms');
-        let x = library[type];
-        var matches = [];
-        // console.log("searching for: ", search, " in ", fullImgList);
-        for (i = 0; i < x.length; i++) {
-            if (x[i].src.toLowerCase().includes(search)) {
-                // x[i].style.display = "none";
-                matches.push(x[i]);
-                // x[i].style.display = "";
-            }
+
+    function showErrorMsg(msg) {
+        // var imagePrevDiv = document.getElementById("imgPrevDiv");
+        let errorMSG = document.getElementById("errorMsg")
+        if (errorMSG == null) {
+            errorMSG = document.createElement("strong")
+            errorMSG.id = "errorMSG";
         }
-        console.log("Matching Search Results: ", matches)
-        if (matches != null) {
+        errorMSG.innerText = msg;
+        console.log("MSG: ", msg);
+        // imagePrevDiv.append(errorMSG);
+    }
+
+    // search the user sound and image libraries
+    function searchLibrary(search, type) {
+
+        search = search.toLowerCase();
+
+        let x = library[type];
+        var matches = [], errored = false;
+        console.log("var x:", x)
+
+        try {
+            for (i = 0; i < x.length; i++) {
+                if (x[i].src.toLowerCase().includes(search)) {
+                    matches.push(x[i]);
+                }
+            }
+            console.log("Media type: ", type)
+            console.log("Matching Search Results: ", matches)
+        } catch (error) {
+            showErrorMsg(`The ${type} library is empty.`);
+            errored = true;
+        }
+
+        if (matches != null || errored) {
             return matches;
         } else {
             return null;
@@ -859,12 +999,15 @@ if (1) {
     }
 
     // JavaScript code
-    function searchImages(search) {
-        // var search = document.getElementById("imgSearch").value;
-        // let search = document.getElementById('searchbar').value
+    function searchMedia(search, type) {
         search = search.toLowerCase();
-        // let x = document.getElementsByClassName('rooms');
-        let x = fullImgList;
+        var x;
+        if (type == "Sound") {
+            x = fullSndList;
+        } else {
+            x = fullImgList;
+        }
+        console.log("Media type: ", type)
         var matches = [];
         // console.log("searching for: ", search, " in ", fullImgList);
         for (i = 0; i < x.length; i++) {
@@ -882,35 +1025,93 @@ if (1) {
         }
     }
 
-    var library = {};
-    library["images"] = [];
 
-    var modeToggle = "search";
-    var modeToggleBtn = document.getElementById("searchMode")
-    var addBtn = document.getElementById("addToLibBtn")
 
-    modeToggleBtn.addEventListener("click", () => {
-        var imagePrevDiv = document.getElementById("imgPrevDiv");
-        var imgSearchBar = document.getElementById("imgSearch");
-
+    //Click on Library/Find Button
+    modeToggleBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        var imgSearchBar = document.getElementById("mediaSearch");
+        var ficon = document.getElementById("findIcon");
         if (modeToggle == "search") {
+            //switch to library mode
             modeToggle = "library";
-            modeToggleBtn.innerText = "Library";
+            modeToggleText.innerText = "Library";
+            ficon.className = "fas fa-book-open";
             removeAllChildNodes(imagePrevDiv);
             imgSearchBar.placeholder = "Search Your Library";
-            if (library["images"] != []) {
-                library["images"].forEach(img => {
-                    imagePrevDiv.append(img);
-                });
+
+            if (mediaTypeText.innerText == "Sound") {
+                if (library["sounds"] != []) {
+                    library["sounds"].forEach(snd => {
+                        var thing = document.getElementById("soundElem");
+
+                        var soundElmt = document.createElement("div");
+                        soundElmt = thing.cloneNode(true);
+                        soundElmt.id = snd;
+                        let playbtn = soundElmt.querySelector('#playSnd');
+                        // let addToLibBtn = soundElmt.querySelector('#addToLib');
+                        let soundName = soundElmt.querySelector('#sndName');
+                        soundName.innerText = snd;
+                        // addToLibBtn.addEventListener("click", () => {
+                        //     console.log("adding sound to library: ", snd);
+                        //     library["sounds"].push(snd);
+                        // })
+                        playbtn.addEventListener("click", () => {
+                            playSound(snd);
+                        })
+
+                        soundElmt.hidden = false;
+                        imagePrevDiv.append(soundElmt);
+                    });
+                }
+            } else {
+                if (library["images"] != []) {
+                    library["images"].forEach(img => {
+                        imagePrevDiv.append(img);
+                    });
+                }
             }
-            imgSearchBar.value = "";
+
+
+            // imgSearchBar.value = "";
             delay(500);
-        } else {// (modeToggle == "library") {
+        } else {
+            //switch to search mode
             modeToggle = "search";
-            imgSearchBar.placeholder = "Search For Images";
-            modeToggleBtn.innerText = "Find";
-            imgSearchBar.value = "";
+            imgSearchBar.placeholder = "Search For Media";
+            modeToggleText.innerText = "Find";
+            // imgSearchBar.value = "";
+            ficon.className = "fas fa-magnifying-glass";
             removeAllChildNodes(imagePrevDiv);
+            searchMedia(imgSearchBar.value, mediaType)
+        }
+        delay(100);
+    })
+
+    //Click on Image/Sound Button
+    mediaTypeBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        var imgSearchBar = document.getElementById("mediaSearch");
+        var icon = document.getElementById("mediaIcon");
+
+        if (mediaType == "Sound") {
+            mediaType = "Image";
+            icon.className = 'fas fa-image';
+            mediaTypeText.innerText = "Image";
+            removeAllChildNodes(imagePrevDiv);
+            previewImg(imgSearchBar.value)
+            imgSearchBar.placeholder = "Search For Images";
+            showErrorMsg("Search For Images");
+
+            delay(100);
+        } else if (mediaType == "Image") {
+            mediaType = "Sound";
+            icon.className = 'fas fa-volume-down';
+            mediaTypeText.innerText = "Sound";
+            imgSearchBar.placeholder = "Search For Sounds";
+            removeAllChildNodes(imagePrevDiv);
+            showErrorMsg("Search For Sounds");
+            previewImg(imgSearchBar.value)
         }
         delay(100);
     })
