@@ -52,13 +52,12 @@ var activeRooms = [];
 // Unique secret key
 const secret_key = 'your secret key';
 // Update the below details with your own MySQL connection details
-// var connection = mysql2.createConnection({
-// 	// host: '34.136.59.230:3306',
+// var connection = mysql.createConnection({
 // 	host: 'localhost',
 // 	port: 3306,
 // 	user: 'root',
 // 	password: '',//,password: 'root',
-// 	database: 'nodelogin',
+// 	database: 'iotalogin',
 // 	// multipleStatements: true,
 // 	// bigNumberStrings: true,
 // });
@@ -69,10 +68,20 @@ var connection = mysql2.createConnection({
 	user: 'tnlcK70z3M',
 	password: 'ltHsANPgZX',//,password: 'root',
 	database: 'tnlcK70z3M',
+	multipleStatements: true,
+	bigNumberStrings: true,
+});
+var connection2 = mysql2.createConnection({
+	// host: '34.136.59.230:3306',
+	host: 'remotemysql.com',
+	port: 3306,
+	user: 'tnlcK70z3M',
+	password: 'ltHsANPgZX',//,password: 'root',
+	database: 'tnlcK70z3M',
 	// multipleStatements: true,
 	// bigNumberStrings: true,
 });
-var connection2 = mysql.createConnection({
+var connection3 = mysql.createConnection({
 	// host: '34.136.59.230:3306',
 	host: '139.144.34.246',
 	port: 3306,
@@ -317,6 +326,10 @@ app.post('/register', (request, response) => init(request, settings => {
 			} else {
 				// Insert account
 				connection.query('INSERT INTO accounts (username, password, email, activation_code, role, ip) VALUES (?, ?, ?, "activated", ?, ?)', [username, hashedPassword, email, role, ip], (error, result) => {
+					connection.query('INSERT INTO userstats (username, role) VALUES (?, ?)', [username, role], (error, results) => {
+						console.log("UserStat results: ", results);
+						console.log("UserStat errors: ", error);
+					})
 					// Registration success!
 					if (settings['auto_login_after_register'] == 'true') {
 						// Authenticate the user
@@ -704,7 +717,7 @@ app.post(['/createRoom'], (request, response) => isLoggedin(request, settings =>
 
 	console.log("posted roomInfo: ", room);
 	if (room.saveRmCfg == "on") {
-		connection.query("SELECT * FROM accounts WHERE username = ?", [room.host], function (err, userStatsResults) {
+		connection.query("SELECT * FROM userstats WHERE username = ?", [room.host], function (err, userStatsResults) {
 			if (err) throw err;
 			userStatsResult = userStatsResults;
 			let users = room.host.split(",");
@@ -714,7 +727,7 @@ app.post(['/createRoom'], (request, response) => isLoggedin(request, settings =>
 			connection.query('INSERT INTO rooms (roomID, host, users, passcode, topic, teams, private, watchCost, joinCost, tags) VALUES (?,?,?,?,?,?,?,?,?,?)', 
 			  [room.roomID, room.host, users, room.passcode, room.topic, teams, room.private, room.watchCost, room.joinCost, tags], function (err, finalresult) {
 				if (err) throw err;
-				connection.query('UPDATE accounts SET roomConfig = ? WHERE username = ?', [JSON.stringify(room), room.host]);
+				connection.query('UPDATE userstats SET roomConfig = ? WHERE username = ?', [JSON.stringify(room), room.host]);
 				console.log("fetched usersname: ", room.host);
 
 				connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, finalresult) {
@@ -743,7 +756,7 @@ app.post(['/joinRoom'], (request, response) => isLoggedin(request, settings => {
 		console.log("Joined Room Info: ", finalresult[0]["passcode"]);
 		// Render room templateconsole.log("Post rooms.SQL: ", result);
 		if (room.passcode == finalresult[0]["passcode"]) {
-			connection.query("SELECT * FROM accounts WHERE username = ?", [room.userID], function (err, userStatsResult) {
+			connection.query("SELECT * FROM userstats WHERE username = ?", [room.userID], function (err, userStatsResult) {
 				if (err) throw err;
 				userStats = JSON.stringify(userStatsResult); //console.log("user Info: ", userStats);
 				console.log("Correct Passcode.")
@@ -773,7 +786,7 @@ app.post(['/modal', '/modal:id'], (request, response) => isLoggedin(request, set
 		console.log("Joined Room Info: ", finalresult);
 		// Render room templateconsole.log("Post rooms.SQL: ", result);
 
-		connection.query("SELECT * FROM accounts WHERE username = ?", [request.session.account_username], function (err, userStatsResult) {
+		connection.query("SELECT * FROM userstats WHERE username = ?", [request.session.account_username], function (err, userStatsResult) {
 			if (err) throw err;
 			userStats = JSON.stringify(userStatsResult);
 			console.log("user Info: ", userStats);
@@ -806,9 +819,7 @@ app.post(['/room', '/room:id'], (request, response) => isLoggedin(request, setti
 
 	const id = request.params.id; //params = {id:"000000"} for joining or creating a room 
 	var room = request.query;
-	// console.log("Req.params ", id);
-	// console.log("Query: ", room);
-	// console.log("Body: ", request.body);
+	
 	let roomJSON = JSON.parse(request.body.roomObj);
 	let userJSON = JSON.parse(request.body.userObj);
 	let nickname = request.body.nickname;
@@ -819,25 +830,7 @@ app.post(['/room', '/room:id'], (request, response) => isLoggedin(request, setti
 
 	if (join == 1) { // if joining room
 
-		// connection.query("SELECT * FROM rooms WHERE roomID = ?", [roomJSON.roomID], function (err, result) {
-		// 	if (err) throw err;
-
-		// 	connection.query("SELECT * FROM rooms WHERE roomID = ?", [roomJSON.roomID], function (err, finalresult) {
-		// 		if (err) throw err;
-		// 		activeRoom = JSON.stringify(finalresult);
-		// 		console.log("Joined Room Info: ", finalresult);
-		// 		// Render room templateconsole.log("Post rooms.SQL: ", result);
-
-		// 		connection.query("SELECT * FROM accounts WHERE username = ?", [request.session.account_username], function (err, userStatsResult) {
-		// 			if (err) throw err;
-		// 			userStats = JSON.stringify(userStatsResult); //console.log("user Info: ", userStats);
-		// 			response.render('room.html', { roomObj: finalresult, username: request.session.account_username, role: request.session.account_role, userJSON: userStatsResult, jroom: activeRoom, juser: userStats, roomId: room.roomID });
-		// 		});
-		// 	});
-
-		// });
 		response.render('room.html', { roomObj: roomJSON, roomObjText: request.body.roomObj, userJSON: userJSON, userObjText: request.body.userObj, team: team, secret: secretMode, nickname: nickname, username: request.session.account_username, role: request.session.account_role });
-		// response.render('room.html', { roomObj: roomJSON, username: request.session.account_username, role: request.session.account_role, userJSON: userJSON, team: team, secret: secretMode, nickname: nickname});
 
 	} else if (create == 1) {// if creating a room
 
@@ -884,7 +877,8 @@ app.get('/admin/', (request, response) => isAdmin(request, settings => {
 	// Retrieve statistical data
 	connection.query('SELECT * FROM accounts WHERE cast(registered as DATE) = cast(now() as DATE) ORDER BY registered DESC; SELECT COUNT(*) AS total FROM accounts LIMIT 1; SELECT COUNT(*) AS total FROM accounts WHERE last_seen < date_sub(now(), interval 1 month) LIMIT 1; SELECT * FROM accounts WHERE last_seen > date_sub(now(), interval 1 day) ORDER BY last_seen DESC; SELECT COUNT(*) AS total FROM accounts WHERE last_seen > date_sub(now(), interval 1 month) LIMIT 1', (error, results, fields) => {
 		// Render dashboard template
-		response.render('admin/dashboard.html', { selected: 'dashboard', accounts: results?.[0], accounts_total: results?.[1][0], inactive_accounts: results?.[2][0], active_accounts: results?.[3], active_accounts2: results?.[4][0], timeElapsedString: timeElapsedString });
+		// console.log("Admin results: ", results);
+		response.render('admin/dashboard.html', { selected: 'dashboard', accounts: results[0], accounts_total: results[1][0], inactive_accounts: results[2][0], active_accounts: results[3], active_accounts2: results[4][0], timeElapsedString: timeElapsedString });
 	});
 }, () => {
 	// Redirect to login page
@@ -900,7 +894,7 @@ app.get(['/admin/accounts', '/admin/accounts/:msg/:search/:status/:activation/:r
 	let activation = request.params.activation == 'n0' ? '' : request.params.activation;
 	let role = request.params.role == 'n0' ? '' : request.params.role;
 	let order = request.params.order == 'DESC' ? 'DESC' : 'ASC';
-	let order_by_whitelist = ['id', 'username', 'email', 'activation_code', 'role', 'registered', 'last_seen'];
+	let order_by_whitelist = ['id','username','email','activation_code','role','registered','last_seen'];
 	let order_by = order_by_whitelist.includes(request.params.order_by) ? request.params.order_by : 'id';
 	// Number of accounts to show on each pagination page
 	let results_per_page = 20;
@@ -946,7 +940,7 @@ app.get(['/admin/accounts', '/admin/accounts/:msg/:search/:status/:activation/:r
 			if (msg) {
 				if (msg == 'msg1') {
 					msg = 'Account created successfully!';
-				} else if (msg == 'msg2') {
+				} else if (msg == 'msg2') { 
 					msg = 'Account updated successfully!';
 				} else if (msg == 'msg3') {
 					msg = 'Account deleted successfully!';
@@ -964,23 +958,23 @@ app.get(['/admin/accounts', '/admin/accounts/:msg/:search/:status/:activation/:r
 // http://localhost:3000/admin/account - Admin edit/create account
 app.get(['/admin/account', '/admin/account/:id'], (request, response) => isAdmin(request, settings => {
 	// Default page (Create/Edit)
-	let page = request.params.id ? 'Edit' : 'Create';
+    let page = request.params.id ? 'Edit' : 'Create';
 	// Current date
 	let d = new Date();
-	// Default input account values
-	let account = {
-		'username': '',
-		'password': '',
-		'email': '',
-		'activation_code': '',
-		'rememberme': '',
-		'role': 'Member',
+    // Default input account values
+    let account = {
+        'username': '',
+        'password': '',
+        'email': '',
+        'activation_code': '',
+        'rememberme': '',
+        'role': 'Member',
 		'registered': (new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString()).slice(0, -1).split('.')[0],
 		'last_seen': (new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString()).slice(0, -1).split('.')[0]
-	};
-	let roles = ['Member', 'Admin'];
-	// GET request ID exists, edit account
-	if (request.params.id) {
+    };
+    let roles = ['Member', 'Admin'];
+    // GET request ID exists, edit account
+    if (request.params.id) {
 		connection.query('SELECT * FROM accounts WHERE id = ?', [request.params.id], (error, accounts) => {
 			account = accounts[0];
 			response.render('admin/account.html', { selected: 'accounts', selectedChild: 'manage', page: page, roles: roles, account: account });
@@ -995,11 +989,11 @@ app.get(['/admin/account', '/admin/account/:id'], (request, response) => isAdmin
 
 // http://localhost:3000/admin/account - Admin edit/create account
 app.post(['/admin/account', '/admin/account/:id'], (request, response) => isAdmin(request, settings => {
-	// GET request ID exists, edit account
-	if (request.params.id) {
-		// Edit an existing account
-		page = 'Edit'
-		// Retrieve account by ID with the GET request ID
+    // GET request ID exists, edit account
+    if (request.params.id) {
+        // Edit an existing account
+        page = 'Edit'
+        // Retrieve account by ID with the GET request ID
 		connection.query('SELECT * FROM accounts WHERE id = ?', [request.params.id], (error, accounts) => {
 			// If user submitted the form
 			if (request.body.submit) {
@@ -1033,8 +1027,8 @@ app.post(['/admin/account', '/admin/account/:id'], (request, response) => isAdmi
 
 // http://localhost:3000/admin/account/delete/:id - Delete account based on the ID param
 app.get('/admin/account/delete/:id', (request, response) => isAdmin(request, settings => {
-	// GET request ID exists, delete account
-	if (request.params.id) {
+    // GET request ID exists, delete account
+    if (request.params.id) {
 		connection.query('DELETE FROM accounts WHERE id = ?', [request.params.id]);
 		response.redirect('/admin/accounts/msg3/n0/n0/n0/n0/ASC/id/1');
 	}
@@ -1048,7 +1042,7 @@ app.get('/admin/roles', (request, response) => isAdmin(request, settings => {
 	// Roles list
 	let roles_list = ['Member', 'Admin'];
 	// Select and group roles from the accounts table
-	connection.query('SELECT role, COUNT(*) as total FROM accounts GROUP BY role; SELECT role, COUNT(*) as total FROM accounts WHERE last_seen > date_sub(now(), interval 1 month) GROUP BY role; SELECT role, COUNT(*) as total FROM accounts WHERE last_seen < date_sub(now(), interval 1 month) GROUP BY role', (error, roles) => {
+    connection.query('SELECT role, COUNT(*) as total FROM accounts GROUP BY role; SELECT role, COUNT(*) as total FROM accounts WHERE last_seen > date_sub(now(), interval 1 month) GROUP BY role; SELECT role, COUNT(*) as total FROM accounts WHERE last_seen < date_sub(now(), interval 1 month) GROUP BY role', (error, roles) => {
 		// Roles array
 		new_roles = {};
 		// Update the structure
@@ -1161,12 +1155,11 @@ app.get('/admin/myaccount', (request, response) => isAdmin(request, settings => 
 // http://localhost:3000/admin/about - View about page
 app.get('/admin/about', (request, response) => isAdmin(request, settings => {
 	// Render about template
-	response.render('admin/about.html', { selected: 'about' });
+   	response.render('admin/about.html', { selected: 'about' });
 }, () => {
 	// Redirect to login page
 	response.redirect('/');
 }));
-
 // Function that checks whether the user is logged-in or not
 const isLoggedin = (request, callback, callback2) => {
 	// Check if the loggedin param exists in session
@@ -1605,12 +1598,12 @@ io.on('connection', socket => {
 
 		// socket.emit("Scores", room, roomScores[room]);
 
-		connection.query("UPDATE accounts SET xp = ? WHERE username = ?", [xp, username], (error, updateResults) => {
+		connection.query("UPDATE userstats SET xp = ? WHERE username = ?", [xp, username], (error, updateResults) => {
 			if (error) throw error;
 			// console.log("Set " + username + " xp to: " + xp);
 			// console.log("results of XP update: ", updateResults);
 		});
-		connection.query("UPDATE accounts SET coins = ? WHERE username = ?", [coins, username], (error, updateResults) => {
+		connection.query("UPDATE userstats SET coins = ? WHERE username = ?", [coins, username], (error, updateResults) => {
 			if (error) throw error;
 			// console.log("Set " + username + " coin to: " + coins);
 			// console.log("results of XP update: ", updateResults);
@@ -1662,7 +1655,7 @@ app.post('/tip', (request, response) => isLoggedin(request, settings => {
 	var recieverOfCoins; var giverOfCoins; var giveCoins; var recieveCoins;
 	console.log("tip user => ", tippedUser);
 	console.log("current user => ", currentUser);
-	connection.query("SELECT * FROM accounts WHERE username = ?", [currentUser], (error, coinresults1) => {
+	connection.query("SELECT * FROM userstats WHERE username = ?", [currentUser], (error, coinresults1) => {
 		//giverOfCoins = Object.values(JSON.parse(JSON.stringify(coinresults1)));
 		giverOfCoins = coinresults1
 		giveCoins = (giverOfCoins[0]["coins"]) - 1;
@@ -1675,7 +1668,7 @@ app.post('/tip', (request, response) => isLoggedin(request, settings => {
 			giveCoins = giveCoins + amt;
 		}
 	} else {
-		connection.query("SELECT coins FROM accounts WHERE username = ?", [tippedUser], (error, coinresults2) => {
+		connection.query("SELECT coins FROM userstats WHERE username = ?", [tippedUser], (error, coinresults2) => {
 			recieverOfCoins = coinresults2;
 			// recieverOfCoins = Object.values(JSON.parse(JSON.stringify(coinresults2)));
 
@@ -1687,12 +1680,12 @@ app.post('/tip', (request, response) => isLoggedin(request, settings => {
 	setTimeout(doSumtin, 1000);
 
 	function doSumtin() {
-		connection.query("UPDATE accounts SET coins = ? WHERE username = ?", [giveCoins, currentUser], (error, results1) => {
+		connection.query("UPDATE userstats SET coins = ? WHERE username = ?", [giveCoins, currentUser], (error, results1) => {
 			if (error) throw error;
 			//console.log("result 1: ", results1.affectedRows);
 		});
 		if (tippedUser != "BOT") {
-			connection.query("UPDATE accounts SET coins = ? WHERE username = ?", [recieveCoins, tippedUser], (error, results2) => {
+			connection.query("UPDATE userstats SET coins = ? WHERE username = ?", [recieveCoins, tippedUser], (error, results2) => {
 				if (error) throw error;
 				//console.log("result 2: ", results2.affectedRows);
 			});
@@ -1710,7 +1703,7 @@ app.post('/follow', (request, response) => isLoggedin(request, settings => {
 	var action = request.body.action;
 	var userFriends; var otherUserFollowersList;
 
-	connection.query("SELECT friends FROM accounts WHERE username = ?", [currentUser], (error, friendresults) => {
+	connection.query("SELECT friends FROM userstats WHERE username = ?", [currentUser], (error, friendresults) => {
 		if (error) throw error;
 		console.log("userFriends Results: ", friendresults[0]["friends"]);
 		//userFriends = JSON.parse(JSON.stringify((friendresults1)));//friendresults1;
@@ -1722,7 +1715,7 @@ app.post('/follow', (request, response) => isLoggedin(request, settings => {
 		// userFriends = JSON.parse(friendresults[0].friends);
 		console.log("userFriends: ", userFriends);
 
-		connection.query("SELECT follower FROM accounts WHERE username = ?", [userToBeFollowed], (error, followedUser) => {
+		connection.query("SELECT follower FROM userstats WHERE username = ?", [userToBeFollowed], (error, followedUser) => {
 			if (error) throw error;
 			console.log("Follower Results: ", followedUser[0]["followers"]);
 			//userFriends = JSON.parse(JSON.stringify((friendresults1)));//friendresults1;
@@ -1758,11 +1751,11 @@ app.post('/follow', (request, response) => isLoggedin(request, settings => {
 				otherUserFollowersList = otherUserFollowersList.filter(removeFollower)
 				userFriends = userFriends.filter(removeFriend); // remove a user is added
 			}
-			connection.query("UPDATE accounts SET friends = ? WHERE username = ?", [JSON.stringify(userFriends), currentUser], (error, results2, fields) => {
+			connection.query("UPDATE userstats SET friends = ? WHERE username = ?", [JSON.stringify(userFriends), currentUser], (error, results2, fields) => {
 				if (error) throw error;
 				//console.log("Current User Friends: ", results2);
 			});
-			connection.query("UPDATE accounts SET followers = ? WHERE username = ?", [JSON.stringify(userFriends), userToBeFollowed], (error, results2, fields) => {
+			connection.query("UPDATE userstats SET followers = ? WHERE username = ?", [JSON.stringify(userFriends), userToBeFollowed], (error, results2, fields) => {
 				if (error) throw error;
 				//console.log("Current User Friends: ", results2);
 			});
@@ -1778,7 +1771,7 @@ app.post('/block', (request, response) => isLoggedin(request, settings => {
 	var blockedUser = request.body.userToBlock;
 	var currentUser = request.body.currentUser;
 	var blockedUsers;
-	connection.query("SELECT blockedUsers FROM accounts WHERE username = ?", [currentUser], (error, blockedUsersresults) => {
+	connection.query("SELECT blockedUsers FROM userstats WHERE username = ?", [currentUser], (error, blockedUsersresults) => {
 		if (error) throw error;
 		console.log("userFriends Results: ", blockedUsersresults[0]["blockedUsers"]);
 		//userFriends = JSON.parse(JSON.stringify((friendresults1)));//friendresults1;
@@ -1802,7 +1795,7 @@ app.post('/block', (request, response) => isLoggedin(request, settings => {
 				blockedUsers = blockedUsers.filter((item, index) => index == blockedUsers.indexOf(item));
 				console.log("Adding ", blockedUser, " to blocked list");
 			}
-			connection.query("UPDATE accounts SET blockedUsers = ? WHERE username = ?", [JSON.stringify(blockedUsers), currentUser], (error, results2, fields) => {
+			connection.query("UPDATE userstats SET blockedUsers = ? WHERE username = ?", [JSON.stringify(blockedUsers), currentUser], (error, results2, fields) => {
 				if (error) throw error;
 				//console.log("Current User Friends: ", results2);
 			});
@@ -1811,7 +1804,7 @@ app.post('/block', (request, response) => isLoggedin(request, settings => {
 		}
 		console.log("Done Block Opperation");
 	};
-	// connection.query("UPDATE accounts SET blockedUsers = ? WHERE username = ?", [blockedUser, currentUser], (error, results2, fields) => {
+	// connection.query("UPDATE userstats SET blockedUsers = ? WHERE username = ?", [blockedUser, currentUser], (error, results2, fields) => {
 	// 	if (error) throw error;
 	// 	//console.log("Current User Friends: ", results2);
 	// });
