@@ -63,11 +63,11 @@ const secret_key = 'your secret key';
 // });
 var connection = mysql2.createConnection({
 	// host: '34.136.59.230:3306',
-	host: 'remotemysql.com',
+	host: '72.14.183.70',
 	port: 3306,
-	user: 'tnlcK70z3M',
-	password: 'ltHsANPgZX',//,password: 'root',
-	database: 'tnlcK70z3M',
+	user: 'remoteiota',
+	password: 'Password!*',//,password: 'root',
+	database: 'nodelogin',
 	multipleStatements: true,
 	bigNumberStrings: true,
 });
@@ -326,7 +326,7 @@ app.post('/register', (request, response) => init(request, settings => {
 			} else {
 				// Insert account
 				connection.query('INSERT INTO accounts (username, password, email, activation_code, role, ip) VALUES (?, ?, ?, "activated", ?, ?)', [username, hashedPassword, email, role, ip], (error, result) => {
-					connection.query('INSERT INTO userstats (username, role) VALUES (?, ?)', [username, role], (error, results) => {
+					connection.query('INSERT INTO userstats (username, role, coins, xp, friends, roomConfig, blockedUsers, followers) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [username, role, 100, 10, "[]", "{}", "[]", "[]" ], (error, results) => {
 						console.log("UserStat results: ", results);
 						console.log("UserStat errors: ", error);
 					})
