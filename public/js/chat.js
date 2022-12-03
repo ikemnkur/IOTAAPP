@@ -1,3 +1,7 @@
+// const { delay } = require("bluebird");
+async function delay(time) {
+  return new Promise(resolve => setTimeout(resolve, time));
+}
 
 const portnum = 3000;
 
@@ -33,15 +37,15 @@ try {
 } catch (error) {
   var friendsList = userJSON[0].friends.split(",");
 }
-try{
+try {
   var blocked = userJSON[0].blockedUsers;
-} catch(error){
+} catch (error) {
   // const blocked = userJSON[0].blockedUsers;
 }
 
 var activeUsers;
 
-var colors = ["green", "cyan", "pink", "gold", "agua", "red", "thistle", "lightcyan", "salmon", "crismon", "springgreen", "sykblue", "seagreen", "greenyellow", "fuschia", "lavender", "magenta"]
+var colors = ["green", "cyan", "pink", "gold", "agua", "red", "thistle", "lightcyan", "salmon", "crismon", "springgreen", "sykblue", "yellowgreen", "greenyellow", "fuschia", "lavender", "magenta"]
 var focusedStyle = "background: radial-gradient(#ac1b1b, transparent);"
 const socket = io({
   transports: ["websocket"], pingInterval: 1000 * 60 * 5,
@@ -80,11 +84,23 @@ socket.on("vote", (msg_ID, vote, msg_username) => {
       if (msg_username == username)
         xp += 2;
     }
+    if (vote == "unlike") {
+      var upvotes = document.getElementById(msg_ID).querySelector('#like');
+      upvotes.innerText = parseInt(upvotes.innerText) - 1;
+      if (msg_username == username)
+        xp -= 2;
+    }
     if (vote == "hate") {
       var downvotes = document.getElementById(msg_ID).querySelector('#hate');
       downvotes.innerText = parseInt(downvotes.innerText) + 1;
       if (msg_username == username)
         xp -= 1;
+    }
+    if (vote == "unhate") {
+      var downvotes = document.getElementById(msg_ID).querySelector('#hate');
+      downvotes.innerText = parseInt(downvotes.innerText) - 1;
+      if (msg_username == username)
+        xp += 1;
     }
   }
 });
@@ -108,7 +124,8 @@ socket.on("messageTo", (message, toUser) => {
   // console.log(`Socket IO Message to: ${toUser}`, message);
   message.username = "BOT";
   if (toUser == username)
-    outputMessage(message, null);
+    createMessage(message, null)
+  // outputMessage(message, null);
 
   // Scroll down
   chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -118,11 +135,13 @@ socket.on("messageTo", (message, toUser) => {
 socket.on("message", (message, replyTo) => {
   // console.log("Socket IO Message: ", message);
 
-  if (blocked.indexOf(message.username) < 0)
-    outputMessage(message, replyTo);
-  else {
+  if (blocked.indexOf(message.username) < 0) {
+    createMessage(message, replyTo);
+    // outputMessage(message, replyTo);
+  } else {
     message.msgText = "BLOCKED";
-    outputMessage(message, replyTo);
+    createMessage(message, replyTo);
+    // outputMessage(message, replyTo);
   }
 
   // Scroll down
@@ -150,7 +169,7 @@ function msgSubmit(e, replyTo) {
   if (replyTo == null)
     socket.emit("chatMessage", msg + "ßΓ" + nickname + "ßΓ" + team + "ßΓ" + xp, null);
   else
-    socket.emit("replyMessage", "REPLY: (" + replyTo + ") " + msg + "ßΓ" + nickname + "ßΓ" + team + "ßΓ" + xp, replyTo);
+    socket.emit("replyMessage", "REPLY: [" + replyTo + "] " + msg + "ßΓ" + nickname + "ßΓ" + team + "ßΓ" + xp, replyTo);
 
   // Clear input
   e.target.elements.msg.value = "";
@@ -158,9 +177,329 @@ function msgSubmit(e, replyTo) {
 }
 
 // Message submit
-// chatForm.addEventListener("submit", (e) => {
-//   msgSubmit(e);
-// });
+chatForm.addEventListener("submit", (e) => {
+  msgSubmit(e);
+});
+
+function randomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min) + min);
+}
+
+function createMessage(message, replyTo) {
+
+  //check for secret mode
+  var uname //= document.createElement("strong");
+  if (message.nckName == '')
+    uname = message.username;
+  else if (message.secretMode == 'on') {
+    uname = message.nckName; // output nickname
+  } else {
+    // output username and nickname
+    uname = + message.username + " AKA " + message.nckName;
+  }
+
+  if (message.username == "BOT") {
+    uname = "CHATBOT"
+  }
+
+  var msgBlockPrototype = document.getElementById("msgFormat");
+  var msgBlock = msgBlockPrototype.cloneNode(true);
+  msgBlock.id = message.username + "-" + message.time;
+  msgBlock.hidden = false;
+
+  if (replyTo != null) {
+    let replyTag = msgBlock.querySelector('#replyTag');
+    replyTag.innerText = replyTo;
+    replyTag.hidden = false;
+  }
+
+  let messageText = msgBlock.querySelector('#msgText');
+  messageText.innerText = message.msgText;
+
+  let timeTag = msgBlock.querySelector('#timeTag');
+  timeTag.innerText = message.time;
+
+  let usernameTag = msgBlock.querySelector('#userTag');
+  let userstats = msgBlock.querySelector('#userStats');
+  let teamStat = msgBlock.querySelector('#teamStat');
+  let xpStat = msgBlock.querySelector('#xpStat');
+  usernameTag.innerText = uname;
+  xpStat.innerText = "XP: " + message.xp;
+  teamStat.innerText = "Team: " + message.team;
+  usernameTag.addEventListener("mouseover", () => {
+    userstats.hidden = false;
+  })
+
+  usernameTag.addEventListener("mouseleave", () => {
+    userstats.hidden = true;
+  })
+
+  teams.forEach((item, index) => {
+    if (message.team == team) {
+      // let num = randomNumber(0, colors.length)
+      // console.log(item, " len:", item.length)
+      let col = colors[(colors.length - index+1) % colors.length];
+      msgBlock.style = `background: ${col};`
+    } else if (message.team == item) {
+      let col = colors[(index + item.length) % colors.length];
+      msgBlock.style = `background: ${col};`
+    }
+  })
+
+  let likeBtn = msgBlock.querySelector('#likeBtn');
+  let likeIcon = msgBlock.querySelector('#likeIcon');
+  let numOfLikes = msgBlock.querySelector('#like');
+  likeBtn.addEventListener("click", () => {
+    if (username != message.username)
+      if (likeIcon.style.color != "green") {
+        likeIcon.style.color = "green";
+        // message.xp += 2;
+        // numOfLikes.innerText = parseInt(numOfLikes.innerText) + 1;
+        console.log(`${username} liked ${message.username}'s comment`);
+        socket.emit("chatVote", message.username, msgBlock.id, 'like');
+      } else {
+        likeIcon.style.color = "gray";
+        // message.xp -= 2;
+        // numOfLikes.innerText = parseInt(numOfLikes.innerText) - 1;
+        console.log(`${username} unliked ${message.username}'s comment`);
+        socket.emit("chatVote", message.username, msgBlock.id, 'unlike');
+      }
+    delay(250);
+  })
+
+  let hateBtn = msgBlock.querySelector('#hateBtn');
+  let hateIcon = msgBlock.querySelector('#hateIcon');
+  let numOfHates = msgBlock.querySelector('#hate');
+  hateBtn.addEventListener("click", () => {
+    if (username != message.username)
+      if (hateIcon.style.color != "red") {
+        hateIcon.style.color = "red";
+        // message.xp -= 1;
+        // numOfHates.innerText = parseInt(numOfHates.innerText) + 1;
+        console.log(`${username} hated ${message.username}'s comment`);
+        socket.emit("chatVote", message.username, msgBlock.id, 'hate');
+      } else {
+        hateIcon.style.color = "gray";
+        // message.xp += 1;
+        // numOfHates.innerText = parseInt(numOfHates.innerText) - 1;
+        console.log(`${username} unhated ${message.username}'s comment`);
+        socket.emit("chatVote", message.username, msgBlock.id, 'unhate');
+      }
+    delay(250);
+  })
+
+  let hideBtn = msgBlock.querySelector('#hideBtn');
+  let extraBtns = msgBlock.querySelector('#extraBtns');
+  let hideIcon = msgBlock.querySelector('#hideIcon');
+  hideBtn.addEventListener("click", () => {
+    if (extraBtns.hidden == false) {
+      extraBtns.hidden = true;
+    } else {
+      extraBtns.hidden = false;
+    }
+  })
+  hideBtn.addEventListener("mouseleave", (event) => {
+    hideIcon.style = "font-size:16px; color:rgb(145, 240, 255);"
+  });
+  hideBtn.addEventListener("mouseover", function () {
+    hideIcon.style = "font-size:16px; color:rgb(145, 210, 255);"
+  });
+
+  let videoBtn = msgBlock.querySelector('#videoBtn');
+  let videoIcon = msgBlock.querySelector('#videoIcon');
+  //add the video chat button
+  if ((username != message.username & message.username != "BOT")) {
+
+    videoIcon.addEventListener("mouseover", () => {
+      videoIcon.style.color = "blue";
+    })
+    videoIcon.addEventListener("mouseleave", () => {
+      videoIcon.style.color = "black";
+    })
+    videoBtn.addEventListener("click", () => {
+      if (username != message.username & message.username != "BOT") {
+        videoCallUser(message.username);
+        console.log("joining user live");
+      }
+    })
+  } else { videoBtn.hidden = true; }
+
+  let coinBtn = msgBlock.querySelector('#coinBtn');
+  //Tip in chat Button
+  if (username != message.username) {
+    let coin = msgBlock.querySelector('#coinIcon');
+
+    coinBtn.addEventListener("mouseleave", (event) => {
+      coin.style = "font-size:16px; color:silver;"
+    });
+    coinBtn.addEventListener("mouseover", function () {
+      coin.style = "font-size:16px; color:gold;"
+    });
+    coinBtn.addEventListener("click", function () {
+      if (username != message.username) {
+        tipUsers(username, message.username, 1);
+        // console.log(`${username} Tipped ${message.username}`);
+        socket.emit("chatMessageTo", `$$$ ${username} Tipped ${message.username} $$$`, message.username);
+        setTimeout(() => {
+          coin.style = "font-size:16px; color:gold;";
+        }, 1000)
+      }
+    });
+  }
+
+  let friendBtn = msgBlock.querySelector('#addFriendBtn');
+  let friendIcon = msgBlock.querySelector('#addFriendIcon');
+  //Follow in chat Button
+  if (username != message.username & message.username != "BOT") {
+    //add friend
+    if (friendsList.length > 0) {
+      for (const [index, val] of friendsList.entries()) {
+        // friendsList.forEach((item, indx) => {
+        if (message.username == val) {
+          friendIcon.className = "fas fa-check";
+          usernameTag.style.color = yellowgreen;
+          //console.log(val, " is followed");
+          break;
+        } else {
+          friendIcon.className = "fas fa-plus-square";
+          //console.log(val, " is not followed");
+        }
+      }
+    } else {
+      friendIcon.className = "fas fa-plus-square";
+    }
+
+    // friendIcon.style = "font-size:16px;color:green;padding-right: 5px;";
+    // friendIcon.name = "friend";
+    // friendBtn.appendChild(friendIcon);
+    // commentTbl.appendChild(friendBtn);
+
+    friendBtn.addEventListener("click", function () {
+      if (username != message.username & friendIcon.className == "fas fa-plus-square") {
+        addFriend(username, message.username, "add");
+        console.log(`${username} followed ${message.username}`);
+        socket.emit("chatMessageTo", `${username} started following ${message.username}`, message.username);
+      }
+    });
+
+  }
+
+
+  let blockBtn = msgBlock.querySelector('#blockBtn');
+  let blockIcon = msgBlock.querySelector('#blockIcon');
+  //Block in chat Button
+  if (username != message.username & message.username != "BOT") {
+    //block
+    blockedList.forEach((item, index) => {
+      if (message.username == item) {
+        blockIcon.style = "font-size:16px; color:grey;";
+      }
+    })
+
+    blockBtn.addEventListener("click", function () {
+      if (username != message.username) {
+        addFriend(username, message.username, "remove");
+        console.log(`${username} blocked ${message.username}`);
+        socket.emit("chatMessageTo", `${username} has blocked you, try to be less annoying.`, message.username);
+      }
+    });
+  }
+
+
+  let trashBtn = msgBlock.querySelector('#trashBtn');
+  let trashIcon = msgBlock.querySelector('#trashIcon');
+  //deleteIcon chatbox Button
+  if (1) {
+    //deleteIcon
+    trashBtn.addEventListener("click", function () {
+      msgBlock.remove();
+    });
+    trashBtn.addEventListener("mouseleave", function () {
+      trashIcon.style = "font-size:16px;color:blue;";
+    });
+    trashBtn.addEventListener("mouseover", function () {
+      trashIcon.style = "font-size:16px;color:red;";
+    });
+  }
+
+
+
+  // handles replying to messages
+  if (1) {
+    var reply = { action: false, target: "" }
+    var throttle = false;
+
+    var inputMsg = document.getElementById("msg");
+    var submitBtn = document.getElementById("submitBtn");
+    var cancelBtn = document.getElementById("cancelBtn");
+    inputMsg.addEventListener("keydown", () => {
+      if (inputMsg.value != "") {
+        cancelBtn.style = "display: block";
+      } else {
+        cancelBtn.style = "display: none";
+      }
+    })
+
+    cancelBtn.addEventListener("click", () => {
+      cancelBtn.style = "display: none";
+      inputMsg.value = ''; reply.action = false;
+    })
+
+    submitBtn.addEventListener("click", () => {
+      cancelBtn.style = "display: none";
+    })
+
+    chatForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      inputMsg.placeholder = "Enter Message...";
+      if (reply.action == true)
+        replySubmit(e, reply.target);
+      else
+        msgSubmit(e, null);
+      reply.action = false;
+    });
+
+    var cancelBtn = document.getElementById("cancelBtn");
+
+    msgBlock.addEventListener('click', function (evt) {
+      // var o = this,
+      // ot = this.textContent;
+      if (!throttle && evt.detail === 3) {
+        // this.textContent = 'Triple-clicked!';
+
+        cancelBtn.style = "display: block";
+        inputMsg.placeholder = "Replying to " + message.username + " AKA " + message.nickname;
+        reply.action = true;
+        reply.target = message.username;
+        throttle = true;
+        setTimeout(function () {
+          // o.textContent = ot;    
+          throttle = false;
+        }, 1000);
+      }
+    });
+  }
+
+  var chatbox = document.getElementById("chatBox")
+  chatbox.append(msgBlock);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Output message to DOM
 function outputMessage(message, replyTo) {
@@ -196,6 +535,23 @@ function outputMessage(message, replyTo) {
     // header.innerHTML += `<i class="fas fa-reply"></i>`;
   }
 
+  const commentTbl = document.createElement("div");
+  commentTbl.className = "chat-commentTbl";
+  commentTbl.show = false;
+
+  //HANDLE Show Buttons
+  var showBtnIcon = document.createElement("i");
+  showBtnIcon.className = "fas fa-sliders";
+  showBtnIcon.addEventListener("click", () => {
+    var cancelBtn = document.getElementById("cancelBtn");
+    cancelBtn.style = "display: block";
+    inputMsg.placeholder = "Replying to " + message.username + " AKA " + message.nickname;
+    reply.action = true;
+    reply.target = message.username;
+    throttle = true;
+  })
+
+
   //HANDLE REPLY
   var replyIcon = document.createElement("i");
   replyIcon.className = "fas fa-reply";
@@ -227,11 +583,9 @@ function outputMessage(message, replyTo) {
   paratext.innerText = message.msgText; //output the message text
   para.appendChild(paratext);
 
-  const commentTbl = document.createElement("div");
-  commentTbl.className = "chat-commentTbl";
 
   //add the video chat button
-  if ( (username != message.username & message.username != "BOT") ) {
+  if ((username != message.username & message.username != "BOT")) {
     const cmtJoinUserLive = document.createElement("div")
     const cmtJoinUserLiveIcon = document.createElement("i")
     cmtJoinUserLiveIcon.className = "fas fa-video";
@@ -310,7 +664,7 @@ function outputMessage(message, replyTo) {
     coinBtn.appendChild(coin);
     commentTbl.appendChild(coinBtn);
 
-    coinBtn.addEventListener("mouseleave", function () {
+    coinBtn.addEventListener("mouseleave", (event) => {
       coin.style = "font-size:16px; color:silver;"
     });
     coinBtn.addEventListener("mouseover", function () {
@@ -324,6 +678,8 @@ function outputMessage(message, replyTo) {
 
       }
     });
+
+
   }
 
   //Follow in chat Button
@@ -433,6 +789,7 @@ function outputMessage(message, replyTo) {
     })
 
     chatForm.addEventListener("submit", (e) => {
+      e.preventDefault();
       inputMsg.placeholder = "Enter Message...";
       if (reply.action == true)
         replySubmit(e, reply.target);
@@ -441,6 +798,8 @@ function outputMessage(message, replyTo) {
       reply.action = false;
     });
 
+
+    // div.parentElement.style = "background: auga;";
 
     div.addEventListener('click', function (evt) {
       // var o = this,
@@ -511,7 +870,7 @@ function teamsDisplay() {
     btn.addEventListener("click", () => {
       team = item;
       tipUsers(username, "BOT", roomJSON[0]["joinCost"]);
-      socket.emit("user joined room", room , username, item, 30, room, "FFF", teams); //item = team
+      socket.emit("user joined room", room, username, item, 30, room, "FFF", teams); //item = team
       // socket.emit("setStreamJoinConfig", username, item, 30, room, "FFF", teams); //item = team
     })
 

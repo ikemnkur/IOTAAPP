@@ -17,11 +17,11 @@
         </div>
 
         <div class="profile-detail">
-            <strong>XP: </strong>{{ account.xp }}
+            <strong>XP: </strong>{{ stats.xp }}
         </div>
-        
+
         <div class="profile-detail">
-            <strong>Coins: </strong>{{ account.coins }}
+            <strong>Coins: </strong>{{ stats.coins }}
         </div>
 
         <div class="profile-detail">
@@ -41,28 +41,85 @@
 
         <div class="profile-detail">
             <strong>Room Creation Config</strong>
-            <table>
-                <tr>
-                    Work In Progress
-                </tr>
+            <!-- HTML classCode: Place this code in the document's body (between the 'body' tags) where the table should appear -->
+            <table id="roomCfgTable">
+                <thead>
+                    <tr>
+                        <th>Room Config#</th>
+                        <th>Topic</th>
+                        <th>RoomID</th>
+                        <th>Number of Users</th>
+                        <th>Watch Cost</th>
+                        <th>Join Cost</th>
+                        <th>Create Room</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="rmCfg">
+                        <td id="rmCfgTb1">EMPTY</td>
+                        <td id="rmCfgTb2"></td>
+                        <td id="rmCfgTb3"></td>
+                        <td id="rmCfgTb4"></td>
+                        <td id="rmCfgTb5"></td>
+                        <td id="rmCfgTb6"></td>
+                        <td id="rmCfgTb7"></td>
+                    </tr>
+                </tbody>
             </table>
-            <p hidden id="data">{{ account.roomConfig }}</p>
+            <!-- Codes by Quackit.com -->
+            <p hidden id="roomCfgTblData">{{ stats.roomConfig }}</p>
         </div>
 
         <div class="profile-detail">
             <strong>Friends</strong>
-            <table id="friendTbl" >
+            <table id="friendTbl">
 
             </table>
-            <p hidden id="friendTblData">{{ account.friends }}</p>
+            <p hidden id="friendTblData">{{ stats.friends }}</p>
         </div>
+        <div class="profile-detail">
+            <strong>Blocked Users</strong>
+            <table id="blockedTbl">
 
+            </table>
+            <p hidden id="blockedTblData">{{ stats.blockedUsers }}</p>
+        </div>
         <a class="profile-btn" href="/edit_profile">Edit Details</a>
 
-        
+
     </div>
 
 </div>
+
+
+<!-- CSS Code: Place this code in the document's head (between the 'head' tags) -->
+<style>
+    table.GeneratedTable {
+        width: 100%;
+        background-color: #ffffff;
+        border-collapse: collapse;
+        border-width: 2px;
+        border-color: #625770;
+        border-style: solid;
+        color: #000000;
+    }
+
+    table.GeneratedTable td,
+    table.GeneratedTable th {
+        border-width: 2px;
+        border-color: #625770;
+        border-style: solid;
+        padding: 3px;
+    }
+
+    table.GeneratedTable thead {
+        background-color: #4c79a9;
+    }
+</style>
+
+
+
+
 
 <script src="js/profile.js"></script>
 {% endblock %}

@@ -726,11 +726,11 @@ function Circle(canvas) {
     var context = canvas.getContext('2d');
     var centerX = canvas.xcursor;
     var centerY = canvas.ycursor;
-    var radius = 5 + posX / 4;
+    var radius = 5 + posX / 8;
 
     context.beginPath();
     context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-    // context.fillStyle = 'white';
+    context.fillStyle = 'white';
     context.lineWidth = 2;
     context.strokeStyle = `#${step * 5 + 10}${99 - step * 4}${50 + step * 2}`;
     context.stroke();

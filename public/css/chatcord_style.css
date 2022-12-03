@@ -51,6 +51,7 @@ a {
 
 .chat-commentTbl div{
 	padding: 3px; 
+	margin: auto;
 	/* float:right; */
 	/* align-self: center; */
 }

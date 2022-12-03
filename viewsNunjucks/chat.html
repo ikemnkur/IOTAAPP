@@ -1,5 +1,26 @@
 <!-- CHAT BOX -->
 
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="css/chatcord_style.css" />
+    <link rel="stylesheet" href="css/videoapp.css" />
+    <link rel="stylesheet" href="css/modal.css" />
+    <link rel="stylesheet" href="css/joinpopup.css">
+    <!-- <link rel="stylesheet" href="style.css"> -->
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.css" rel="stylesheet"
+        media="all">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js">
+    </script>
+    <script></script>
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+    <script src="/socket.io/socket.io.js" defer></script>
+
+    <title>{{roomObj.topic}}</title>
+</head>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.css" rel="stylesheet" media="all">
 <div>
@@ -20,7 +41,7 @@
                 <h3><i class="fas fa-smile"></i> User Lobby</h3>
                 <h2>
                     <table id="userTableObj">
-                        
+
                         <thead>
                             <tr>
                                 <th>Name&nbsp;</th>
@@ -37,7 +58,64 @@
 
                 <!-- DivTable.com -->
             </div>
-            <div class="chat-messages"></div>
+            <div id="chatBox" class="chat-messages">
+                <div id="msgFormat" class="message" hidden>
+
+                    <div class="meta" style="padding: 3px; color: rgb(15, 15, 15)">
+                        <div id="userTag"
+                            style="font-size: 12px; background: rgb(233, 233, 233); float: left; padding: 3px; border-radius: 3px;">
+                            • user6
+                        </div>
+                        <i class="fas fa-clock"></i> <span id="timeTag" style="font-size: 12px; margin: auto;"> 6:43:31
+                            pm </span>
+                        <span id="userStats" hidden style="float: left; padding: 3px;">
+                            <span id="teamStat" style="color: black; font-size: 12px; padding: 3px;"> Team: IOS</span>
+                            <span id="xpStat" style="color: blue; font-size: 12px"> XP: 10 </span>
+                        </span>
+
+                        <div class="chat-commentTbl">
+                            <div id="videoBtn"><i id="videoIcon" class="fas fa-video"></i></div>
+                            <span style="display: flex; color: grey;">
+                                <div id="like" style="align-self: center;">0</div>
+                                <div id="likeBtn">
+                                    <i id="likeIcon" class="fas fa-thumbs-up"
+                                        style="color: grey; padding-bottom: 3px;"></i>
+                                </div>
+                                <div id="hate" style="align-self: center;">0</div>
+                                <div id="hateBtn">
+                                    <i id="hateIcon" class="fas fa-thumbs-down"
+                                        style="color: grey; padding-top: 3px;"></i>
+                                </div>
+                            </span>
+                            <div id="hideBtn">
+                                <i id="hideIcon" class="fas fa-sliders"
+                                    style="font-size: 16px; color: rgb(143, 229, 255);"></i>
+                            </div>
+                            <span id="extraBtns" hidden>
+                                <span id="coinBtn"><i id="coinIcon" class="fas fa-coins"
+                                        style="font-size: 16px; margin: 0px 0px 0px 5px; color: silver;"></i>
+                                </span>
+                                <span id="addFriendBtn"><i id="addFriendIcon" class="fas fa-plus-square"
+                                        style="font-size: 16px; margin: 0px 0px 0px 5px; color: green;"></i></span>
+                                <span id="blockBtn"><i id="blockIcon" class="fas fa-ban"
+                                        style="font-size: 16px; margin: 0px 0px 0px 5px; color: red;"></i></span>
+                                <span id="trashBtn"><i id="trashIcon" class="fas fa-trash"
+                                        style="font-size: 16px; margin: 0px 0px 0px 5px; color: blue;"></i>
+                                </span>
+
+                            </span>
+                        </div>
+
+                        <div>
+                            <text id="msgText"
+                                style="display:block; margin: 5px 0px 0px 0px; font-size: 12px; color: black; "> 
+                                <i id="replyBtn" class="fas fa-reply" style="font-size: 16px; color: blue;"></i>
+                                <text id="replyTag" hidden style="font-size: 12px; background: rgb(233, 233, 233); float: left; padding: 3px; border-radius: 3px;"></text>
+                                ddgg</text>
+                        </div>
+
+                    </div>
+                </div>
         </main>
         <div class="chat-form-container">
             <form id="chat-form">
@@ -74,7 +152,7 @@
         background-color: #fff;
     }
 
-    #userTableObj{
+    #userTableObj {
         margin: auto;
     }
 

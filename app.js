@@ -52,45 +52,45 @@ var activeRooms = [];
 // Unique secret key
 const secret_key = 'your secret key';
 // Update the below details with your own MySQL connection details
-// var connection = mysql.createConnection({
-// 	host: 'localhost',
-// 	port: 3306,
-// 	user: 'root',
-// 	password: '',//,password: 'root',
-// 	database: 'iotalogin',
-// 	// multipleStatements: true,
-// 	// bigNumberStrings: true,
-// });
-var connection = mysql2.createConnection({
-	// host: '34.136.59.230:3306',
-	host: '72.14.183.70',
-	port: 3306,
-	user: 'remoteiota',
-	password: 'Password!*',//,password: 'root',
+var connection = mysql.createConnection({
+	host: 'localhost',
+	// port: 3306,
+	user: 'root',
+	password: '',//,password: 'root',
 	database: 'nodelogin',
 	multipleStatements: true,
 	bigNumberStrings: true,
 });
-var connection2 = mysql2.createConnection({
-	// host: '34.136.59.230:3306',
-	host: 'remotemysql.com',
-	port: 3306,
-	user: 'tnlcK70z3M',
-	password: 'ltHsANPgZX',//,password: 'root',
-	database: 'tnlcK70z3M',
-	// multipleStatements: true,
-	// bigNumberStrings: true,
-});
-var connection3 = mysql.createConnection({
-	// host: '34.136.59.230:3306',
-	host: '139.144.34.246',
-	port: 3306,
-	user: 'remote_user',
-	password: 'Password!*',//,password: 'root',
-	database: 'IOTA',
-	// multipleStatements: true,
-	// bigNumberStrings: true,
-});
+// var connection = mysql2.createConnection({
+// 	// host: '34.136.59.230:3306',
+// 	host: '72.14.183.70',
+// 	port: 3306,
+// 	user: 'remoteiota',
+// 	password: 'Password!*',//,password: 'root',
+// 	database: 'nodelogin',
+// 	multipleStatements: true,
+// 	bigNumberStrings: true,
+// });
+// var connection2 = mysql2.createConnection({
+// 	// host: '34.136.59.230:3306',
+// 	host: 'remotemysql.com',
+// 	port: 3306,
+// 	user: 'tnlcK70z3M',
+// 	password: 'ltHsANPgZX',//,password: 'root',
+// 	database: 'tnlcK70z3M',
+// 	// multipleStatements: true,
+// 	// bigNumberStrings: true,
+// });
+// var connection3 = mysql.createConnection({
+// 	// host: '34.136.59.230:3306',
+// 	host: '139.144.34.246',
+// 	port: 3306,
+// 	user: 'remote_user',
+// 	password: 'Password!*',//,password: 'root',
+// 	database: 'IOTA',
+// 	// multipleStatements: true,
+// 	// bigNumberStrings: true,
+// });
 // Mail settings: Update the username and passowrd below to your email and pass, the current mail host is set to gmail, but you can change that if you want.
 const transporter = nodemailer.createTransport({
 	host: 'smtp.gmail.com',
@@ -168,6 +168,7 @@ app.post(['/', '/login'], (request, response) => init(request, settings => {
 		if (settings['csrf_protection'] == 'true' && token != request.session.token) {
 			// Incorrect token
 			response.send('Incorrect token provided!');
+			response.render('index.html', { token: null, msg: "Incorrect token provided!" });
 			return response.end();
 		}
 		// Select the account from the accounts table
@@ -214,16 +215,18 @@ app.post(['/', '/login'], (request, response) => init(request, settings => {
 				// Bruteforce
 				if (settings['brute_force_protection'] == 'true') loginAttempts(ip);
 				// Incorrect username/password
-				response.send('Incorrect Username and/or Password!');
-				return response.end();
+				// response.send('Incorrect Username and/or Password!');
+				response.render('index.html', { token: null, msg: "Incorrect Username and/or Password!" });
+				// return response.end();
 			}
 		});
 	} else {
 		// Bruteforce
 		if (settings['brute_force_protection'] == 'true') loginAttempts(ip);
 		// Incorrect username/password
-		response.send('Incorrect Username and/or Password!');
-		return response.end();
+		// response.send('Incorrect Username and/or Password!');
+		response.render('index.html', { token: null, msg: "Incorrect Username and/or Password!" });
+		// return response.end();
 	}
 }));
 
@@ -326,7 +329,7 @@ app.post('/register', (request, response) => init(request, settings => {
 			} else {
 				// Insert account
 				connection.query('INSERT INTO accounts (username, password, email, activation_code, role, ip) VALUES (?, ?, ?, "activated", ?, ?)', [username, hashedPassword, email, role, ip], (error, result) => {
-					connection.query('INSERT INTO userstats (username, role, coins, xp, friends, roomConfig, blockedUsers, followers) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [username, role, 100, 10, "[]", "{}", "[]", "[]" ], (error, results) => {
+					connection.query('INSERT INTO userstats (username, role, coins, xp, friends, roomConfig, blockedUsers, followers) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [username, role, 100, 10, "[]", "[]", "[]", "[]"], (error, results) => {
 						console.log("UserStat results: ", results);
 						console.log("UserStat errors: ", error);
 					})
@@ -383,6 +386,7 @@ app.get('/forgotpassword', (request, response) => {
 	// Render forgot password template and output message
 	response.render('forgotpassword.html');
 });
+
 // http://localhost:3000/forgotpassword - update account details
 app.post('/forgotpassword', (request, response) => init(request, settings => {
 	// Render activate template and output message
@@ -443,6 +447,7 @@ app.get('/resetpassword/:email/:code', (request, response) => {
 		response.end();
 	}
 });
+
 // http://localhost:3000/resetpassword - update password
 app.post('/resetpassword/:email/:code', (request, response) => {
 	// Make sure the params are specified
@@ -518,6 +523,7 @@ app.get('/twofactor', (request, response) => init(request, settings => {
 		response.redirect('/');
 	}
 }));
+
 // http://localhost:3000/twofactor - twofactor authentication
 app.post('/twofactor', (request, response) => {
 	// Check if the tfa session variables are declared
@@ -582,10 +588,13 @@ app.get(['/home'], (request, response) => isLoggedin(request, settings => {
 app.get('/profile', (request, response) => isLoggedin(request, settings => {
 	// Get all the users account details so we can populate them on the profile page
 	connection.query('SELECT * FROM accounts WHERE username = ?', [request.session.account_username], (error, accounts, fields) => {
-		// Format the registered date
-		accounts[0].registered = new Date(accounts[0].registered).toISOString().split('T')[0];
-		// Render profile page
-		response.render('profile.html', { account: accounts[0], role: request.session.account_role });
+		connection.query('SELECT * FROM userstats WHERE username = ?', [request.session.account_username], (error, stats, fields) => {
+			// Format the registered date
+			accounts[0].registered = new Date(accounts[0].registered).toISOString().split('T')[0];
+			// Render profile page
+			response.render('profile.html', { account: accounts[0], stat: stats,  role: request.session.account_role });
+		})
+
 	});
 }, () => {
 	// Redirect to login page
@@ -697,9 +706,9 @@ app.post('/edit_profile', (request, response) => isLoggedin(request, settings =>
 	}
 }));
 
-app.get(['/joinRoom'], (request, response) => {
+app.get(['/testchat'], (request, response) => {
 	console.log("rendering layout")
-	response.render('layout.html')
+	response.render('chat.html')
 });
 
 // http://localhost:3000/home - display the home page
@@ -724,19 +733,19 @@ app.post(['/createRoom'], (request, response) => isLoggedin(request, settings =>
 			let teams = room.teams.toString();
 			console.log("Teams:", teams)
 			let tags = room.tags.toString();
-			connection.query('INSERT INTO rooms (roomID, host, users, passcode, topic, teams, private, watchCost, joinCost, tags) VALUES (?,?,?,?,?,?,?,?,?,?)', 
-			  [room.roomID, room.host, users, room.passcode, room.topic, teams, room.private, room.watchCost, room.joinCost, tags], function (err, finalresult) {
-				if (err) throw err;
-				connection.query('UPDATE userstats SET roomConfig = ? WHERE username = ?', [JSON.stringify(room), room.host]);
-				console.log("fetched usersname: ", room.host);
-
-				connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, finalresult) {
+			connection.query('INSERT INTO rooms (roomID, host, users, passcode, topic, teams, private, watchCost, joinCost, tags) VALUES (?,?,?,?,?,?,?,?,?,?)',
+				[room.roomID, room.host, users, room.passcode, room.topic, teams, room.private, room.watchCost, room.joinCost, tags], function (err, finalresult) {
 					if (err) throw err;
-					newRoom = finalresult;
-					console.log("New room Info: ", newRoom);
-					response.render('modal.html', { roomObj: newRoom, roomOBJ: JSON.stringify(newRoom), userJSON: JSON.stringify(userStatsResult), userOBJ: userStatsResult });
+					connection.query('UPDATE userstats SET roomConfig = ? WHERE username = ?', [JSON.stringify(room), room.host]);
+					console.log("fetched usersname: ", room.host);
+
+					connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, finalresult) {
+						if (err) throw err;
+						newRoom = finalresult;
+						console.log("New room Info: ", newRoom);
+						response.render('modal.html', { roomObj: newRoom, roomOBJ: JSON.stringify(newRoom), userJSON: JSON.stringify(userStatsResult), userOBJ: userStatsResult });
+					});
 				});
-			});
 		})
 	}
 }, () => {
@@ -790,7 +799,7 @@ app.post(['/modal', '/modal:id'], (request, response) => isLoggedin(request, set
 			if (err) throw err;
 			userStats = JSON.stringify(userStatsResult);
 			console.log("user Info: ", userStats);
-			response.render('modal.html', { roomOBJ: JSON.stringify(finalresult), userJSON: JSON.stringify(userStatsResult)});
+			response.render('modal.html', { roomObj: finalresult, roomOBJ: JSON.stringify(finalresult), userOBJ: userStatsResult, userJSON: JSON.stringify(userStatsResult) });
 		})
 	})
 
@@ -819,7 +828,7 @@ app.post(['/room', '/room:id'], (request, response) => isLoggedin(request, setti
 
 	const id = request.params.id; //params = {id:"000000"} for joining or creating a room 
 	var room = request.query;
-	
+
 	let roomJSON = JSON.parse(request.body.roomObj);
 	let userJSON = JSON.parse(request.body.userObj);
 	let nickname = request.body.nickname;
@@ -894,7 +903,7 @@ app.get(['/admin/accounts', '/admin/accounts/:msg/:search/:status/:activation/:r
 	let activation = request.params.activation == 'n0' ? '' : request.params.activation;
 	let role = request.params.role == 'n0' ? '' : request.params.role;
 	let order = request.params.order == 'DESC' ? 'DESC' : 'ASC';
-	let order_by_whitelist = ['id','username','email','activation_code','role','registered','last_seen'];
+	let order_by_whitelist = ['id', 'username', 'email', 'activation_code', 'role', 'registered', 'last_seen'];
 	let order_by = order_by_whitelist.includes(request.params.order_by) ? request.params.order_by : 'id';
 	// Number of accounts to show on each pagination page
 	let results_per_page = 20;
@@ -940,7 +949,7 @@ app.get(['/admin/accounts', '/admin/accounts/:msg/:search/:status/:activation/:r
 			if (msg) {
 				if (msg == 'msg1') {
 					msg = 'Account created successfully!';
-				} else if (msg == 'msg2') { 
+				} else if (msg == 'msg2') {
 					msg = 'Account updated successfully!';
 				} else if (msg == 'msg3') {
 					msg = 'Account deleted successfully!';
@@ -958,23 +967,23 @@ app.get(['/admin/accounts', '/admin/accounts/:msg/:search/:status/:activation/:r
 // http://localhost:3000/admin/account - Admin edit/create account
 app.get(['/admin/account', '/admin/account/:id'], (request, response) => isAdmin(request, settings => {
 	// Default page (Create/Edit)
-    let page = request.params.id ? 'Edit' : 'Create';
+	let page = request.params.id ? 'Edit' : 'Create';
 	// Current date
 	let d = new Date();
-    // Default input account values
-    let account = {
-        'username': '',
-        'password': '',
-        'email': '',
-        'activation_code': '',
-        'rememberme': '',
-        'role': 'Member',
+	// Default input account values
+	let account = {
+		'username': '',
+		'password': '',
+		'email': '',
+		'activation_code': '',
+		'rememberme': '',
+		'role': 'Member',
 		'registered': (new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString()).slice(0, -1).split('.')[0],
 		'last_seen': (new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString()).slice(0, -1).split('.')[0]
-    };
-    let roles = ['Member', 'Admin'];
-    // GET request ID exists, edit account
-    if (request.params.id) {
+	};
+	let roles = ['Member', 'Admin'];
+	// GET request ID exists, edit account
+	if (request.params.id) {
 		connection.query('SELECT * FROM accounts WHERE id = ?', [request.params.id], (error, accounts) => {
 			account = accounts[0];
 			response.render('admin/account.html', { selected: 'accounts', selectedChild: 'manage', page: page, roles: roles, account: account });
@@ -989,11 +998,11 @@ app.get(['/admin/account', '/admin/account/:id'], (request, response) => isAdmin
 
 // http://localhost:3000/admin/account - Admin edit/create account
 app.post(['/admin/account', '/admin/account/:id'], (request, response) => isAdmin(request, settings => {
-    // GET request ID exists, edit account
-    if (request.params.id) {
-        // Edit an existing account
-        page = 'Edit'
-        // Retrieve account by ID with the GET request ID
+	// GET request ID exists, edit account
+	if (request.params.id) {
+		// Edit an existing account
+		page = 'Edit'
+		// Retrieve account by ID with the GET request ID
 		connection.query('SELECT * FROM accounts WHERE id = ?', [request.params.id], (error, accounts) => {
 			// If user submitted the form
 			if (request.body.submit) {
@@ -1027,8 +1036,8 @@ app.post(['/admin/account', '/admin/account/:id'], (request, response) => isAdmi
 
 // http://localhost:3000/admin/account/delete/:id - Delete account based on the ID param
 app.get('/admin/account/delete/:id', (request, response) => isAdmin(request, settings => {
-    // GET request ID exists, delete account
-    if (request.params.id) {
+	// GET request ID exists, delete account
+	if (request.params.id) {
 		connection.query('DELETE FROM accounts WHERE id = ?', [request.params.id]);
 		response.redirect('/admin/accounts/msg3/n0/n0/n0/n0/ASC/id/1');
 	}
@@ -1042,7 +1051,7 @@ app.get('/admin/roles', (request, response) => isAdmin(request, settings => {
 	// Roles list
 	let roles_list = ['Member', 'Admin'];
 	// Select and group roles from the accounts table
-    connection.query('SELECT role, COUNT(*) as total FROM accounts GROUP BY role; SELECT role, COUNT(*) as total FROM accounts WHERE last_seen > date_sub(now(), interval 1 month) GROUP BY role; SELECT role, COUNT(*) as total FROM accounts WHERE last_seen < date_sub(now(), interval 1 month) GROUP BY role', (error, roles) => {
+	connection.query('SELECT role, COUNT(*) as total FROM accounts GROUP BY role; SELECT role, COUNT(*) as total FROM accounts WHERE last_seen > date_sub(now(), interval 1 month) GROUP BY role; SELECT role, COUNT(*) as total FROM accounts WHERE last_seen < date_sub(now(), interval 1 month) GROUP BY role', (error, roles) => {
 		// Roles array
 		new_roles = {};
 		// Update the structure
@@ -1155,7 +1164,7 @@ app.get('/admin/myaccount', (request, response) => isAdmin(request, settings => 
 // http://localhost:3000/admin/about - View about page
 app.get('/admin/about', (request, response) => isAdmin(request, settings => {
 	// Render about template
-   	response.render('admin/about.html', { selected: 'about' });
+	response.render('admin/about.html', { selected: 'about' });
 }, () => {
 	// Redirect to login page
 	response.redirect('/');
@@ -1417,7 +1426,7 @@ io.on('connection', socket => {
 		console.log("Imgs to room:", roomId, "by user:", userId);
 		io.emit('drawImageToCanvas', imagesrc, targetCanvas, roomId, userId, imgSentToCanvas);
 	})
-	
+
 	socket.on("sendSoundToCanvas", (soundsrc, targetCanvas, roomId, userId, msg) => {
 		// var files = fs.readdirSync('./public/images/');
 		console.log("Sound to room:", roomId, "by user:", userId);
@@ -1734,14 +1743,14 @@ app.post('/follow', (request, response) => isLoggedin(request, settings => {
 
 	function doSumn() {
 		try {
-			if (action == "fa fa-plus-square") { // add user or remove
+			if (action == "add") { // add user or remove
 				// adds to array
 				userFriends.push(userToBeFollowed);
 				otherUserFollowersList.push(currentUser);
 				// filters out duplicates
 				userFriends = userFriends.filter((item, index) => index == userFriends.indexOf(item)); // add a user and remove duplicates
 				otherUserFollowersList = otherUserFollowersList.filter((item, index) => index == otherUserFollowersList.indexOf(item));
-			} else if (action == "fa fa-check") {
+			} else if (action == "remove") {
 				function removeFriend(user) {
 					return userToBeFollowed != user;
 				}
