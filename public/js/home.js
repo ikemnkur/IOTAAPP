@@ -14,15 +14,17 @@ function listRooms() {
     var cell4 = row.insertCell(3);
     var cell5 = row.insertCell(4);
     var cell6 = row.insertCell(5);
-    var cell7 = row.insertCell(6);
+    // var cell7 = row.insertCell(6);
     // Add some text to the header cells:
     cell1.innerHTML = "#";
     cell2.innerHTML = "Topic";
-    cell3.innerHTML = "RoomID";
-    cell4.innerHTML = "# of Users";
-    cell5.innerHTML = "Watch Cost";
-    cell6.innerHTML = "Join Cost";
-    cell7.innerHTML = "Join Room";
+    // cell3.innerHTML = "RoomID";
+    
+    cell3.innerHTML = "# of Users";
+    cell4.innerHTML = "Watch Cost";
+    cell5.innerHTML = "Join Cost"; 
+    cell6.innerHTML = "Join Room";
+    // cell7.innerHTML = "Join Room";
 
     const rooms = JSON.parse(roomListsText.innerText);
     console.log("Active Rooms: ", rooms);
@@ -95,7 +97,7 @@ function listRooms() {
         tableDivJoin.appendChild(tableDivFormBtn);// Append to join div:
         tableRow.appendChild(tableDivIndex);
         tableRow.appendChild(tableDivTopic);
-        tableRow.appendChild(tableDivRoomID);
+        // tableRow.appendChild(tableDivRoomID);
         tableRow.appendChild(tableDivUsernNum);
         tableRow.appendChild(tableDivWatchCost);
         tableRow.appendChild(tableDivJoinCost);

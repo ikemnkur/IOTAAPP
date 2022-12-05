@@ -29,13 +29,15 @@
     <p hidden id="secretMode">{{secret}}</p>
     <p hidden id="team">{{team}}</p>
     
-    <!-- <nav class="navtop">
-        <div>
-            <a href="/home"><i class="fas fa-home"></i>Home</a>
-            <a href="/profile"><i class="fas fa-user-circle"></i>Profile</a>
-            <a href="/logout"><i class="fas fa-sign-out-alt"></i>Logout</a>
+    <nav class="navtop">
+        <div style="color: #313030; background: #e6e9ff; margin-right: auto; margin-left: auto; padding: 10px; font-size: 20px;">
+            <a href="/home" style="margin: 0px 10px 0px 10px;"><i class="fas fa-home"></i></a>
+            <a href="/profile" style="margin: 0px 10px 0px 10px;"><i class="fas fa-user-circle"></i></a>
+            <a href="/logout" style="margin: 0px 10px 0px 10px;"><i class="fas fa-sign-out-alt"></i></a>
+            <i id="settingsBtn" style="margin: 0px 10px 0px 10px;" class="fas fa-cog"></i>
+            <i id="mediaBtn" style="margin: 0px 10px 0px 10px;" class="fas fa-sliders"></i>
         </div>
-    </nav> -->
+    </nav>
 
     <!-- WEBRTC -->
     {% include 'videoApplet.html' %}
@@ -55,6 +57,14 @@
     <!-- <//script src="js/room.js"></script>  -->
     <script src="js/chat.js"></script>
     <script src="js/videocallUser.js" defer></script>
+    <script>
+        var mediabtn = document.getElementById("mediaBtn");
+        var mediaWindow = document.getElementById("mediaWindow")
+        mediabtn.addEventListener("click", () => {
+            let state = mediaWindow.hidden
+            mediaWindow.hidden = !state;
+        })
+    </script>
     <!-- <script src="js/videoteam.js" defer></script> -->
     <!-- <//script src="js/chatNvideo.js"></script> -->
 

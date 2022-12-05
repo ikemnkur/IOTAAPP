@@ -17,34 +17,38 @@
                 <tr>
                     <!-- <th style="float: left;"> -->
                     <div class="filters">
-                        <td><i class="fas fa-search"></i>
-                            <label for="search">:</label>
-                        </td>
-
-                        <!-- input tag -->
                         <td>
-                            <input id="searchbar" onkeyup="searchRooms()" type="text" name="search"
-                                placeholder="Search rooms..">
-                        </td>
-                        <td>
-                            <a><i class="fas fa-filter"></i> Filters</a>
-                            <code class="hljs xml">
-
-                            <select id="selector" onmouseout="sortTable()" name="roomSearchFilter">
-                                <option value="Users">Users</option>
-                                <option value="Age">Age</option>
-                                <option value="Alphabetical">Alphabetical</option>
-                                <option value="Cost">Cost</option>
-                            </select>
-                            <label for="Sort">Sort:</label>
-                            <a onclick="sortASC()" name="Sort"><i class="fas fa-arrow-up"></i></a>
-                            <a onclick="sortDSC()" name="Sort"><i class="fas fa-arrow-down"></i></a>
-                            <strong id="order">
-                                ASC
-                            </strong>
-                            </code>
+                            <!-- <label for="search" style="width: inherit;"></label> -->
+                            <div style="display: flex;">
+                                <i class="fas fa-search" style="margin: 0px 5px 0px 5px; padding:5px 0px 0px 0px;"></i>
+                                <input id="searchbar" onkeyup="searchRooms()" type="text" name="search"
+                                    placeholder="Search rooms.." style="min-width: 300px;" >
+                            </div>
                         </td>
                     </div>
+                </tr>
+                <tr>
+                    <!-- <div> -->
+                    <td style="padding: 5px; display: table; margin: auto;">
+                        <a><i class="fas fa-filter" style="padding: 5px;"></i></a>
+                        <code class="hljs xml"></code>
+                        <select id="selector" onmouseout="sortTable()" name="roomSearchFilter">
+                            <option value="Users">Users</option>
+                            <option value="Age">Age</option>
+                            <option value="Alphabetical">Alphabetical</option>
+                            <option value="Cost">Cost</option>
+                        </select>
+                        </code>
+                    <!-- </td>
+                    <td> -->
+                        <label for="Sort" style="padding: 5px;">Sort:</label>
+                        <a onclick="sortASC()" style="padding: 5px;" name="Sort"><i class="fas fa-arrow-up"></i></a>
+                        <a onclick="sortDSC()" style="padding: 5px;" name="Sort"><i class="fas fa-arrow-down"></i></a>
+                        <strong style="padding: 5px;" id="order">
+                            ASC
+                        </strong>
+                    </td>
+                    <!-- </div> -->
                 </tr>
             </Table>
         </form>
@@ -82,7 +86,7 @@
 
         #activeRooms tbody tr td {
             font-weight: bold;
-            font-size: 20px;
+            font-size: 14px;
             padding: 0px 5px;
         }
     </style>

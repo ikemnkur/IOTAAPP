@@ -6,8 +6,8 @@
 
     <link rel="stylesheet" href="css/chatcord_style.css" />
     <link rel="stylesheet" href="css/videoapp.css" />
-    <link rel="stylesheet" href="css/modal.css" />
-    <link rel="stylesheet" href="css/joinpopup.css">
+    <!-- <link rel="stylesheet" href="css/modal.css" /> -->
+    <!-- <link rel="stylesheet" href="css/joinpopup.css"> -->
     <!-- <link rel="stylesheet" href="style.css"> -->
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.css" rel="stylesheet"
@@ -31,7 +31,7 @@
         <header class="chat-header">
             <h3><i class="fas fa-comments"></i> Topic: {{roomObj[0]["topic"]}}</h2>
                 <h3 id="user-stats"></h3>
-                <a id="leave-btn" class="btn">Leave Room</a>
+                <!-- <a id="leave-btn" class="btn">Leave Room</a> -->
         </header>
         <main class="chat-main">
             <div class="chat-sidebar">
@@ -41,7 +41,6 @@
                 <h3><i class="fas fa-smile"></i> User Lobby</h3>
                 <h2>
                     <table id="userTableObj">
-
                         <thead>
                             <tr>
                                 <th>Name&nbsp;</th>
@@ -51,7 +50,6 @@
                             </tr>
                         </thead>
                         <tbody id="usersTable">
-
                         </tbody>
                     </table>
                 </h2>
@@ -62,12 +60,12 @@
                 <div id="msgFormat" class="message" hidden>
 
                     <div class="meta" style="padding: 3px; color: rgb(15, 15, 15)">
-                        <div id="userTag"
+                        <span id="userTag"
                             style="font-size: 12px; background: rgb(233, 233, 233); float: left; padding: 3px; border-radius: 3px;">
                             • user6
-                        </div>
-                        <i class="fas fa-clock"></i> <span id="timeTag" style="font-size: 12px; margin: auto;"> 6:43:31
-                            pm </span>
+                        </span>
+                        <i class="fas fa-clock"></i>
+                        <span id="timeTag" style="font-size: 12px; margin: auto; padding: 3px;"> 6:43:31pm </span>
                         <span id="userStats" hidden style="float: left; padding: 3px;">
                             <span id="teamStat" style="color: black; font-size: 12px; padding: 3px;"> Team: IOS</span>
                             <span id="xpStat" style="color: blue; font-size: 12px"> XP: 10 </span>
@@ -108,10 +106,10 @@
 
                         <div>
                             <text id="msgText"
-                                style="display:block; margin: 5px 0px 0px 0px; font-size: 12px; color: black; "> 
+                                style="display:block; text-align: start; font-size: 12px; color: black; ">
                                 <i id="replyBtn" class="fas fa-reply" style="font-size: 16px; color: blue;"></i>
-                                <text id="replyTag" hidden style="font-size: 12px; background: rgb(233, 233, 233); float: left; padding: 3px; border-radius: 3px;"></text>
-                                ddgg</text>
+                                <text id="replyTag" hidden
+                                    style="font-size: 12px; background: rgb(233, 233, 233); float: left; padding: 3px; border-radius: 3px;"></text>ddgg</text>
                         </div>
 
                     </div>
@@ -149,7 +147,7 @@
     td {
         font-size: 12px;
         padding: 3px;
-        background-color: #fff;
+        /* background-color: #fff; */
     }
 
     #userTableObj {

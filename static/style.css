@@ -1,7 +1,7 @@
 * {
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "segoe ui", roboto, oxygen, ubuntu, cantarell, "fira sans", "droid sans", "helvetica neue", Arial, sans-serif;
-  font-size: 16px;
+  font-size: 12px;
 }
 
 body {
@@ -132,9 +132,9 @@ body {
 }
 
 .navtop div {
-  display: flex;
+  /* display: flex; */
   margin: 0 auto;
-  width: 1000px;
+  width: auto;
   height: 100%;
 }
 
@@ -180,7 +180,7 @@ body.loggedin {
 
 .content h2 {
   margin: 0;
-  padding: 25px 0;
+  padding: 5px 0;
   font-size: 20px;
   border-bottom: 1px solid #e0e0e3;
   color: #4a536e;
@@ -256,7 +256,7 @@ body.loggedin {
 @media screen and (max-width: 1000px) {
   .navtop {
     height: auto;
-    padding: 10px;
+    padding: 3px;
   }
   .navtop div {
     flex-flow: wrap;
@@ -267,7 +267,7 @@ body.loggedin {
     flex-basis: 100%;
   }
   .navtop div a {
-    padding: 10px 0;
+    padding: 5px 10px;
     flex-basis: 15%;
   }
   .content {

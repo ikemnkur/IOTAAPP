@@ -5,19 +5,19 @@
 <div>
   <p hidden id="rmID">{{roomObj[0]["roomID"]}}</p>
   <div id="container">
-    <button id="settingsBtn"><i class="fas fa-cog"></i> Settings</button>
+    <!-- <button id="settingsBtn"><i class="fas fa-cog"></i> Settings</button> -->
     <div id="settings" style="display: block ">
       <div style="border: 3px solid #667aff; max-width: -webkit-fill-available;">
         <div class="select" style="padding: 2px;">
-          <label for="audioSource">Audio input source: </label> <select id="audioSource"></select>
+          <label for="audioSource">Audio input: </label> <select id="audioSource" style="width: 200px;"></select>
         </div>
 
         <div class="select" style="padding: 2px;">
-          <label for="audioOutput">Audio output destination: </label> <select id="audioOutput"></select>
+          <label for="audioOutput">Audio output: </label> <select id="audioOutput" style="width: 200px;"></select>
         </div>
 
         <div class="select" style="padding: 2px;">
-          <label for="videoSource">Video source: </label> <select id="videoSource"></select>
+          <label for="videoSource">Video source: </label> <select id="videoSource" style="width: 200px;"></select>
         </div>
 
         <div>
@@ -50,26 +50,41 @@
     <table id="videoTable" style="min-height: 96px;"></table>
   </div>
 </div>
-<div
-  style="border: 5px solid #667aff; padding: 5px; background-color: #e6e9ff; border-radius:5px; margin-right: 0%; margin-left: 0%;">
+<div id="mediaWindow"
+  style="border: 5px solid #667aff; padding: 5px;  background-color: #e6e9ff; border-radius:5px; margin-right: 0%; margin-left: 0%;">
   <div style="margin: 5px;">
     <div id="searchForm">
-      <!-- <span style="float: left; margin-right: 2px; margin: 5px 2px 0px 0px;">Mode: </span> -->
-      <button id="searchModeBtn"
-        style="padding: 2px 5px 2px 5px; background-color:mediumorchid; float: left; border-radius: 3px;">
-        <i id="findIcon" class="fas fa-magnifying-glass"></i>
-        <text id="searchModeText">Find</text>
-      </button>
-      <span>Search: </span>
-      <input id="mediaSearch" type="text" placeholder="Search Image"
-        style="border: 3px solid #667aff; max-width: -webkit-fill-available;">
-      <!-- <span style="float: left; margin-right: 2px; margin: 5px 2px 0px 0px;">Type: </span> -->
-      <button id="addToLibBtn"
-        style="padding: 2px 5px 2px 5px; background-color:greenyellow; float: right; border-radius: 3px;">
-        <i id="mediaIcon" class="fas fa-image"></i>
-        <text id="addToLibText">Image</text>
-      </button>
+      <table style="margin: 0px auto;">
+        <tbody>
+          <tr>
+            <td>
+              <button id="searchModeBtn"
+                style="padding: 2px 5px 2px 5px; background-color:mediumorchid; float: left; border-radius: 3px;">
+                <div style="display: flex;">
+                  <i id="findIcon" class="fas fa-magnifying-glass"></i>
+                  <text id="searchModeText" style="padding: 0px 5px 0px 5px;">Find</text>
+                </div>
+              </button>
+            </td>
+            <td>
+              <span>Search: </span>
+              <input id="mediaSearch" type="text" placeholder="Search Image"
+                style="border: 3px solid #667aff; max-width: -webkit-fill-available;">
+              <!-- <span style="float: left; margin-right: 2px; margin: 5px 2px 0px 0px;">Type: </span> -->
+            </td>
+            <td>
+              <button id="addToLibBtn"
+                style="padding: 2px 5px 2px 5px; background-color:greenyellow; float: right; border-radius: 3px;">
+                <div style="display: flex;">
+                  <i id="mediaIcon" class="fas fa-image"></i>
+                  <text id="addToLibText" style="padding: 0px 5px 0px 5px;"> Image</text>
+                </div>
 
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
   <table style="all:revert; margin: auto;">
@@ -77,39 +92,38 @@
       <tr>
         <td>
           <div id="imgPrevDiv" style="
-          border: 3px solid #667aff; 
-          background-color: white;
-          /* margin-right: 5%;
-          margin-left: 5%; */
-          overflow-y: scroll;
-          min-width: 300px;
-          max-height: 80px;
-          min-height: 64px;
-          padding: 5px;
-          margin-top: 2px;">
-
-
+            border: 3px solid #667aff; 
+            background-color: white;
+            /* margin-right: 5%;
+            margin-left: 5%; */
+            overflow-y: scroll;
+            /* min-width: 300px; */
+            max-height: 100px;
+            min-height: 64px;
+            padding: 5px;
+            margin-top: 2px;">
           </div>
-          <textarea id="errorMsg" style=" width: 300px;
-          height: 24px;">Type in the "Search" bar to get started</textarea>
+          <textarea id="errorMsg" style=" width: 300px; height: 32px;">
+            Type in the "Search" bar to get started
+          </textarea>
         </td>
         <td>
-          <div>
+          <!-- <div>
             <text>Rotate: </text>
             <button id="rotate+" style="padding: 5px 5px;">+</button>
             <button id="rotate-" style="padding: 5px 5px;">-</button>
-          </div>
+          </div> 
 
           <div id="imgEditDiv" style="
             border: 3px solid #667aff; 
             background-color: white;
             /* margin-right: 5%;
             margin-left: 5%; */
-            max-height: 80px;max-width: 80px;
+            max-height: 80px;/* max-width: 80px; */
             min-height: 64px;min-width: 64px;
             padding: 5px;
             margin-top: 2px;">
-          </div>
+          </div> -->
         </td>
       </tr>
     </tbody>
@@ -136,7 +150,7 @@
     background: #e6e9ff;
   }
 
-  table td {
+  .chat-sidebar table td {
     border: 1px solid #b3adad;
     text-align: center;
     padding: 3px;
