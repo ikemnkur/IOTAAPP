@@ -1,3 +1,26 @@
+const socket = io();
+var socketid;
+
+socket.on("connect", () => {
+    console.log(`you connected with socket.id ${socket.id}`);
+    socketid = socket.id;
+
+    // myUserData = {
+    //   "id": socketid,
+    //   "name": userID,
+    //   "userTeam": team, // gets this from the modal.html 
+    //   "XP": userJSON[0]["xp"],
+    //   "peerId": userID,
+    //   "HP": 100,
+    //   "streaming": false,
+    //   "score": 0,
+    //   "coins": userJSON[0]["coins"],
+    // };
+
+    // socket.emit('connectNewStream', ROOM_ID, userID, myUserData); //Set up socket.io
+
+})
+
 function listRooms() {
     var count = 0;
     var table = document.getElementById("activeRooms");
@@ -19,10 +42,10 @@ function listRooms() {
     cell1.innerHTML = "#";
     cell2.innerHTML = "Topic";
     // cell3.innerHTML = "RoomID";
-    
+
     cell3.innerHTML = "# of Users";
     cell4.innerHTML = "Watch Cost";
-    cell5.innerHTML = "Join Cost"; 
+    cell5.innerHTML = "Join Cost";
     cell6.innerHTML = "Join Room";
     // cell7.innerHTML = "Join Room";
 
@@ -38,13 +61,13 @@ function listRooms() {
         watchCost = rooms[index]["watchCost"];
         joinCost = rooms[index]["joinCost"];
         userslist = rooms[index]["users"];
-        
+
         try {
             usersArray = JSON.parse(userslist);
         } catch (error) {
             usersArray = userslist.split(",");
         }
-        
+
         // console.log("Usernames Array: ", usersArray);
         numberOfUsers = usersArray.length;
         count++;

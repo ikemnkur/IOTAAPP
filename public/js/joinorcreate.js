@@ -6,6 +6,15 @@ async function delay(time) {
 
 var portnum = 3000;
 
+// const homeSocket = io();
+var socketid;
+
+// homeSocket.on("connect", () => {
+//     console.log(`you connected with socket.id ${homeSocket.id}`);
+//     socketid = homeSocket.id;
+
+// })
+
 function createRoom() {
     // used to follow a user, add them to the friend list once
     let topic, roomID, joinCost, watchCost, private, passcode, tags, teams, saveRmCfg;
@@ -19,7 +28,7 @@ function createRoom() {
     passcode = document.getElementById("passcode").value;
     saveRmCfg = document.getElementById("saveConfigBox").value;
     let host = document.getElementById("host").value;
-    
+    let randNum = Math.floor(Math.random() * 100);
     var payload = {
         "topic": topic,
         "roomID": roomID,
@@ -31,10 +40,23 @@ function createRoom() {
         "private": private,
         "saveRmCfg": saveRmCfg,
         "host": host,
+        "randNum": randNum
     };
 
-    postData("http://localhost:" + portnum + "/createRoom", payload)
+    // homeSocket.emit('createRoomHome', payload);
+
+    socket.emit('createRoomHome', payload);
+    // postData("http://localhost:" + portnum + "/createRoom", payload)
+    delay(1000).then(() => {
+        console.log("redirecting...");
+        // postData("http://localhost:" + portnum + "/modal", payload);
+        window.location.href = "/createRoom?data=" + randNum;
+    });
 }
+
+// socket.on("goToRoom", (data) => {
+//     data
+// })
 
 async function joinRoom() {
     // used to follow a user, add them to the friend list once
@@ -43,25 +65,23 @@ async function joinRoom() {
     roomID = document.getElementById("joinroom#").value;
     passcode = document.getElementById("password").value;
     userID = document.getElementById("host").value;
+    let randNum = Math.floor(Math.random() * 100);
     var payload = {
         "roomID": roomID,
         "passcode": passcode,
-        "userID": userID
+        "userID": userID,
+        "randNum": randNum
     };
-    // console.log("Data: ", payload)
-    postData("http://localhost:" + portnum + "/joinRoom", payload)
 
-    // payload = {
-    //     "roomID": roomID,
-    // }
+    socket.emit("joinRoomHome", payload)
 
-    delay(3000).then(() => {
-            // console.log("redirecting...");
-            // postData("http://localhost:" + portnum + "/modal", payload);
-            // window.location.href = "/joinRoom";
-        }
-    );
-    
+    delay(1000).then(() => {
+        console.log("redirecting...");
+        // postData("http://localhost:" + portnum + "/modal", payload);
+        window.location.href = "/joinRoom?data=" + randNum;
+        // window.location.href = "/joinRoom";
+    });
+
 }
 
 async function postData(url = "", data = {}) {

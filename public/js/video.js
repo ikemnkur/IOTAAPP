@@ -81,6 +81,7 @@ peer.on("call", (call) => {
     }
     console.log("Check User: ", "#", index, item.streaming)
   })
+  
   // if (user.streaming) {
   if (1) {
     console.log("Streaming User: ", user)

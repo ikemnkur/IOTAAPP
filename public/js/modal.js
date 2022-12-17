@@ -15,7 +15,12 @@ function roomModal() {
     var numbOfUsers = document.getElementById("NoU");
     var activeUsersList = roomModalJSON[0]["users"];
     console.log("Modal Users: ", activeUsersList);
-    var activeUsersArray = JSON.parse(activeUsersList);
+    try {
+        var activeUsersArray = JSON.parse(activeUsersList);
+    } catch (error) {
+        var activeUsersArray = activeUsersList.split(",");
+    }
+
     var NoU = activeUsersArray.length;
     console.log("Number of Users: ", NoU);
     numbOfUsers.innerText = NoU;
@@ -25,8 +30,13 @@ function roomModal() {
 roomModal();
 
 var teams = roomModalJSON[0]["teams"];
+var dropDownItems;
+try {
+    dropDownItems = JSON.parse(teams);
+} catch (error) {
+    dropDownItems = teams.split(",");
+}
 
-const dropDownItems = JSON.parse(teams);
 
 var teamdrpdwn = document.getElementById('teamSelector');
 
@@ -51,7 +61,7 @@ loadModal();
 
 async function sumbitFunc() {
     // submitModalData();
-    
+
     document.getElementById('id01').style.display = 'none';
 }
 

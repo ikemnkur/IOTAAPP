@@ -57,7 +57,7 @@
     </div>
 
     <div class="form-popup" id="myFormJoin">
-        <form action="/modal?join" class="form-container">
+        <form action="/modal" class="form-container">
             <h1>Join Room</h1>
 
             <label for="email">Room ID#</label>
@@ -81,7 +81,7 @@
             <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
         </form>
     </div>
-
+    <script src="/socket.io/socket.io.js" ></script>
     <script>
         function openFormJoin() {
             document.getElementById("myFormJoin").style.display = "block";
@@ -99,10 +99,10 @@
                 document.getElementById("privateBoolean").value = 0;
             }
             var teams = document.getElementById("teamsInput");
-            var teamArray = teams.value.split(",")
+            var teamArray = teams.value.split(",");
             teams.value = teamArray;
             var tags = document.getElementById("tagsInput");
-            var tagArray = tags.value.split(",")
+            var tagArray = tags.value.split(",");
             tags.value = tagArray;
             saveRoomConfig();
         }

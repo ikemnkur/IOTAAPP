@@ -24,7 +24,13 @@ var blockedList = JSON.parse(userJSON[0].blockedUsers);
 const username = userJSON[0]["username"];
 const nickname = document.getElementById("nickname").innerText;
 var team = document.getElementById("team").innerText;
-const teams = JSON.parse(document.getElementById("teamnames").innerText);
+var teams;
+try {
+  teams = JSON.parse(document.getElementById("teamnames").innerText);
+} catch (error) {
+  teams = document.getElementById("teamnames").innerText.split(",");
+}
+
 const room = roomJSON[0]["roomID"];
 const topic = roomJSON[0]["topic"];
 
@@ -238,7 +244,7 @@ function createMessage(message, replyTo) {
     if (message.team == team) {
       // let num = randomNumber(0, colors.length)
       // console.log(item, " len:", item.length)
-      let col = colors[(colors.length - index+1) % colors.length];
+      let col = colors[(colors.length - index + 1) % colors.length];
       msgBlock.style = `background: ${col};`
     } else if (message.team == item) {
       let col = colors[(index + item.length) % colors.length];
@@ -837,7 +843,12 @@ function outputMessage(message, replyTo) {
 // Display the teasm button table
 function teamsDisplay() {
   var teamBox = document.getElementById("teamnames");
-  var teams = JSON.parse(teamBox.innerText);
+  var teams;
+  try {
+    var teams = JSON.parse(teamBox.innerText);
+  } catch (error) {
+    var teams = teamBox.innerText.split(",");
+  }
   teamBox.innerText = '';
   var tbl = document.createElement("table");
   var thead = document.createElement("thead");
