@@ -37,7 +37,16 @@ const topic = roomJSON[0]["topic"];
 var secretMode = document.getElementById("secretMode").innerText;
 var coins = userJSON[0].coins;
 var xp = userJSON[0].xp;
-var score = 0, scores = {};
+
+var score = 0, scores = [];
+
+teams.forEach((item, index) => {
+  if (scores[index] == null) {
+    scores[index] = 0;
+  }
+})
+
+
 try {
   var friendsList = JSON.parse(userJSON[0].friends);
 } catch (error) {
@@ -51,7 +60,7 @@ try {
 
 var activeUsers;
 
-var colors = ["green", "cyan", "pink", "gold", "agua", "red", "thistle", "lightcyan", "salmon", "crismon", "springgreen", "sykblue", "yellowgreen", "greenyellow", "fuschia", "lavender", "magenta"]
+var colors = ["green", "cyan", "pink", "gold", "agua", "red", "thistle", "lightcyan", "salmon", "crismon", "springgreen", "sykblue", "yellowgreen", "fuschia", "greenyellow", "lavender", "magenta"]
 var focusedStyle = "background: radial-gradient(#ac1b1b, transparent);"
 const socket = io({
   transports: ["websocket"], pingInterval: 1000 * 60 * 5,
@@ -59,13 +68,16 @@ const socket = io({
 });
 
 // Join chatroom
-socket.emit("joinRoom", { username, nickname, coins, xp, room, secretMode, team });
+socket.emit("joinRoom", { username, nickname, coins, xp, room, secretMode, team, score, teams });
 
 // Get room and users
-socket.on("roomUsers", ({ room, users }) => {
-  activeUsers = users;
-  displayUserStats();
-  outputUsers(users);
+socket.on("roomUsers", ({ roomname, users }) => {
+  if (roomname == room) {
+    activeUsers = users;
+    displayUserStats();
+    outputUsers(users);
+  }
+
 });
 
 socket.on('tipEvent', (tipperUsername, msg_username, coinsAmount, roomid) => {
@@ -111,11 +123,55 @@ socket.on("vote", (msg_ID, vote, msg_username) => {
   }
 });
 
-socket.on("Scores", (roomName, scoreData) => {
-  console.log("Scores Event: ", scoreData)
-  // if (room == roomName)
-  scores = scoreData;
+socket.on("Scores", (roomName, scoreData, text) => {
+  if (room == roomName) {
+    // console.log("Scores test text: ", text)
+    console.log("Scores Event: ", scoreData[room])
+    // let dscores = JSON.parse(scoreData);
+    // let dscores = scoreData;
+    // console.log("scores: ", dscores)
+
+    scoreData[room].forEach((item, index) => {
+      scores[index] = item;
+    })
+
+    teams.forEach((item, index) => {
+      var teamScore = document.getElementById(`${item}#Score`)
+      teamScore.innerText = scores[index]
+
+      //let tdScore = document.getElementById("tdScore#" + item);
+      //tdScore.innerHTML = `<strong>${scores[index]}</strong>`;
+
+      if (scores[item] > 999)
+        resetScores(item);
+    })
+  }
 });
+
+
+socket.emit("startScoreKeeping", room, teams)
+
+setTimeout(addToScore, 10000)
+
+function addToScore() {
+  var place = 0;
+  teams.forEach((item, index) => {
+    if (team == item)
+      place = index;
+  })
+  socket.emit("incrementScore", 1, place, room)
+  setTimeout(addToScore, 10000)
+}
+
+function resetScores(winningTeam) {
+  alert(`${winningTeam} has won this round`)
+  socket.emit("resetScores", room);
+  activeUsers.forEach((item, index) => {
+    if (item.team == winningTeam) {
+      console.log("adding coins to " + item.username + "for winning round")
+    }
+  })
+}
 
 function updates() {
   socket.emit('updateStats', xp, coins, username, 50, team, room);
@@ -125,7 +181,7 @@ function updates() {
   setTimeout(updates, 10000);
 }
 
-// Message from server
+// Message from server BOT
 socket.on("messageTo", (message, toUser) => {
   // console.log(`Socket IO Message to: ${toUser}`, message);
   message.username = "BOT";
@@ -137,7 +193,7 @@ socket.on("messageTo", (message, toUser) => {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 });
 
-// Message from server
+// Reply Message from server
 socket.on("message", (message, replyTo) => {
   // console.log("Socket IO Message: ", message);
 
@@ -182,10 +238,47 @@ function msgSubmit(e, replyTo) {
   e.target.elements.msg.focus();
 }
 
+var mustWait = false;
+
 // Message submit
 chatForm.addEventListener("submit", (e) => {
-  msgSubmit(e);
+
+  if (mustWait == false) {
+    console.log("submitted a message")
+    mustWait = true;
+    msgSubmit(e);
+    var timer = document.getElementById("timer");
+    timer.hidden = false;
+    var clockIconBad = document.getElementById("clockIconBad");
+    var clockIconGood = document.getElementById("clockIconGood");
+    clockIconBad.hidden = false;
+    clockIconGood.hidden = true;
+
+    updateChatTimer(15);
+
+    socket.emit("incrementScore", 1, team, room)
+  }
+
 });
+
+function updateChatTimer(time) {
+  var clockIconBad = document.getElementById("clockIconBad");
+  var clockIconGood = document.getElementById("clockIconGood");
+  var timer = document.getElementById("timer");
+  timer.innerText = time + "s";
+  time--;
+  if (time > 0) {
+    // document.getElementById("msg").value = "";
+    setTimeout(updateChatTimer, 1000, time);
+  }
+  else {
+    clockIconBad.hidden = true;
+    clockIconGood.hidden = false;
+    mustWait = false;
+    timer.hidden = true;
+    timer.innerText = ""
+  }
+}
 
 function randomNumber(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
@@ -204,14 +297,16 @@ function createMessage(message, replyTo) {
     uname = + message.username + " AKA " + message.nckName;
   }
 
-  if (message.username == "BOT") {
-    uname = "CHATBOT"
-  }
-
   var msgBlockPrototype = document.getElementById("msgFormat");
   var msgBlock = msgBlockPrototype.cloneNode(true);
   msgBlock.id = message.username + "-" + message.time;
   msgBlock.hidden = false;
+
+  if (message.username == "BOT") {
+    uname = "CHATBOT";
+    // let col = colors[(index + room.length) % colors.length];
+    // msgBlock.style = `background: #9bacdf;`
+  }
 
   if (replyTo != null) {
     let replyTag = msgBlock.querySelector('#replyTag');
@@ -241,16 +336,19 @@ function createMessage(message, replyTo) {
   })
 
   teams.forEach((item, index) => {
-    if (message.team == team) {
-      // let num = randomNumber(0, colors.length)
-      // console.log(item, " len:", item.length)
-      let col = colors[(colors.length - index + 1) % colors.length];
-      msgBlock.style = `background: ${col};`
-    } else if (message.team == item) {
-      let col = colors[(index + item.length) % colors.length];
+    // if (message.team == team) {
+    //   // let num = randomNumber(0, colors.length)
+    //   // console.log(item, " len:", item.length)
+    //   let col = colors[(colors.length - index + 1) % colors.length];
+    //   msgBlock.style = `background: ${col};`
+    // } else 
+    if (message.team == item) {
+      let col = colors[(index + room.length % 4 + 1) % colors.length];
       msgBlock.style = `background: ${col};`
     }
   })
+
+
 
   let likeBtn = msgBlock.querySelector('#likeBtn');
   let likeIcon = msgBlock.querySelector('#likeIcon');
@@ -457,12 +555,15 @@ function createMessage(message, replyTo) {
 
     chatForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      inputMsg.placeholder = "Enter Message...";
-      if (reply.action == true)
-        replySubmit(e, reply.target);
-      else
-        msgSubmit(e, null);
-      reply.action = false;
+      if (mustWait == false) {
+        inputMsg.placeholder = "Enter Message...";
+        if (reply.action == true)
+          replySubmit(e, reply.target);
+        else
+          msgSubmit(e, null);
+        reply.action = false;
+      }
+
     });
 
     var cancelBtn = document.getElementById("cancelBtn");
@@ -796,12 +897,14 @@ function outputMessage(message, replyTo) {
 
     chatForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      inputMsg.placeholder = "Enter Message...";
-      if (reply.action == true)
-        replySubmit(e, reply.target);
-      else
-        msgSubmit(e, null);
-      reply.action = false;
+      if (!mustWait) {
+        inputMsg.placeholder = "Enter Message...";
+        if (reply.action == true)
+          replySubmit(e, reply.target);
+        else
+          msgSubmit(e, null);
+        reply.action = false;
+      }
     });
 
 
@@ -840,6 +943,8 @@ function outputMessage(message, replyTo) {
   document.querySelector(".chat-messages").appendChild(div);
 }
 
+
+
 // Display the teasm button table
 function teamsDisplay() {
   var teamBox = document.getElementById("teamnames");
@@ -855,42 +960,51 @@ function teamsDisplay() {
   var tbody = document.createElement("tbody");
   let th1 = document.createElement("th");
   let th2 = document.createElement("th");
-  let th3 = document.createElement("th");
+  // let th3 = document.createElement("th");
   th1.innerHTML = `<strong>TeamName</strong>`;
   th2.innerHTML = `<strong>Score</strong>`;
-  th3.innerHTML = `<strong>+</strong>`;
+  // th3.innerHTML = `<strong>+</strong>`;
   thead.appendChild(th1);
   thead.appendChild(th2);
-  thead.appendChild(th3);
+  // thead.appendChild(th3);
   tbl.appendChild(thead)
+
+
 
   teams.forEach((item, index) => {
     //console.log(`teams Obj: ${index}. ${item}`);
     // let score = Math.ceil(Math.random() * 1000);
-    scores[item] = 0;
+    // scores[item] = 0;
     let tr = document.createElement("tr");
     let tdName = document.createElement("td");
     let tdScore = document.createElement("td");
-    tdScore.id = item + "#Score";
+
     let tdBtn = document.createElement("td");
 
-    var btn = document.createElement("button");
-    btn.id = "join" + item + "Team";
-    btn.innerText = "Join";
-    btn.style = "padding: 0px 5px; color: black;";
-    btn.addEventListener("click", () => {
-      team = item;
-      tipUsers(username, "BOT", roomJSON[0]["joinCost"]);
-      socket.emit("user joined room", room, username, item, 30, room, "FFF", teams); //item = team
-      // socket.emit("setStreamJoinConfig", username, item, 30, room, "FFF", teams); //item = team
-    })
+    // var btn = document.createElement("button");
+    // btn.id = "join" + item + "Team";
+    // btn.innerText = "Join";
+    // btn.style = "padding: 0px 5px; color: black;";
+    // btn.addEventListener("click", () => {
+    //   team = item;
+    //   tipUsers(username, "BOT", roomJSON[0]["joinCost"]);
+    //   // socket.emit("user joined room", room, username, item, 30, room, "FFF", teams); //item = team
+    //   // socket.emit("setStreamJoinConfig", username, item, 30, room, "FFF", teams); //item = team
+    // })
+
+    // let col = colors[(index + room.length) % colors.length];
+    let col = colors[(index + room.length % 4 + 1) % colors.length];
+    tdName.style = `background: ${col};`
 
     tdName.innerText = item;
-    tdScore.innerHTML = `<strong>${scores[item]}</strong>`;
-    tdBtn.append(btn);
+    tdScore.id = "tdScore#" + item;
+    tdScore.innerHTML = `<strong>${scores[index]}</strong>`;
+    // tdScore.id = item + "Score";  
+    tdScore.id = item + "#Score";
+    // tdBtn.append(btn);
     tr.appendChild(tdName);
     tr.appendChild(tdScore);
-    tr.appendChild(tdBtn);
+    // tr.appendChild(tdBtn);
     tbody.appendChild(tr)
   });
   tbl.appendChild(tbody);
@@ -918,7 +1032,7 @@ function displayUserStats() {
 // this supposed to code for the add friend table
 function outputUsers(users) {
   userList.innerHTML = "";
-  // console.log("Output Users: ", users);
+  console.log("Output Users: ", users);
   users.forEach((user) => {
 
     const tr = document.createElement("tr");

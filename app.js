@@ -721,7 +721,6 @@ app.get(['/joinRoom'], (request, response) => {
 		if (err) throw err;
 
 		console.log("Joined Room Info: ", finalresult);
-		// Render room templateconsole.log("Post rooms.SQL: ", result);
 		if (room.passcode == finalresult[0]["passcode"]) {
 			connection.query("SELECT * FROM userstats WHERE username = ?", [room.userID], function (err, userStatsResult) {
 				if (err) throw err;
@@ -735,7 +734,6 @@ app.get(['/joinRoom'], (request, response) => {
 
 	})
 });
-
 
 app.get(['/createRoom'], (request, response) => {
 	let data = request.query.data;
@@ -752,131 +750,30 @@ app.get(['/createRoom'], (request, response) => {
 	else
 		room.private = 0;
 
-	// console.log("posted Create roomInfo: ", room);
+	connection.query("SELECT * FROM userstats WHERE username = ?", [room.host], function (err, userStatsResults) {
+		if (err) throw err;
+		userStatsResult = userStatsResults;
+		let users = room.host.split(",");
+		let teams = room.teams.toString();
+		console.log("Teams:", teams)
+		let tags = room.tags.toString();
+		connection.query('INSERT INTO rooms (roomID, host, users, passcode, topic, teams, private, watchCost, joinCost, tags) VALUES (?,?,?,?,?,?,?,?,?,?)',
+			[room.roomID, room.host, users, room.passcode, room.topic, teams, room.private, room.watchCost, room.joinCost, tags], function (err, finalresult) {
+				if (err) throw err;
+				console.log("room Query Info: ", finalresult);
+				connection.query('UPDATE userstats SET roomConfig = ? WHERE username = ?', [JSON.stringify(room), room.host]);
 
-	// if (room.saveRmCfg == "on") {
-		connection.query("SELECT * FROM userstats WHERE username = ?", [room.host], function (err, userStatsResults) {
-			if (err) throw err;
-			userStatsResult = userStatsResults;
-			let users = room.host.split(",");
-			let teams = room.teams.toString();
-			console.log("Teams:", teams)
-			let tags = room.tags.toString();
-			connection.query('INSERT INTO rooms (roomID, host, users, passcode, topic, teams, private, watchCost, joinCost, tags) VALUES (?,?,?,?,?,?,?,?,?,?)',
-				[room.roomID, room.host, users, room.passcode, room.topic, teams, room.private, room.watchCost, room.joinCost, tags], function (err, finalresult) {
+				console.log("fetched usersname: ", room.host);
+
+				connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, finalresult) {
 					if (err) throw err;
-					console.log("room Query Info: ", finalresult);
-					connection.query('UPDATE userstats SET roomConfig = ? WHERE username = ?', [JSON.stringify(room), room.host]);
-					
-					console.log("fetched usersname: ", room.host);
-
-					connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, finalresult) {
-						if (err) throw err;
-						newRoom = finalresult;
-						console.log("New room Info: ", newRoom);
-						response.render('modal.html', { roomObj: newRoom, roomOBJ: JSON.stringify(newRoom), userJSON: JSON.stringify(userStatsResult), userOBJ: userStatsResult });
-					});
+					newRoom = finalresult;
+					console.log("New room Info: ", newRoom);
+					response.render('modal.html', { roomObj: newRoom, roomOBJ: JSON.stringify(newRoom), userJSON: JSON.stringify(userStatsResult), userOBJ: userStatsResult });
 				});
-		})
-	// }
+			});
+	})
 });
-
-// // http://localhost:3000/home - display the home page
-// app.post(['/createRoom'], (request, response) => isLoggedin(request, settings => {
-// 	// response.render('layout.html')
-// 	console.log("rendering layout")
-// 	let room = request.body;
-// 	room.private = (room.private == "on");
-// 	let userStatsResult;
-// 	let newRoom;
-// 	if (room.private)
-// 		room.private = 1;
-// 	else
-// 		room.private = 0;
-
-// 	console.log("posted roomInfo: ", room);
-// 	if (room.saveRmCfg == "on") {
-// 		connection.query("SELECT * FROM userstats WHERE username = ?", [room.host], function (err, userStatsResults) {
-// 			if (err) throw err;
-// 			userStatsResult = userStatsResults;
-// 			let users = room.host.split(",");
-// 			let teams = room.teams.toString();
-// 			console.log("Teams:", teams)
-// 			let tags = room.tags.toString();
-// 			connection.query('INSERT INTO rooms (roomID, host, users, passcode, topic, teams, private, watchCost, joinCost, tags) VALUES (?,?,?,?,?,?,?,?,?,?)',
-// 				[room.roomID, room.host, users, room.passcode, room.topic, teams, room.private, room.watchCost, room.joinCost, tags], function (err, finalresult) {
-// 					if (err) throw err;
-// 					// connection.query('UPDATE userstats SET roomConfig = ? WHERE username = ?', [JSON.stringify(room), room.host]);
-// 					console.log("fetched usersname: ", room.host);
-
-// 					connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, finalresult) {
-// 						if (err) throw err;
-// 						newRoom = finalresult;
-// 						console.log("New room Info: ", newRoom);
-// 						response.render('modal.html', { roomObj: newRoom, roomOBJ: JSON.stringify(newRoom), userJSON: JSON.stringify(userStatsResult), userOBJ: userStatsResult });
-// 					});
-// 				});
-// 		})
-// 	}
-// }, () => {
-// 	// Redirect to login page
-// 	response.redirect('/');
-// }));
-
-// http://localhost:3000/home - display the home page
-// app.post(['/joinRoom'], (request, response) => isLoggedin(request, settings => {
-// 	// response.render('chat1.html')
-
-// 	let room = request.body;
-// 	console.log("room Info: ", room.roomID);
-// 	connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, finalresult) {
-// 		if (err) throw err;
-
-// 		let activeRoom = JSON.stringify(finalresult);
-// 		console.log("Joined Room Info: ", finalresult);
-// 		// Render room templateconsole.log("Post rooms.SQL: ", result);
-// 		if (room.passcode == finalresult[0]["passcode"]) {
-// 			// connection.query("SELECT * FROM userstats WHERE username = ?", [room.userID], function (err, userStatsResult) {
-// 			// 	if (err) throw err;
-// 			// 	userStats = JSON.stringify(userStatsResult); //console.log("user Info: ", userStats);
-// 			// 	console.log("Correct Passcode.")
-
-// 			// response.render('modal.html', { roomObj: finalresult, roomOBJ: JSON.stringify(finalresult), userJSON: JSON.stringify(userStatsResult), userOBJ: userStatsResult });
-// 			// response.render('chat1.html')
-// 			// })
-// 		} else {
-// 			console.log("Wrong Passcode.")
-// 		}
-
-// 	})
-// }, () => {
-// 	// Redirect to login page
-// 	response.redirect('/');
-// }));
-
-// // http://localhost:3000/game - display the home page
-// app.post('/createRoom', (request, response) => isLoggedin(request, settings => {
-// 	const id = request.params.id;
-// 	let room = request.body;
-// 	console.log("Game Info: ", room);
-// 	connection.query('INSERT INTO rooms (roomID,host,passcode,topic,createDate,teams,users, private, watchCost, joinCost, tags) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-// 		[room.roomID, room.host, room.passcode, room.topic, room.createDate, room.teams, room.users, room.private, room.watchCost, room.joinCost, room.tags]);
-
-// 	connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, finalresult) {
-// 		console.log("Joined Room Info: ", finalresult);
-
-// 		connection.query("SELECT * FROM userstats WHERE username = ?", [request.session.account_username], function (err, userStatsResult) {
-// 			if (err) throw err;
-// 			userStats = JSON.stringify(userStatsResult);
-// 			console.log("user Info: ", userStats);
-// 			response.render('modal.html', { roomObj: finalresult, roomOBJ: JSON.stringify(finalresult), userOBJ: userStatsResult, userJSON: JSON.stringify(userStatsResult) });
-// 		})
-
-// 	});
-// }, () => {
-// 	// Redirect to login page
-// 	response.redirect('/');
-// }));
 
 // http://localhost:3000/modal - display the home page
 app.post(['/modal', '/modal:id'], (request, response) => isLoggedin(request, settings => {
@@ -1598,6 +1495,11 @@ io.on('connection', socket => {
 			// filter out disconnected user
 
 			var disconnectedUser = activeRoomandUsers[roomId].find(user => user.id === socket.id);
+			
+			// clear scores array for empty room
+			if (activeRoomandUsers[roomId].length == 0) {
+				roomScores[roomId] = null;
+			}
 
 			console.log(`ActiveRoomandUsers[${roomId}]:`, activeRoomandUsers[roomId])
 			if (activeRoomandUsers[roomId] != undefined) // if not empty
@@ -1641,7 +1543,7 @@ io.on('connection', socket => {
 	})
 
 	//LIVE CHAT
-	socket.on('joinRoom', ({ username, room, nickname, points, xp, secretMode, team, score }) => {
+	socket.on('joinRoom', ({ username, room, nickname, points, xp, secretMode, team, score, teams }) => {
 		const user = userJoin(socket.id, username, nickname, points, xp, room, secretMode, team, score);
 
 		socket.join(user.room);
@@ -1664,15 +1566,61 @@ io.on('connection', socket => {
 		});
 
 		// // update scores array
-		// if (roomScores[room] == null)
-		// 	roomScores[room] = [];
-		// if (roomScores[room][team] == null)
-		// 	roomScores[room][team] = 0;
+		// if (roomScores[room] == null) {
 
+		// 	roomScores[room] = new Array(teams.length);
+
+		// 	teams.forEach((item, index) => {
+		// 		roomScores[room][index] = 5;
+		// 	})
+		// }
 
 		ActiveUsers();
+
 	});
 
+	function outputScores(room, rmScores) {
+		console.log("rmScores OS(): ", (rmScores))
+		socket.emit("Scores", room, rmScores, "abcdefg")
+		// socket.emit("Scores", room, rmScores)
+		if (roomScores[room] != null)
+			setTimeout(outputScores, 5000, room, rmScores)
+	}
+
+	socket.on("startScoreKeeping", (room, teams) => {
+		// update scores array
+		if (roomScores[room] == null) {
+
+			roomScores[room] = new Array(teams.length);
+
+			teams.forEach((item, index) => {
+				roomScores[room][index] = 0;
+			})
+
+			outputScores(room, roomScores);
+
+			console.log("started score Keeping: ", roomScores[room])
+		}
+
+	})
+
+	socket.on("incrementScore", (amount, trgtTeam, roomId) => {
+		// if (roomScores[roomId][trgtTeam] != null) {
+		roomScores[roomId][trgtTeam] += parseInt(amount);
+		console.log("add to score for team: ", trgtTeam, ", result: ", roomScores[roomId][trgtTeam])
+		// } else {
+		// roomScores[roomId][trgtTeam] = 0;
+		// }
+		// outputScores(roomId, roomScores[trgtTeam]);
+	})
+
+	socket.on("resetscores", (roomId) => {
+		//if (roomScores[roomId] == null) 
+		roomScores[roomId].forEach((item, index) => {
+			roomScores[roomId][index] = 0;
+		})
+		console.log("Scores for room: ", roomId, ", result: ", roomScores[roomId]);
+	})
 
 	// Listen for tipMessgae
 	socket.on('Tip', (currentUser, tippedUser, coins) => {
