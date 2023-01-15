@@ -126,11 +126,14 @@ socket.on("vote", (msg_ID, vote, msg_username) => {
 // if ()
 socket.emit("startScoreKeeping", room, teams)
 
+
+
+
 socket.on("Scores", (roomName, scoreData) => {
   if (room == roomName) {
-    console.log("Scores Event: ", scoreData[room])
+    console.log("Scores Event: ", scoreData)
 
-    scoreData[room].forEach((item, index) => {
+    scoreData.forEach((item, index) => {
       scores[index] = item;
     })
 
@@ -145,17 +148,20 @@ socket.on("Scores", (roomName, scoreData) => {
   }
 });
 
-setTimeout(addToScore, 10000);
+
+
+setTimeout(addToScore, 1000);
 
 var team2addScoreTo = 0;
 teams.forEach((item, index) => {
   if (team == item)
     team2addScoreTo = index;
 })
+
 function addToScore() {
   console.log("adding to score");
   socket.emit("incrementScore", 1, team2addScoreTo, room)
-  setTimeout(addToScore, 10000)
+  setTimeout(addToScore, 5000)
 }
 
 function resetScores(winningTeam) {

@@ -1335,8 +1335,8 @@ const timeElapsedString = date => {
 	return Math.floor(seconds) + ' seconds';
 };
 
-var roomScores = {};
-var roomNames = {};
+var roomScores = [];
+var roomNames = [];
 var activeRoomandUsers = {};
 
 
@@ -1475,8 +1475,8 @@ io.on('connection', socket => {
 
 	socket.on('connectNewStream', (roomId, peerId, userData) => {
 		console.log("New User connected:");
-		console.log("room: ", roomId, ", ", "peerId: ", peerId);
-		console.log("userData: ", userData);
+		// console.log("room: ", roomId, ", ", "peerId: ", peerId);
+		// console.log("userData: ", userData);
 		socket.join(roomId)
 
 		if (activeRoomandUsers[roomId] == null) {
@@ -1487,7 +1487,7 @@ io.on('connection', socket => {
 		const ids = activeRoomandUsers[roomId].map(o => o.name)
 		activeRoomandUsers[roomId] = activeRoomandUsers[roomId].filter(({ id }, index) => !ids.includes(id, index + 1))
 
-		console.log(`Active Users in room: ${roomId}:`, activeRoomandUsers[roomId]);
+		// console.log(`Active Users in room: ${roomId}:`, activeRoomandUsers[roomId]);
 
 		io.emit('userConnected', activeRoomandUsers[roomId], roomId, userData);
 		// io.emit('getActiveUsers', roomId, activeRoomandUsers[roomId]);
@@ -1580,17 +1580,26 @@ io.on('connection', socket => {
 
 	});
 
-	// function outputScores() {
-	// 	if (roomScores != null) {
-	// 		console.log("rmScores: ", (roomScores))
-	// 		roomScores.forEach((item, index) => {
-	// 			let roomname = roomNames[index];
-	// 			if (roomScores[roomname] != null)
-	// 				socket.emit("Scores", roomname, roomScores)
-	// 		})
-	// 		setTimeout(outputScores, 5000)
-	// 	}
-	// }
+	function outputScores() {
+		// if (roomScores != null) {
+			console.log("rmScores: ", roomScores[roomNames[0]])
+			// roomScores.forEach((item, index) => {
+			console.log("RM Length: ", roomNames.length)
+			for (i = 0; i < roomNames.length; i++) {
+				// console.log(i);
+				let roomname = roomNames[i];
+				// console.log("RoomScores[roomname]: ", roomScores[i].roomname)
+
+				// if (roomScores[roomname] != null) {
+					socket.emit("Scores", roomname, roomScores[roomNames[i]])
+				// }
+
+			}
+
+			// })
+			// setTimeout(outputScores, 5000)
+		// }
+	}
 
 	// //delay this until define in the startScoreKeeping socket is triggered
 	// setTimeout(() => {
@@ -1609,25 +1618,32 @@ io.on('connection', socket => {
 				roomScores[room][index] = 0;
 			})
 
-			function outputScores(room, rmScores) {
-				console.log("rmScores OS(): ", (rmScores))
-				socket.emit("Scores", room, rmScores)
-				// socket.emit("Scores", room, rmScores)
-				if (roomScores[room] != null)
-					setTimeout(outputScores, 5000, room, rmScores)
-			}
+			// function outputScores(room, rmScores) {
+			// 	console.log("rmScores OS(): ", (rmScores))
+			// 	socket.emit("Scores", room, rmScores)
+			// 	// socket.emit("Scores", room, rmScores)
+			// 	if (roomScores[room] != null)
+			// 		setTimeout(outputScores, 5000, room, rmScores)
+			// }
 
-			outputScores(room, roomScores);
+			// outputScores(room, roomScores);
 
 			console.log("Room names: ", roomNames[roomScores.length]);
-			console.log("started score Keeping: ", roomScores[room]);
+			console.log("started score Keeping: ", roomScores[room], "for Room: ", room);
 		}
 
 	})
 
 	socket.on("incrementScore", (amount, trgtTeam, roomId) => {
+		// to team SCores
 		roomScores[roomId][trgtTeam] += parseInt(amount);
+		//Logg the scores
 		console.log("add to score for team: ", trgtTeam, ", result: ", roomScores[roomId][trgtTeam])
+
+		//delay this until define in the incrementSCore socket is triggered
+		// setTimeout(() => {
+			outputScores()
+		// }, 5000)
 	})
 
 	socket.on("resetscores", (roomId) => {
