@@ -20,7 +20,7 @@
   <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> -->
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <title>Enter Room: {{roomObj[0]["topic"]}}</title>
+  <title>Enter Room: </title>
 </head>
 
 <body>
@@ -29,7 +29,8 @@
       <div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:400px">
         <p hidden id="roomModalInfo"></p>
         <header class="w3-container w3-teal">
-          <h2>Enter Room</h2>
+          <h2>Enter Room:</h2>
+          <h3>{{roomObj[0]["topic"]}}<h3>
         </header>
         <div class="w3-center"><br>
           <span onclick="document.getElementById('id01').style.display='none'"
@@ -57,19 +58,22 @@
               </tbody>
             </table>
             <form method="POST" action="/room">
-              <label><b>Username</b></label>
-              <input class="w3-input w3-border w3-margin-bottom" type="text" placeholder="Enter Nickname"
+              <label><b>Username:</b></label>
+              <h3 id="regularname" style="background: lightgrey;">  {{userOBJ[0]["username"]}} </h3>
+
+              <input class="w3-input w3-border w3-margin-bottom" style="display: none;" type="text" placeholder="Enter Nickname"
                 name="nickname" id="nickname">
-              <div class="w3-input">
-                <label for="teams">Choose a Team:</label>
-                <p id="teamList"></p>
-                <select name="team" id="teamSelector">
-                </select>
-                <br><br>
-              </div>
+              
+                <div class="w3-input" style="margin: auto;">
+                  <label for="teams">Choose a Team:</label>
+                  <p id="teamList"></p>
+                  <select name="team" id="teamSelector">
+                  </select>
+                  <br><br>
+                </div>
               <button id="enter" type="submit" class="w3-button w3-block w3-green w3-section w3-padding"
                 onclick=submission()>Enter</button>
-              <input class="w3-check w3-margin-top" type="checkbox" checked="checked" id="secret" name="secretMode">
+              <input class="w3-check w3-margin-top" type="checkbox" id="secret" name="secretMode">
               Secret Mode
               <input hidden type="text" id="roomOBJInput" name="roomObj">
               <input hidden type="text" id="userOBJInput" name="userObj">
@@ -97,6 +101,21 @@
     var userOBJ = document.getElementById("userOBJInput");
     roomOBJ.value = document.getElementById("roomObj").innerText;
     userOBJ.value = document.getElementById("userJSON").innerText;
+    let secretCheckBox = document.getElementById("secret")
+    let nicknameBox = document.getElementById("nickname")
+    let regularname = document.getElementById("regularname")
+    secretCheckBox.addEventListener("click",
+      function(e) {
+        if (!(e.target.checked)) {
+          nicknameBox.style.display = "none";
+          nicknameBox.value = "";
+          regularname.hidden = false;
+        } else {
+          nicknameBox.style.display = "block";
+          regularname.hidden = true;
+        }
+      }
+    )
     // }
   </script>
 

@@ -775,7 +775,7 @@ app.get(['/createRoom'], (request, response) => {
 	})
 });
 
-// http://localhost:3000/modal - display the home page
+// http://localhost:3000/modal - going to the Modal page where the team and user name is choosen
 app.post(['/modal', '/modal:id'], (request, response) => isLoggedin(request, settings => {
 	// console.log("Modal Resp:", request.body);
 	const id = request.params.id;
@@ -815,7 +815,7 @@ app.post(['/modal', '/modal:id'], (request, response) => isLoggedin(request, set
 // 	// response.render('/room.html', { roomObj: roomJSON, username: request.session.account_username, role: request.session.account_role, userJSON: userJSON, team: team, secretMode: secretMode, nickname: nickname});
 // }));
 
-// http://localhost:3000/room - display the room page
+// http://localhost:3000/room - display the room page with the live chat and video
 app.post(['/room', '/room:id'], (request, response) => isLoggedin(request, settings => {
 
 	const id = request.params.id; //params = {id:"000000"} for joining or creating a room 
@@ -1495,7 +1495,7 @@ io.on('connection', socket => {
 			// filter out disconnected user
 
 			var disconnectedUser = activeRoomandUsers[roomId].find(user => user.id === socket.id);
-			
+
 			// clear scores array for empty room
 			if (activeRoomandUsers[roomId].length == 0) {
 				roomScores[roomId] = null;
@@ -1579,13 +1579,7 @@ io.on('connection', socket => {
 
 	});
 
-	function outputScores(room, rmScores) {
-		console.log("rmScores OS(): ", (rmScores))
-		socket.emit("Scores", room, rmScores, "abcdefg")
-		// socket.emit("Scores", room, rmScores)
-		if (roomScores[room] != null)
-			setTimeout(outputScores, 5000, room, rmScores)
-	}
+
 
 	socket.on("startScoreKeeping", (room, teams) => {
 		// update scores array
@@ -1597,6 +1591,14 @@ io.on('connection', socket => {
 				roomScores[room][index] = 0;
 			})
 
+			function outputScores(room, rmScores) {
+				console.log("rmScores OS(): ", (rmScores))
+				socket.emit("Scores", room, rmScores)
+				// socket.emit("Scores", room, rmScores)
+				if (roomScores[room] != null)
+					setTimeout(outputScores, 5000, room, rmScores)
+			}
+			
 			outputScores(room, roomScores);
 
 			console.log("started score Keeping: ", roomScores[room])

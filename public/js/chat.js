@@ -123,43 +123,38 @@ socket.on("vote", (msg_ID, vote, msg_username) => {
   }
 });
 
-socket.on("Scores", (roomName, scoreData, text) => {
+// if ()
+socket.emit("startScoreKeeping", room, teams)
+
+socket.on("Scores", (roomName, scoreData) => {
   if (room == roomName) {
-    // console.log("Scores test text: ", text)
     console.log("Scores Event: ", scoreData[room])
-    // let dscores = JSON.parse(scoreData);
-    // let dscores = scoreData;
-    // console.log("scores: ", dscores)
 
     scoreData[room].forEach((item, index) => {
       scores[index] = item;
     })
 
     teams.forEach((item, index) => {
+      // update score text in the scoreboards
       var teamScore = document.getElementById(`${item}#Score`)
       teamScore.innerText = scores[index]
 
-      //let tdScore = document.getElementById("tdScore#" + item);
-      //tdScore.innerHTML = `<strong>${scores[index]}</strong>`;
-
-      if (scores[item] > 999)
+      if (scores[index] > 999)
         resetScores(item);
     })
   }
 });
 
+setTimeout(addToScore, 10000);
 
-socket.emit("startScoreKeeping", room, teams)
-
-setTimeout(addToScore, 10000)
-
+var team2addScoreTo = 0;
+teams.forEach((item, index) => {
+  if (team == item)
+    team2addScoreTo = index;
+})
 function addToScore() {
-  var place = 0;
-  teams.forEach((item, index) => {
-    if (team == item)
-      place = index;
-  })
-  socket.emit("incrementScore", 1, place, room)
+  console.log("adding to score");
+  socket.emit("incrementScore", 1, team2addScoreTo, room)
   setTimeout(addToScore, 10000)
 }
 
@@ -256,7 +251,7 @@ chatForm.addEventListener("submit", (e) => {
 
     updateChatTimer(15);
 
-    socket.emit("incrementScore", 1, team, room)
+    socket.emit("incrementScore", 1, team2addScoreTo, room)
   }
 
 });
@@ -286,21 +281,38 @@ function randomNumber(min, max) {
 
 function createMessage(message, replyTo) {
 
-  //check for secret mode
-  var uname //= document.createElement("strong");
-  if (message.nckName == '')
-    uname = message.username;
-  else if (message.secretMode == 'on') {
-    uname = message.nckName; // output nickname
-  } else {
-    // output username and nickname
-    uname = + message.username + " AKA " + message.nckName;
-  }
 
   var msgBlockPrototype = document.getElementById("msgFormat");
   var msgBlock = msgBlockPrototype.cloneNode(true);
   msgBlock.id = message.username + "-" + message.time;
   msgBlock.hidden = false;
+
+  let usernameTag = msgBlock.querySelector('#userTag');
+  let userstats = msgBlock.querySelector('#userStats');
+  let teamStat = msgBlock.querySelector('#teamStat');
+  let xpStat = msgBlock.querySelector('#xpStat');
+
+  //check for secret mode
+  var uname //= document.createElement("strong");
+  if (message.nckName == '')
+    uname = message.username;
+  else if (message.secretMode == 'on') {
+
+    uname = message.nckName; // output nickname
+    // } else {
+    //   // output username and nickname
+    //   uname = + message.username + " AKA " + message.nckName;
+  }
+
+  if (!(message.nckName) || message.username == "BOT") {
+    let secretIcon = msgBlock.querySelector('#secretIcon');
+    secretIcon.style.display = "none";
+    console.log(message.username + "-" + message.nckName)
+  }
+  if (message.username == username) {
+    usernameTag.style.color = "cyan"
+  }
+
 
   if (message.username == "BOT") {
     uname = "CHATBOT";
@@ -320,16 +332,16 @@ function createMessage(message, replyTo) {
   let timeTag = msgBlock.querySelector('#timeTag');
   timeTag.innerText = message.time;
 
-  let usernameTag = msgBlock.querySelector('#userTag');
-  let userstats = msgBlock.querySelector('#userStats');
-  let teamStat = msgBlock.querySelector('#teamStat');
-  let xpStat = msgBlock.querySelector('#xpStat');
+
   usernameTag.innerText = uname;
   xpStat.innerText = "XP: " + message.xp;
   teamStat.innerText = "Team: " + message.team;
-  usernameTag.addEventListener("mouseover", () => {
-    userstats.hidden = false;
-  })
+
+  if (message.xp != undefined) {
+    usernameTag.addEventListener("mouseover", (e) => {
+      userstats.hidden = false;
+    })
+  }
 
   usernameTag.addEventListener("mouseleave", () => {
     userstats.hidden = true;
@@ -403,10 +415,10 @@ function createMessage(message, replyTo) {
     }
   })
   hideBtn.addEventListener("mouseleave", (event) => {
-    hideIcon.style = "font-size:16px; color:rgb(145, 240, 255);"
+    hideIcon.style = "font-size:16px; color:black;"
   });
   hideBtn.addEventListener("mouseover", function () {
-    hideIcon.style = "font-size:16px; color:rgb(145, 210, 255);"
+    hideIcon.style = "font-size:16px; color:rgb(120, 60, 143);"
   });
 
   let videoBtn = msgBlock.querySelector('#videoBtn');
@@ -499,7 +511,7 @@ function createMessage(message, replyTo) {
         blockIcon.style = "font-size:16px; color:grey;";
       }
     })
-
+    // block button event listener
     blockBtn.addEventListener("click", function () {
       if (username != message.username) {
         addFriend(username, message.username, "remove");
@@ -608,7 +620,7 @@ function createMessage(message, replyTo) {
 
 
 
-// Output message to DOM
+// Output message to chatbox
 function outputMessage(message, replyTo) {
   const div = document.createElement("div");
   div.id = message.username + "-" + message.time;
@@ -619,9 +631,8 @@ function outputMessage(message, replyTo) {
   const header = document.createElement("div"); topDiv.appendChild(header);
   header.classList.add("meta"); header.style += "margin-top: 10px; padding: 3px;";
 
-  // console.log('message: ', message)
   //check for secret mode
-  var uname //= document.createElement("strong");
+  var uname;
   if (message.nckName == '')
     uname = "• " + message.username;
   else if (message.secretMode == 'on') {
@@ -638,8 +649,6 @@ function outputMessage(message, replyTo) {
       + `<span style="color: black;font-size: 12px; padding: 3px;"> ${" Team: " + message.team}</span>`
       + `<span style="color: blue;font-size: 12px"> ${" XP: " + message.xp} </span>`
       + `<i class="fas fa-clock"></i><span style="font-size: 12px;"> ${" " + message.time} </span></div>`;
-    // header.innerHTML += `<span><i class="fas fa-reply-all"></i> </span>`;
-    // header.innerHTML += `<i class="fas fa-reply"></i>`;
   }
 
   const commentTbl = document.createElement("div");
@@ -763,11 +772,9 @@ function outputMessage(message, replyTo) {
   //Tip in chat Button
   if (username != message.username) {
     const coinBtn = document.createElement("div");
-    // coinBtn.innerText = "+1";
     const coin = document.createElement("i");
     coin.className = "fas fa-coins";
     coin.style = "font-size:16px; color:silver;";
-    // coinBtn.type = "submit";
     coinBtn.appendChild(coin);
     commentTbl.appendChild(coinBtn);
 
@@ -780,13 +787,9 @@ function outputMessage(message, replyTo) {
     coinBtn.addEventListener("click", function () {
       if (username != message.username) {
         tipUsers(username, message.username, 1);
-        // console.log(`${username} Tipped ${message.username}`);
         socket.emit("chatMessageTo", `$$$ ${username} Tipped ${message.username} $$$`, message.username);
-
       }
     });
-
-
   }
 
   //Follow in chat Button
@@ -796,16 +799,12 @@ function outputMessage(message, replyTo) {
     const friendIcon = document.createElement("i");
 
     if (friendsList.length > 0) {
-      //tdFriend.append(friendObj);
       for (const [index, val] of friendsList.entries()) {
-        // friendsList.forEach((item, indx) => {
         if (message.username == val) {
           friendIcon.className = "fas fa-check";
-          //console.log(val, " is followed");
           break;
         } else {
           friendIcon.className = "fas fa-plus-square";
-          //console.log(val, " is not followed");
         }
       }
     } else {
@@ -860,7 +859,6 @@ function outputMessage(message, replyTo) {
     const deleteIcon = document.createElement("i");
     deleteIcon.className = "fas fa-trash";
     deleteIcon.style = "font-size:16px;color:blue;";
-    // deleteIcon.onclick = deleteIconUser();
     deleteIconBtn.appendChild(deleteIcon);
 
     commentTbl.appendChild(deleteIconBtn);

@@ -60,10 +60,13 @@
                 <div id="msgFormat" class="message" hidden>
 
                     <div class="meta" style="padding: 3px; color: rgb(15, 15, 15)">
-                        <span id="userTag"
-                            style="font-size: 12px; background: rgb(247, 246, 246); float: left; padding: 3px; border-radius: 3px;">
-                            • user6
-                        </span>
+                        <div style="font-size: 12px; background: rgb(247, 246, 246); float: left; padding: 3px; border-radius: 3px;">
+                            <i id="secretIcon" hidden class="fas fa-user-secret" aria-hidden="true"></i>
+                            <span id="userTag">
+                                • user6 <i class="fas fa-user-secret" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                        
                         <i class="fas fa-clock"></i>
                         <span id="timeTag" style="font-size: 12px; margin: auto; padding: 3px;"> 6:43:31pm </span>
                         <span id="userStats" hidden style="float: left; padding: 3px;">
@@ -87,7 +90,7 @@
                             </span>
                             <div id="hideBtn">
                                 <i id="hideIcon" class="fas fa-sliders"
-                                    style="font-size: 16px; color: rgb(143, 229, 255);"></i>
+                                    style="font-size: 16px; color: black;"></i>
                             </div>
                             <span id="extraBtns" hidden>
                                 <span id="coinBtn"><i id="coinIcon" class="fas fa-coins"
