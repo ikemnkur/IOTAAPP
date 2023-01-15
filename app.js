@@ -1597,7 +1597,7 @@ io.on('connection', socket => {
 	// 	outputScores()
 	// }, 5000)
 
-	// Add to te Room sources array
+	// Add to te Room scores array
 	socket.on("startScoreKeeping", (room, teams) => {
 		// update scores array
 		if (roomScores[room] == null) {
