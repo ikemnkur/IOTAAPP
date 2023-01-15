@@ -4,9 +4,9 @@
         <a href="/home" style="margin: 0px 10px 0px 10px;"><i class="fas fa-home"></i></a>
         <a href="/profile" style="margin: 0px 10px 0px 10px;"><i class="fas fa-user-circle"></i></a>
         <a href="/logout" style="margin: 0px 10px 0px 10px;"><i class="fas fa-sign-out-alt"></i></a> -->
-<!-- <i id="settingsBtn" style="margin: 0px 10px 0px 10px;" class="fas fa-cog"></i>
+        <!-- <i id="settingsBtn" style="margin: 0px 10px 0px 10px;" class="fas fa-cog"></i>
         <i id="mediaBtn" style="margin: 0px 10px 0px 10px;" class="fas fa-sliders"></i> -->
-<!-- </div>
+    <!-- </div>
 </nav> -->
 
 {% block title %}Profile{% endblock %}
@@ -65,49 +65,35 @@
                 <tbody>
                     <tr id="rmCfg">
                         <td id="rmCfgTb1">EMPTY</td>
-                        <td id="rmCfgTb2">A2</td>
-                        <td id="rmCfgTb3">B3</td>
-                        <td id="rmCfgTb4">C4</td>
-                        <td id="rmCfgTb5">D5</td>
-                        <td id="rmCfgTb6">E6</td>
-                        <td id="rmCfgTb7">F1</td>
+                        <td id="rmCfgTb2"></td>
+                        <td id="rmCfgTb3"></td>
+                        <td id="rmCfgTb4"></td>
+                        <td id="rmCfgTb5"></td>
+                        <td id="rmCfgTb6"></td>
+                        <td id="rmCfgTb7"></td>
                     </tr>
                 </tbody>
             </table>
             <!-- Codes by Quackit.com -->
             <p hidden id="roomCfgTblData">{{ stats.roomConfig }}</p>
         </div>
-        <!-- List of Friends -->
+
         <div class="profile-detail">
             <strong>Friends</strong>
             <table id="friendTbl">
-                <tbody>
-                    <tr id="friendTblItem" hidden>
-                        <td><button> Gift </button></td>
-                        <td><button> Remove </button></td>
-                        <td><button> Message </button></td>
-                        <td id="uname"> Test USER NAme</td>
-                    </tr>
-                </tbody>
+
             </table>
             <p hidden id="friendTblData">{{ stats.friends }}</p>
         </div>
-
-        <!-- List of Blocked users -->
         <div class="profile-detail">
             <strong>Blocked Users</strong>
             <table id="blockedTbl">
-                <tbody>
-                    <tr id="blockedTblItem" hidden>
-                        <td><button> Unblock </button></td>
-                        <td><button> Remove </button></td>
-                        <td id="uname"> Test USER NAme</td>
-                    </tr>
-                </tbody>
+
             </table>
             <p hidden id="blockedTblData">{{ stats.blockedUsers }}</p>
         </div>
         <a class="profile-btn" href="/edit_profile">Edit Details</a>
+
 
     </div>
 
@@ -136,13 +122,6 @@
 
     table.GeneratedTable thead {
         background-color: #4c79a9;
-    }
-
-    tableDiv {
-        padding: 5px;
-        max-height: 500px;
-        overflow-y: scroll;
-        border: 1px solid black;
     }
 </style>
 
