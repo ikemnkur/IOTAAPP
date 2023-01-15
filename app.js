@@ -1336,6 +1336,7 @@ const timeElapsedString = date => {
 };
 
 var roomScores = {};
+var roomNames = {};
 var activeRoomandUsers = {};
 
 
@@ -1579,13 +1580,30 @@ io.on('connection', socket => {
 
 	});
 
+	// function outputScores() {
+	// 	if (roomScores != null) {
+	// 		console.log("rmScores: ", (roomScores))
+	// 		roomScores.forEach((item, index) => {
+	// 			let roomname = roomNames[index];
+	// 			if (roomScores[roomname] != null)
+	// 				socket.emit("Scores", roomname, roomScores)
+	// 		})
+	// 		setTimeout(outputScores, 5000)
+	// 	}
+	// }
 
+	// //delay this until define in the startScoreKeeping socket is triggered
+	// setTimeout(() => {
+	// 	outputScores()
+	// }, 5000)
 
+	// Add to te Room sources array
 	socket.on("startScoreKeeping", (room, teams) => {
 		// update scores array
 		if (roomScores[room] == null) {
 
 			roomScores[room] = new Array(teams.length);
+			roomNames[roomScores.length] = room;
 
 			teams.forEach((item, index) => {
 				roomScores[room][index] = 0;
@@ -1598,22 +1616,18 @@ io.on('connection', socket => {
 				if (roomScores[room] != null)
 					setTimeout(outputScores, 5000, room, rmScores)
 			}
-			
+
 			outputScores(room, roomScores);
 
-			console.log("started score Keeping: ", roomScores[room])
+			console.log("Room names: ", roomNames[roomScores.length]);
+			console.log("started score Keeping: ", roomScores[room]);
 		}
 
 	})
 
 	socket.on("incrementScore", (amount, trgtTeam, roomId) => {
-		// if (roomScores[roomId][trgtTeam] != null) {
 		roomScores[roomId][trgtTeam] += parseInt(amount);
 		console.log("add to score for team: ", trgtTeam, ", result: ", roomScores[roomId][trgtTeam])
-		// } else {
-		// roomScores[roomId][trgtTeam] = 0;
-		// }
-		// outputScores(roomId, roomScores[trgtTeam]);
 	})
 
 	socket.on("resetscores", (roomId) => {
