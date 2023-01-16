@@ -60,7 +60,7 @@ try {
 
 var activeUsers;
 
-var colors = ["green", "cyan", "pink", "gold", "agua", "lightred", "thistle", "lightcyan", "salmon", "crismon", "springgreen", "sykblue", "yellowgreen", "fuschia", "greenyellow", "lavender", "magenta"]
+var colors = ["green", "cyan", "pink", "gold", "agua", "lightred", "thistle", "lightcyan", "salmon", "crismon", "springgreen", "sykblue", "yellowgreen", "fuchsia", "greenyellow", "lavender", "magenta"]
 var focusedStyle = "background: radial-gradient(#ac1b1b, transparent);"
 const socket = io({
   transports: ["websocket"], pingInterval: 1000 * 60 * 5,
@@ -131,7 +131,7 @@ socket.emit("startScoreKeeping", room, teams)
 
 socket.on("Scores", (roomName, scoreData) => {
   if (room == roomName) {
-    console.log("Scores Event: ", scoreData)
+    // console.log("Scores Event: ", scoreData)
 
     scoreData.forEach((item, index) => {
       scores[index] = item;
@@ -159,7 +159,7 @@ teams.forEach((item, index) => {
 })
 
 function addToScore() {
-  console.log("adding to score");
+  // console.log("adding to score");
   socket.emit("incrementScore", 1, team2addScoreTo, room)
   setTimeout(addToScore, 5000)
 }
@@ -184,11 +184,9 @@ function updates() {
 
 // Message from server BOT
 socket.on("messageTo", (message, toUser) => {
-  // console.log(`Socket IO Message to: ${toUser}`, message);
   message.username = "BOT";
   if (toUser == username)
-    createMessage(message, null)
-  // outputMessage(message, null);
+    createMessage(message, "No - One")
 
   // Scroll down
   chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -216,7 +214,7 @@ function replySubmit(e, replyTo) {
 }
 
 function msgSubmit(e, replyTo) {
-  e.preventDefault();
+  e.preventDefault(); // do not redirect the user to a different page
 
   // Get message text
   let msg = e.target.elements.msg.value;
@@ -224,43 +222,25 @@ function msgSubmit(e, replyTo) {
   msg = msg.trim();
 
   if (!msg) {
-    return false;
+    return false; // exit event is there is no data/text contained in the message
   }
+
   var team = document.getElementById("team").innerText;
   var nickname = document.getElementById("nickname").innerText;
+
   // Emit message to server
   if (replyTo == null)
     socket.emit("chatMessage", msg + "ßΓ" + nickname + "ßΓ" + team + "ßΓ" + xp, null);
-  else
-    socket.emit("replyMessage", "REPLY: [" + replyTo + "] " + msg + "ßΓ" + nickname + "ßΓ" + team + "ßΓ" + xp, replyTo);
+  else // if the user is replying to another message
+    socket.emit("replyMessage",  msg + "ßΓ" + nickname + "ßΓ" + team + "ßΓ" + xp, replyTo);
 
   // Clear input
   e.target.elements.msg.value = "";
   e.target.elements.msg.focus();
 }
 
+// Variable to Control spam prevention
 var mustWait = false;
-
-// Message submit
-chatForm.addEventListener("submit", (e) => {
-
-  if (mustWait == false) {
-    console.log("submitted a message")
-    mustWait = true;
-    msgSubmit(e);
-    var timer = document.getElementById("timer");
-    timer.hidden = false;
-    var clockIconBad = document.getElementById("clockIconBad");
-    var clockIconGood = document.getElementById("clockIconGood");
-    clockIconBad.hidden = false;
-    clockIconGood.hidden = true;
-
-    updateChatTimer(15);
-
-    socket.emit("incrementScore", 1, team2addScoreTo, room)
-  }
-
-});
 
 function updateChatTimer(time) {
   var clockIconBad = document.getElementById("clockIconBad");
@@ -268,7 +248,7 @@ function updateChatTimer(time) {
   var timer = document.getElementById("timer");
   timer.innerText = time + "s";
   time--;
-  if (time > 0) {
+  if (time >= 0) {
     // document.getElementById("msg").value = "";
     setTimeout(updateChatTimer, 1000, time);
   }
@@ -285,13 +265,17 @@ function randomNumber(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 }
 
-function createMessage(message, replyTo) {
+// Variable to track the user that one is replying to
+var replyToUser;
 
+// Posting a message to chat server
+function createMessage(message, replyTo) {
 
   var msgBlockPrototype = document.getElementById("msgFormat");
   var msgBlock = msgBlockPrototype.cloneNode(true);
   msgBlock.id = message.username + "-" + message.time;
   msgBlock.hidden = false;
+
 
   let usernameTag = msgBlock.querySelector('#userTag');
   let userstats = msgBlock.querySelector('#userStats');
@@ -299,26 +283,22 @@ function createMessage(message, replyTo) {
   let xpStat = msgBlock.querySelector('#xpStat');
 
   //check for secret mode
-  var uname //= document.createElement("strong");
-  if (message.nckName == '')
+  var uname;
+  if (message.nickname == '')
     uname = message.username;
   else if (message.secretMode == 'on') {
-
-    uname = message.nckName; // output nickname
-    // } else {
-    //   // output username and nickname
-    //   uname = + message.username + " AKA " + message.nckName;
+    // output nickname
+    uname = message.nickname;
   }
 
-  if (!(message.nckName) || message.username == "BOT") {
+  if (!(message.nickname) || message.username == "BOT") {
     let secretIcon = msgBlock.querySelector('#secretIcon');
     secretIcon.style.display = "none";
-    console.log(message.username + "-" + message.nckName)
+    console.log(message.username + "-" + message.nickname)
   }
   if (message.username == username) {
-    usernameTag.style.color = "cyan"
+    usernameTag.style.color = "blue"
   }
-
 
   if (message.username == "BOT") {
     uname = "CHATBOT";
@@ -326,17 +306,14 @@ function createMessage(message, replyTo) {
     // msgBlock.style = `background: #9bacdf;`
   }
 
-  if (replyTo != null) {
-    let replyTag = msgBlock.querySelector('#replyTag');
-    replyTag.innerText = replyTo;
-    replyTag.hidden = false;
-  }
-
-  let messageText = msgBlock.querySelector('#msgText');
+  var messageText = msgBlock.querySelector('#msgTextDiv');
   messageText.innerText = message.msgText;
 
   let timeTag = msgBlock.querySelector('#timeTag');
   timeTag.innerText = message.time;
+
+
+
 
 
   usernameTag.innerText = uname;
@@ -517,7 +494,7 @@ function createMessage(message, replyTo) {
         blockIcon.style = "font-size:16px; color:grey;";
       }
     })
-    // block button event listener
+    // block button event listenerd
     blockBtn.addEventListener("click", function () {
       if (username != message.username) {
         addFriend(username, message.username, "remove");
@@ -548,8 +525,13 @@ function createMessage(message, replyTo) {
 
   // handles replying to messages
   if (1) {
-    var reply = { action: false, target: "" }
-    var throttle = false;
+    // var reply = { action: false, target: "" }
+
+    // if (replyTo != null)
+    //   reply = { action: true, target: replyTo };
+    // console.log("reply: " + replyTo);
+
+    // var throttle = false;
 
     var inputMsg = document.getElementById("msg");
     var submitBtn = document.getElementById("submitBtn");
@@ -562,389 +544,135 @@ function createMessage(message, replyTo) {
       }
     })
 
+    // Click on the cancel button 
     cancelBtn.addEventListener("click", () => {
       cancelBtn.style = "display: none";
-      inputMsg.value = ''; reply.action = false;
+      inputMsg.value = '';
+      inputMsg.placeholder = "Enter Message...";
+      // reply.action = false;
     })
 
+    //Click on the Send button
     submitBtn.addEventListener("click", () => {
       cancelBtn.style = "display: none";
+      inputMsg.placeholder = "Enter Message...";
     })
 
+
+
+    // press the enter key to sumbit
     chatForm.addEventListener("submit", (e) => {
       e.preventDefault();
+      console.log("sumbission: ", mustWait);
+
       if (mustWait == false) {
+        // console.log("submitted a message")
+    
+        // msgSubmit(e);
+        var timer = document.getElementById("timer");
+        timer.hidden = false;
+        var clockIconBad = document.getElementById("clockIconBad");
+        var clockIconGood = document.getElementById("clockIconGood");
+        clockIconBad.hidden = false;
+        clockIconGood.hidden = true;
+        mustWait = true;
+        updateChatTimer(15);
+    
+        socket.emit("incrementScore", 1, team2addScoreTo, room)
+      // }
+    
+      // if (mustWait == false) {
         inputMsg.placeholder = "Enter Message...";
-        if (reply.action == true)
-          replySubmit(e, reply.target);
+        console.log("ReplyTo: " + replyToUser);
+        // if (reply.action == true)
+        if (replyToUser)
+          replySubmit(e, replyToUser);
+        // replySubmit(e, reply.target);
         else
           msgSubmit(e, null);
-        reply.action = false;
+        // reply.action = false;
       }
 
     });
 
-    var cancelBtn = document.getElementById("cancelBtn");
+    // let cancelBtn = document.getElementById("cancelBtn");
+    let replyBtn = msgBlock.querySelector("#replyBtn");
 
-    msgBlock.addEventListener('click', function (evt) {
-      // var o = this,
-      // ot = this.textContent;
-      if (!throttle && evt.detail === 3) {
-        // this.textContent = 'Triple-clicked!';
+    let messageText = msgBlock.querySelector('#msgTextDiv');
 
-        cancelBtn.style = "display: block";
-        inputMsg.placeholder = "Replying to " + message.username + " AKA " + message.nickname;
-        reply.action = true;
-        reply.target = message.username;
-        throttle = true;
-        setTimeout(function () {
-          // o.textContent = ot;    
-          throttle = false;
-        }, 1000);
+    let replyTag = msgBlock.querySelector("#replyTag");
+    let replyUser = msgBlock.querySelector('#replyUser');
+
+    // let replyTag = messageText.childNodes.item("replyTag")
+    // let replyUser = replyTag.childNodes.item('replyUser');
+
+
+    if (replyTo) {
+      // let replyTag = msgBlock.querySelector('#replyTag');
+      // let replyUser = msgBlock.querySelector('#replyUser');
+      replyUser.innerText = replyTo;
+      console.log("ReplyTo: " + replyTo);
+
+      if (username == replyTo) {
+        replyTag.style.background = "yellow";
       }
-    });
-  }
 
-  var chatbox = document.getElementById("chatBox")
-  chatbox.append(msgBlock);
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Output message to chatbox
-function outputMessage(message, replyTo) {
-  const div = document.createElement("div");
-  div.id = message.username + "-" + message.time;
-  div.classList.add("message");
-  var topDiv = document.createElement("div"); //topDiv.classList.add("meta");
-  // topDiv.style = "display: flex; align-items: flex-start;";
-  div.appendChild(topDiv);
-  const header = document.createElement("div"); topDiv.appendChild(header);
-  header.classList.add("meta"); header.style += "margin-top: 10px; padding: 3px;";
-
-  //check for secret mode
-  var uname;
-  if (message.nckName == '')
-    uname = "• " + message.username;
-  else if (message.secretMode == 'on') {
-    uname = "• " + message.nckName; // output nickname
-  } else {
-    // output username and nickname
-    uname = "• " + message.username + " AKA " + message.nckName;
-  }
-  // Output the team and xp info
-  if (message.username == "BOT") {
-    header.innerHTML = `<div style="font-size: 12px; float: left; padding: 3px"> • CHATBOT  <i class="fas fa-clock"></i><span> <span>${" " + message.time} </span> </div>`;
-  } else {
-    header.innerHTML += `<div style="font-size: 12px; float: left; padding: 3px"> ${"• " + message.username}`
-      + `<span style="color: black;font-size: 12px; padding: 3px;"> ${" Team: " + message.team}</span>`
-      + `<span style="color: blue;font-size: 12px"> ${" XP: " + message.xp} </span>`
-      + `<i class="fas fa-clock"></i><span style="font-size: 12px;"> ${" " + message.time} </span></div>`;
-  }
-
-  const commentTbl = document.createElement("div");
-  commentTbl.className = "chat-commentTbl";
-  commentTbl.show = false;
-
-  //HANDLE Show Buttons
-  var showBtnIcon = document.createElement("i");
-  showBtnIcon.className = "fas fa-sliders";
-  showBtnIcon.addEventListener("click", () => {
-    var cancelBtn = document.getElementById("cancelBtn");
-    cancelBtn.style = "display: block";
-    inputMsg.placeholder = "Replying to " + message.username + " AKA " + message.nickname;
-    reply.action = true;
-    reply.target = message.username;
-    throttle = true;
-  })
-
-
-  //HANDLE REPLY
-  var replyIcon = document.createElement("i");
-  replyIcon.className = "fas fa-reply";
-  replyIcon.addEventListener("click", () => {
-    var cancelBtn = document.getElementById("cancelBtn");
-    cancelBtn.style = "display: block";
-    inputMsg.placeholder = "Replying to " + message.username + " AKA " + message.nickname;
-    reply.action = true;
-    reply.target = message.username;
-    throttle = true;
-  })
-
-  // message text
-  const para = document.createElement("div");
-  const paratext = document.createElement("text");
-  paratext.style = " margin: 0px; font-size: 12px;";
-  if (replyTo != null) {
-    console.log("replying to", replyTo)
-    var replyIcon = document.createElement("i");
-    replyIcon.className = "fas fa-reply";
-    replyIcon.style = "padding: 5px";
-    ///para.style = " margin: 0px 5px; display: flex;";
-    para.append(replyIcon);
-    para.id = message.username + "-" + message.time;
-    para.appendChild(paratext);
-    paratext.innerHTML += `<strong style="color:blue;"> REPLY: ${replyTo}: </strong>`;
-  }
-  paratext.innerHTML += `<strong> ${uname} </strong>`;
-  paratext.innerText = message.msgText; //output the message text
-  para.appendChild(paratext);
-
-
-  //add the video chat button
-  if ((username != message.username & message.username != "BOT")) {
-    const cmtJoinUserLive = document.createElement("div")
-    const cmtJoinUserLiveIcon = document.createElement("i")
-    cmtJoinUserLiveIcon.className = "fas fa-video";
-    cmtJoinUserLive.id = "joinUserLive";
-    cmtJoinUserLive.cmt = "color: grey;";
-    cmtJoinUserLive.appendChild(cmtJoinUserLiveIcon);
-    commentTbl.appendChild(cmtJoinUserLive);
-    cmtJoinUserLive.addEventListener("click", function joinUserLive() {
-      if (username != message.username & message.username != "BOT") {
-        videoCallUser(message.username);
-        console.log("joining user live");
-      }
-    })
-  }
-
-  //like and react in chat Button
-  if (1) {
-    const cmtTblDivLike = document.createElement("span");
-    const cmtTblDivLikeNum = document.createElement("div");
-    cmtTblDivLikeNum.innerText = "0"; cmtTblDivLikeNum.id = "like"; cmtTblDivLikeNum.style = " align-self: center;";
-    const cmtTblDivLikeIconDIV = document.createElement("div");
-    const cmtTblDivLikeIcon = document.createElement("i"); cmtTblDivLikeIcon.style = "color: grey;"; cmtTblDivLikeIcon.id = "likeIcon";
-    cmtTblDivLikeIconDIV.append(cmtTblDivLikeIcon);
-    cmtTblDivLikeIcon.className = "fas fa-thumbs-up";
-    cmtTblDivLike.append(cmtTblDivLikeNum); cmtTblDivLike.append(cmtTblDivLikeIconDIV);
-    cmtTblDivLike.style = "display: flex; color: grey;";
-
-    const cmtTblDivHate = document.createElement("span");
-    const cmtTblDivHateNum = document.createElement("div");
-    cmtTblDivHateNum.innerText = "0"; cmtTblDivHateNum.id = "hate"; cmtTblDivHateNum.style = " align-self: center;";
-    const cmtTblDivHateIconDIV = document.createElement("div");
-    const cmtTblDivHateIcon = document.createElement("i");
-    cmtTblDivHateIconDIV.append(cmtTblDivHateIcon); cmtTblDivHateIcon.style = "color: grey;"; cmtTblDivHateIcon.id = "hateIcon";
-    cmtTblDivHateIcon.className = "fas fa-thumbs-down";
-    cmtTblDivHate.append(cmtTblDivHateNum); cmtTblDivHate.append(cmtTblDivHateIconDIV);
-    cmtTblDivHate.style = "display: flex; color: grey;";
-
-    const cmtTblDivReact = document.createElement("div");
-
-    commentTbl.appendChild(cmtTblDivReact);
-    commentTbl.appendChild(cmtTblDivLike);
-    commentTbl.appendChild(cmtTblDivHate);
-
-    cmtTblDivLike.addEventListener("click", function like() {
-      if (username != message.username) {
-        // message.xp += 2;
-        cmtTblDivLikeIcon.style.color = "green";
-        console.log(`${username} liked ${message.username}'s comment`);
-        socket.emit("chatVote", message.username, div.id, 'like');
-        cmtTblDivLike.removeEventListener("click", like);
-      }
-    });
-
-    cmtTblDivHate.addEventListener("click", function hate() {
-      if (username != message.username) {
-        // message.xp -= 1;
-        cmtTblDivHateIcon.style.color = "red";
-        console.log(`${username} hated ${message.username}'s comment`);
-        socket.emit("chatVote", message.username, div.id, 'hate');
-        cmtTblDivHate.removeEventListener("click", hate);
-
-      }
-    });
-
-    header.appendChild(commentTbl);
-  }
-
-  //Tip in chat Button
-  if (username != message.username) {
-    const coinBtn = document.createElement("div");
-    const coin = document.createElement("i");
-    coin.className = "fas fa-coins";
-    coin.style = "font-size:16px; color:silver;";
-    coinBtn.appendChild(coin);
-    commentTbl.appendChild(coinBtn);
-
-    coinBtn.addEventListener("mouseleave", (event) => {
-      coin.style = "font-size:16px; color:silver;"
-    });
-    coinBtn.addEventListener("mouseover", function () {
-      coin.style = "font-size:16px; color:gold;"
-    });
-    coinBtn.addEventListener("click", function () {
-      if (username != message.username) {
-        tipUsers(username, message.username, 1);
-        socket.emit("chatMessageTo", `$$$ ${username} Tipped ${message.username} $$$`, message.username);
-      }
-    });
-  }
-
-  //Follow in chat Button
-  if (username != message.username & message.username != "BOT") {
-    //add friend
-    const friendBtn = document.createElement("div");
-    const friendIcon = document.createElement("i");
-
-    if (friendsList.length > 0) {
-      for (const [index, val] of friendsList.entries()) {
-        if (message.username == val) {
-          friendIcon.className = "fas fa-check";
-          break;
-        } else {
-          friendIcon.className = "fas fa-plus-square";
-        }
-      }
+      replyTag.hidden = false;
+      replyUser.hidden = false;
+      replyToUser = "";
     } else {
-      friendIcon.className = "fas fa-plus-square";
+
+      // let replyTag = messageText.querySelector('#replyTag');
+      // let replyUser = messageText.querySelector('#replyUser');
+      // if (replyUser != null && replyTag != null) {
+      replyTag.hidden = true;
+      replyUser.hidden = true;
+      replyToUser = "";
+      // }
     }
 
-    friendIcon.style = "font-size:16px;color:green;padding-right: 5px;";
-    friendIcon.name = "friend";
-    friendBtn.appendChild(friendIcon);
-    commentTbl.appendChild(friendBtn);
 
-    friendBtn.addEventListener("click", function () {
-      if (username != message.username) {
-        addFriend(username, message.username, friendIcon.className);
-        console.log(`${username} followed ${message.username}`);
-        socket.emit("chatMessageTo", `${username} started following ${message.username}`, message.username);
+    replyBtn.addEventListener('click', function (evt) {
+      cancelBtn.style = "display: block";
+      // Check if your has a nickname
+      if (message.nickname) {
+        inputMsg.placeholder = "Replying to " + message.nickname;
+        replyToUser = message.nickname;
       }
-    });
-  }
+      else {
+        replyToUser = message.username;
+        inputMsg.placeholder = "Replying to " + message.username;
+      }
 
-  //Block in chat Button
-  if (username != message.username & message.username != "BOT") {
-    //block
-    const blockBtn = document.createElement("div");
-    const block = document.createElement("i");
-    block.className = "fas fa-ban";
-    block.style = "font-size:16px; color:red; padding: 5px;";
-
-
-    blockedList.forEach((item, index) => {
-      if (message.username == item)
-        block.style = "font-size:16px; color:grey; padding: 5px;";
+      // reply.action = true;
+      // reply.target = message.username;
     })
 
-    blockBtn.appendChild(block);
+    // replyBtn.addEventListener('click', function (evt) {
+    //   // var o = this,
+    //   // ot = this.textContent;
+    //   if (!throttle && evt.detail === 3) {
+    //     // this.textContent = 'Triple-clicked!';
 
-    commentTbl.appendChild(blockBtn);
-
-    blockBtn.addEventListener("click", function () {
-      if (username != message.username) {
-        addFriend(username, message.username, friendIcon.className);
-        console.log(`${username} blocked ${message.username}`);
-        socket.emit("chatMessageTo", `${username} has blocked you, try to be less annoying.`, message.username);
-      }
-    });
+    //     cancelBtn.style = "display: block";
+    //     // Check if your has a nickname
+    //     if (message.nickname)
+    //       inputMsg.placeholder = "Replying to " + message.nickname;
+    //     else
+    //       inputMsg.placeholder = "Replying to " + message.username;
+    //     reply.action = true;
+    //     reply.target = message.username;
+    //     throttle = true;
+    //     setTimeout(function () {
+    //       throttle = false;
+    //     }, 1000);
+    //   }
+    // });
   }
 
-  //deleteIcon chatbox Button
-  if (1) {
-    //deleteIcon
-    const deleteIconBtn = document.createElement("div");
-    const deleteIcon = document.createElement("i");
-    deleteIcon.className = "fas fa-trash";
-    deleteIcon.style = "font-size:16px;color:blue;";
-    deleteIconBtn.appendChild(deleteIcon);
+  let chatbox = document.getElementById("chatBox")
+  chatbox.append(msgBlock);
 
-    commentTbl.appendChild(deleteIconBtn);
-
-    deleteIconBtn.addEventListener("click", function () {
-      div.remove();
-    });
-  }
-
-  // handles replying to messages
-  if (1) {
-    var reply = { action: false, target: "" }
-    var throttle = false;
-
-    var inputMsg = document.getElementById("msg");
-    var submitBtn = document.getElementById("submitBtn");
-    var cancelBtn = document.getElementById("cancelBtn");
-    inputMsg.addEventListener("keydown", () => {
-      if (inputMsg.value != "") {
-        cancelBtn.style = "display: block";
-      } else {
-        cancelBtn.style = "display: none";
-      }
-    })
-
-    cancelBtn.addEventListener("click", () => {
-      cancelBtn.style = "display: none";
-      inputMsg.value = ''; reply.action = false;
-    })
-
-    submitBtn.addEventListener("click", () => {
-      cancelBtn.style = "display: none";
-    })
-
-    chatForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      if (!mustWait) {
-        inputMsg.placeholder = "Enter Message...";
-        if (reply.action == true)
-          replySubmit(e, reply.target);
-        else
-          msgSubmit(e, null);
-        reply.action = false;
-      }
-    });
-
-
-    // div.parentElement.style = "background: auga;";
-
-    div.addEventListener('click', function (evt) {
-      // var o = this,
-      // ot = this.textContent;
-      if (!throttle && evt.detail === 3) {
-        // this.textContent = 'Triple-clicked!';
-
-        var cancelBtn = document.getElementById("cancelBtn");
-
-        cancelBtn.style = "display: block";
-        inputMsg.placeholder = "Replying to " + message.username + " AKA " + message.nickname;
-        reply.action = true;
-        reply.target = message.username;
-        throttle = true;
-        setTimeout(function () {
-          // o.textContent = ot;    
-          throttle = false;
-        }, 1000);
-      }
-    });
-  }
-
-  let tbl = document.createElement("table")
-  let thead = document.createElement("thead");
-  let tbody = document.createElement("tbody");
-
-  tbl.appendChild(thead)
-  tbl.appendChild(tbody)
-  div.appendChild(tbl)
-  thead.appendChild(topDiv);
-  tbody.appendChild(para)
-  document.querySelector(".chat-messages").appendChild(div);
 }
 
 
@@ -1019,8 +747,6 @@ function teamsDisplay() {
 // Add room name to DOM
 function displayUserStats() {
   try {
-
-
     // if (myUserData.score != null)
     //   UserStats.innerText = "XP: " + xp + " / Coins: " + coins + " / Score: " + myUserData.score;
     // else
@@ -1050,8 +776,9 @@ function outputUsers(users) {
       tr.appendChild(tdFriend);
       tr.appendChild(tdBlock);
       userList.appendChild(tr);
+    }
+    else {
 
-    } else {
       //name
       const tdName = document.createElement("td");
       tdName.innerText = user.username;
@@ -1061,11 +788,9 @@ function outputUsers(users) {
       if (1) {
         const tdTip = document.createElement("td");
         const coinBtn = document.createElement("div");
-        // coinBtn.innerText = "+1";
         const coin = document.createElement("i");
         coin.className = "fas fa-coins";
         coin.style = "font-size:24px;color:gray;padding: 2px;";
-        // coin.onclick = tipUsers();
         coinBtn.type = "submit";
         coinBtn.appendChild(coin);
         tdTip.appendChild(coinBtn);
@@ -1089,16 +814,12 @@ function outputUsers(users) {
         friendBtn.type = "submit";
 
         if (friendsList.length > 0) {
-          //tdFriend.append(friendObj);
           for (const [index, val] of friendsList.entries()) {
-            // friendsList.forEach((item, indx) => {
             if (user.username == val) {
               friendIcon.className = "fas fa-check";
-              //console.log(val, " is followed");
               break;
             } else {
               friendIcon.className = "fas fa-plus-square";
-              //console.log(val, " is not followed");
             }
           }
         } else {

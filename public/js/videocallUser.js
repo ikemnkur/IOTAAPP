@@ -321,7 +321,7 @@ videoSocket.on('user-disconnected', (peerId, data, roomid, userdata) => {
 
 videoSocket.on('getActiveUsers', (roomID, data) => { // get the active user in the current room
     if (roomID == ROOM_ID) {
-        console.log("got room update");
+        // console.log("got room update");
         Room = data;
         // console.log("live users recieved: ", Room);
         Room.forEach((item, index) => {

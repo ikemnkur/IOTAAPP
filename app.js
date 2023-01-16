@@ -1680,7 +1680,7 @@ io.on('connection', socket => {
 	socket.on('chatMessage', msg => {
 		try {
 			const user = getCurrentUser(socket.id);
-			io.to(user.room).emit('message', formatMessage(user.username, msg, user.secretMode));
+			io.to(user.room).emit('message', formatMessage(user.username, msg, user.secretMode), null);
 		} catch (e) {
 			console.log(e);
 		}

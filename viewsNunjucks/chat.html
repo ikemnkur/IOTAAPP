@@ -57,26 +57,31 @@
                 <!-- DivTable.com -->
             </div>
             <div id="chatBox" class="chat-messages">
-                <div id="msgFormat" class="message" >
+                <div id="msgFormat" class="message" hidden>
 
-                    <div class="meta" style="padding: 3px; color: rgb(15, 15, 15)">
-                        <div style="font-size: 12px; background: rgb(247, 246, 246); float: left; padding: 3px; border-radius: 3px;">
+                    <div class="meta" style="color: rgb(15, 15, 15)">
+                        <!-- The User name Tag -->
+                        <div
+                            style="font-size: 12px; background: rgb(247, 246, 246); float: left; padding: 3px; border-radius: 3px;">
                             <i id="secretIcon" hidden class="fas fa-user-secret" aria-hidden="true"></i>
                             <span id="userTag">
-                                • user6 <i class="fas fa-user-secret" aria-hidden="true"></i>
+                                • user6
                             </span>
                         </div>
-                        
+
+                        <!-- The Time stamp -->
                         <i class="fas fa-clock"></i>
                         <span id="timeTag" style="font-size: 12px; margin: auto; padding: 3px;"> 6:43:31pm </span>
+                        <!-- The Team and XP labels -->
                         <span id="userStats" hidden style="float: left; padding: 3px;">
                             <span id="teamStat" style="color: black; font-size: 12px; padding: 3px;"> Team: IOS</span>
                             <span id="xpStat" style="color: blue; font-size: 12px"> XP: 10 </span>
                         </span>
-
+                        <!-- The Like, hate, hidden menu, and reply buttons -->
                         <div class="chat-commentTbl">
                             <div id="videoBtn"><i id="videoIcon" class="fas fa-video"></i></div>
                             <span style="display: flex; color: grey;">
+
                                 <div id="like" style="align-self: center;">0</div>
                                 <div id="likeBtn">
                                     <i id="likeIcon" class="fas fa-thumbs-up"
@@ -87,10 +92,14 @@
                                     <i id="hateIcon" class="fas fa-thumbs-down"
                                         style="color: grey; padding-top: 3px;"></i>
                                 </div>
+
+                                <div>
+                                    <i id="replyBtn" class="fas fa-reply" style="font-size: 16px; color: blue;"></i>
+                                </div>
+
                             </span>
                             <div id="hideBtn">
-                                <i id="hideIcon" class="fas fa-sliders"
-                                    style="font-size: 16px; color: black;"></i>
+                                <i id="hideIcon" class="fas fa-sliders" style="font-size: 16px; color: black;"></i>
                             </div>
                             <span id="extraBtns" hidden>
                                 <span id="coinBtn"><i id="coinIcon" class="fas fa-coins"
@@ -104,34 +113,46 @@
                                         style="font-size: 16px; margin: 0px 0px 0px 5px; color: blue;"></i>
                                 </span>
 
+
                             </span>
                         </div>
-
+                        <!-- The message text -->
                         <div>
-                            <text id="msgText"
-                                style="display:-webkit-inline-box; text-align: center; font-size: 12px; color: black; ">
-                                <i id="replyBtn" class="fas fa-reply" style="font-size: 16px; color: blue;"></i>
-                                <text id="replyTag" hidden
-                                    style="font-size: 12px; background: rgb(233, 233, 233); float: left; padding: 1px; "></text>ddgg</text>
-                        </div>
+                            <span id="replyTag"
+                                style="font-size: 12px; background: rgb(255, 226, 226); margin-left: 0; padding: 2px;">Reply:
+                                <span id="replyUser">
+                                    (User)
+                                </span>
+                            </span>
+                            <div id="msgTextDiv"
+                                style="display:-webkit-inline-box; text-align: center; padding: 2px; font-size: 12px; color: black; ">
 
+                                Msg Text
+
+                                <!-- <i id="replyBtn" class="fas fa-reply" style="font-size: 16px; margin-top: 3px; color: blue;"></i> -->
+                                <!-- </div> -->
+                            </div>
+                        </div>
                     </div>
                 </div>
         </main>
+
         <div class="chat-form-container">
             <form id="chat-form">
                 <h3 id="timer" style="padding-left: 5px; padding-right: 5px; padding-top: 5px; margin: auto; "></h3>
-                    <h3 id="clockIconGood">
-                        <i class="fas fa-clock" style="font-size: 24px; color: green; margin: auto; padding-left: 5px; padding-right: 5px; padding-top: 5px;"></i>
-                    </h3>
-                    
-                   <h3 id="clockIconBad" hidden>
-                        <i class="fas fa-clock" style="font-size: 24px; color: red; margin: auto; padding-left: 5px; padding-right: 5px; padding-top: 5px;"></i>
-                   </h3>
-                
+                <h3 id="clockIconGood">
+                    <i class="fas fa-clock"
+                        style="font-size: 24px; color: green; margin: auto; padding-left: 5px; padding-right: 5px; padding-top: 5px;"></i>
+                </h3>
+
+                <h3 id="clockIconBad" hidden>
+                    <i class="fas fa-clock"
+                        style="font-size: 24px; color: red; margin: auto; padding-left: 5px; padding-right: 5px; padding-top: 5px;"></i>
+                </h3>
+
                 <input id="msg" style="margin-right: 4px;" type="text" placeholder="Enter Message" required
                     autocomplete="off" />
-                
+
                 <button id="submitBtn" class="btn"><i class="fas fa-paper-plane"></i> Send</button>
                 <button id="cancelBtn" style="display: none;" class="btn"><i class="fas fa-xmark"></i><span> </span>
                     Cancel</button>

@@ -3,7 +3,7 @@ const moment = require('moment');
 function formatMessage(username, text, secret) {
   var txtArry = text.split("ßΓ");
   var msgText = txtArry[0];
-  var nckName = txtArry[1];
+  var nickname = txtArry[1];
   var team = txtArry[2];
   var xp = txtArry[3];
   var secretMode = secret;
@@ -11,7 +11,7 @@ function formatMessage(username, text, secret) {
 
   return {
     username,
-    nckName,
+    nickname,
     msgText,
     team,
     xp,

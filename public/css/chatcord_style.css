@@ -50,7 +50,7 @@ a {
 }
 
 .chat-commentTbl div{
-	padding: 3px; 
+	padding: 0px 3px 0px 3px; 
 	margin: auto;
 	/* float:right; */
 	/* align-self: center; */
@@ -84,7 +84,7 @@ a {
 	color: #fff;
 	padding: 10px 10px 20px;
 	overflow-y: scroll;
-	min-width: 300px;
+	min-width: 240px;
 	overflow-x: hidden;
 }
 
@@ -110,7 +110,7 @@ a {
 }
 
 .chat-messages .message {
-	padding: 5px;
+	padding: 3px;
 	margin-bottom: 5px;
 	background-color: var(--light-color);
 	border-radius: 5px;
