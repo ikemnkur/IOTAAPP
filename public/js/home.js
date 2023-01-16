@@ -56,19 +56,24 @@ function listRooms() {
     // add a copy of drpdwnOption to the dropdown list
     function createtableDiv(item, index) {
         // create dropdown list option object
-        topic = rooms[index]["topic"];
-        roomId = rooms[index]["roomID"];
-        watchCost = rooms[index]["watchCost"];
-        joinCost = rooms[index]["joinCost"];
-        userslist = rooms[index]["users"];
+        var topic = rooms[index]["topic"];
+        var roomId = rooms[index]["roomID"];
+        var watchCost = rooms[index]["watchCost"];
+        var joinCost = rooms[index]["joinCost"];
+        var userslist = rooms[index]["users"];
+        var age = rooms[index]["createDate"];
 
         try {
-            usersArray = JSON.parse(userslist);
+            var usersArray = JSON.parse(userslist);
         } catch (error) {
-            usersArray = userslist.split(",");
+            var usersArray = userslist.split(",");
+            // usersArray.sort()
         }
 
+        
+
         // console.log("Usernames Array: ", usersArray);
+        // get number of user in a room and display/store in value below
         numberOfUsers = usersArray.length;
         count++;
 
@@ -151,7 +156,9 @@ function searchRooms() {
 
 function sortTable() {
     var table, rows, switching, i, x, y, shouldSwitch;
+    //  the table of rooms
     table = document.getElementById("activeRooms");
+    // Filter dropdown list
     search = document.getElementById("selector").value;
     switching = true;
     var select = 0;
@@ -164,9 +171,12 @@ function sortTable() {
         /*Loop through all table rows (except the
         first, which contains table headers):*/
         if (search == "Age") select = 0;
-        if (search == "Users") select = 3;
+
+        if (search == "Users") select = 2;
+
         if (search == "Alphabetical") select = 1;
-        if (search == "Cost") select = 5;
+        
+        if (search == "Cost") select = 4;
 
 
         for (i = 1; i < (rows.length - 1); i++) {
