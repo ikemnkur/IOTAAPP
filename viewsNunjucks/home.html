@@ -22,7 +22,7 @@
                             <div style="display: flex;">
                                 <i class="fas fa-search" style="margin: 0px 5px 0px 5px; padding:5px 0px 0px 0px;"></i>
                                 <input id="searchbar" onkeyup="searchRooms()" type="text" name="search"
-                                    placeholder="Search rooms.." style="min-width: 300px;" >
+                                    placeholder="Search rooms.." style="min-width: 300px;">
                             </div>
                         </td>
                     </div>
@@ -32,14 +32,14 @@
                     <td style="padding: 5px; display: table; margin: auto;">
                         <a><i class="fas fa-filter" style="padding: 5px;"></i></a>
                         <code class="hljs xml"></code>
-                        <select id="selector" onmouseout="sortTable()" name="roomSearchFilter">
+                        <select id="selector" onclick="sortTable()" name="roomSearchFilter">
                             <option value="Users">Users</option>
                             <option value="Age">Age</option>
                             <option value="Alphabetical">Alphabetical</option>
                             <option value="Cost">Cost</option>
                         </select>
                         </code>
-                    <!-- </td>
+                        <!-- </td>
                     <td> -->
                         <label for="Sort" style="padding: 5px;">Sort:</label>
                         <a onclick="sortASC()" style="padding: 5px;" name="Sort"><i class="fas fa-arrow-up"></i></a>
@@ -59,9 +59,40 @@
     <div id="tableDiv">
         <nav>
             <p id="roomLists" hidden>{{rooms}}</p>
-
             <table id="activeRooms">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Topic</th>
+                        <th>  Users  </th>
+                        <th>  Cost  </th>
+                        <th>Age</th>
+                        <th>Join Rooms</th>
+                    </tr>
+                </thead>
+            </table>
 
+            <table hidden>
+                <tr id="rm#row" class="rooms">
+
+                    <td id="rmNum">10. </td>
+                    <td id="rmTopic">pets</td>
+                    <td id="rmNumofUsers">3</td>
+                    <td id="rmCost">2</td>
+                    <td id="rmTimeSeconds" hidden>X</td>
+                    <td id="rmAge">86d 29h 50m 52s</td>
+
+                    <td>
+                        <form action="/modal" method="POST">
+                            <button type="submit" value="JoinRm">Join</button>
+                            <input id="rmJoin" name="join" style="display: none;">
+                            <input id="rmCreate" name="create" style="display: none;">
+                            <input id="rmTopicVal" name="topic" style="display: none;">
+                            <input id="rmUser" name="user" style="display: none;">
+                            <input id="rmRoomID" name="roomID" style="display: none;">
+                        </form>
+                    </td>
+                </tr>
             </table>
         </nav>
     </div>
@@ -80,8 +111,10 @@
             background-color: aliceblue;
         }
 
-        #activeRooms td {
-            padding: 0px 5px;
+        #activeRooms td th {
+            padding: 0px 20px;
+            margin: 0px 20px;
+            /* border: 5px solid black; */
         }
 
         #activeRooms tbody tr td {

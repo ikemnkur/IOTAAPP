@@ -4,134 +4,124 @@ var socketid;
 socket.on("connect", () => {
     console.log(`you connected with socket.id ${socket.id}`);
     socketid = socket.id;
-
-    // myUserData = {
-    //   "id": socketid,
-    //   "name": userID,
-    //   "userTeam": team, // gets this from the modal.html 
-    //   "XP": userJSON[0]["xp"],
-    //   "peerId": userID,
-    //   "HP": 100,
-    //   "streaming": false,
-    //   "score": 0,
-    //   "coins": userJSON[0]["coins"],
-    // };
-
-    // socket.emit('connectNewStream', ROOM_ID, userID, myUserData); //Set up socket.io
-
 })
 
+var roomListsText = document.getElementById("roomLists");
+const rooms = JSON.parse(roomListsText.innerText);
+var table = document.getElementById("activeRooms");
+rows = table.rows;
+var len = rows.length;
+
 function listRooms() {
-    var count = 0;
-    var table = document.getElementById("activeRooms");
-    var roomListsText = document.getElementById("roomLists");
-    var user = document.getElementById("userID").innerText;
 
-    // Create an empty <tr> element and add it to the 1st position of the table:
-    var row = table.insertRow(0);
-
-    // Insert new cells (<td> elements) at the 1st, 2nd, 3rd, 4th, and 5th position of the "new" <tr> element:
-    var cell1 = row.insertCell(0);
-    var cell2 = row.insertCell(1);
-    var cell3 = row.insertCell(2);
-    var cell4 = row.insertCell(3);
-    var cell5 = row.insertCell(4);
-    var cell6 = row.insertCell(5);
-    // var cell7 = row.insertCell(6);
-    // Add some text to the header cells:
-    cell1.innerHTML = "#";
-    cell2.innerHTML = "Topic";
-    // cell3.innerHTML = "RoomID";
-
-    cell3.innerHTML = "# of Users";
-    cell4.innerHTML = "Watch Cost";
-    cell5.innerHTML = "Join Cost";
-    cell6.innerHTML = "Join Room";
-    // cell7.innerHTML = "Join Room";
-
-    const rooms = JSON.parse(roomListsText.innerText);
     console.log("Active Rooms: ", rooms);
     rooms.forEach(createtableDiv);
+
 
     // add a copy of drpdwnOption to the dropdown list
     function createtableDiv(item, index) {
         // create dropdown list option object
         var topic = rooms[index]["topic"];
-        var roomId = rooms[index]["roomID"];
         var watchCost = rooms[index]["watchCost"];
-        var joinCost = rooms[index]["joinCost"];
         var userslist = rooms[index]["users"];
         var age = rooms[index]["createDate"];
+        // var username = rooms[index]["username"];
 
+
+        var usersArray;
         try {
-            var usersArray = JSON.parse(userslist);
+            usersArray = JSON.parse(userslist);
         } catch (error) {
-            var usersArray = userslist.split(",");
-            // usersArray.sort()
+            usersArray = userslist.split(",");
         }
 
-        
+        // duplicate template object from home.html
+        var itemObjPrototype = document.getElementById("rm#row");
+        var itemObj = itemObjPrototype.cloneNode(true);
 
-        // console.log("Usernames Array: ", usersArray);
-        // get number of user in a room and display/store in value below
-        numberOfUsers = usersArray.length;
-        count++;
+        let rmNum = itemObj.querySelector('#rmNum');
+        let rmTopic = itemObj.querySelector('#rmTopic');
+        let rmNumofUsers = itemObj.querySelector('#rmNumofUsers');
+        let rmCost = itemObj.querySelector('#rmCost');
+        let rmAge = itemObj.querySelector('#rmAge');
+        let rmTimeSeconds = itemObj.querySelector('#rmTimeSeconds');
 
-        const tableRow = document.createElement("tr");
-        tableRow.className = "rooms";
-        //Numbering index div
-        const tableDivIndex = document.createElement("td");
-        tableDivIndex.innerText = (count) + ". ";
-        //Room Id div
-        const tableDivRoomID = document.createElement("td");
-        tableDivRoomID.innerText = roomId;
-        //Topic div
-        const tableDivTopic = document.createElement("td");
-        tableDivTopic.innerText = topic; // Set list text
-        //User number div
-        const tableDivUsernNum = document.createElement("td");
-        tableDivUsernNum.innerText = numberOfUsers;
-        //Numbering index div
-        const tableDivJoinCost = document.createElement("td");
-        tableDivJoinCost.innerText = joinCost;
-        //Numbering index div
-        const tableDivWatchCost = document.createElement("td");
-        tableDivWatchCost.innerText = watchCost;
-        //hidden form to pass values to Node JS Query, appended to form
-        const tableDivJoin = document.createElement("td");
-        const tableDivFormBtn = document.createElement("form");
-        const tableDivJoinRoomID = document.createElement("Input");
-        const tableDivJoinTopic = document.createElement("Input");
-        const tableDivJoinUser = document.createElement("Input");
-        const tableDivJoinJoin = document.createElement("Input");
-        const tableDivJoinCreate = document.createElement("Input");
-        tableDivJoinJoin.value = 1; tableDivJoinJoin.name = "join"; tableDivJoinJoin.style.display = "none";
-        tableDivJoinCreate.value = 0; tableDivJoinCreate.name = "create"; tableDivJoinCreate.style.display = "none";
-        tableDivJoinRoomID.value = roomId; tableDivJoinRoomID.name = "roomID"; tableDivJoinRoomID.style.display = "none";
-        tableDivJoinUser.value = user; tableDivJoinUser.name = "user"; tableDivJoinUser.style.display = "none";
-        tableDivJoinTopic.value = topic; tableDivJoinTopic.name = "topic"; tableDivJoinTopic.style.display = "none";
-        //join button
-        const tableDivJoinButton = document.createElement("button");
-        tableDivJoinButton.type = "submit";
-        tableDivFormBtn.action = "/modal";
-        tableDivFormBtn.method = "POST";
-        tableDivJoinButton.innerText = "Join";
-        tableDivJoinButton.value = "JoinRm";
-        tableDivFormBtn.appendChild(tableDivJoinButton);
-        // Append hidden form elements to the <form> elem.
-        tableDivFormBtn.appendChild(tableDivJoinJoin); tableDivFormBtn.appendChild(tableDivJoinCreate); tableDivFormBtn.appendChild(tableDivJoinTopic);
-        tableDivFormBtn.appendChild(tableDivJoinUser); tableDivFormBtn.appendChild(tableDivJoinRoomID);
-        //Append <td> elem. to <tr>
-        tableDivJoin.appendChild(tableDivFormBtn);// Append to join div:
-        tableRow.appendChild(tableDivIndex);
-        tableRow.appendChild(tableDivTopic);
-        // tableRow.appendChild(tableDivRoomID);
-        tableRow.appendChild(tableDivUsernNum);
-        tableRow.appendChild(tableDivWatchCost);
-        tableRow.appendChild(tableDivJoinCost);
-        tableRow.appendChild(tableDivJoin);
-        table.appendChild(tableRow);    // Append to table:
+        let rmJoin = itemObj.querySelector('#rmJoin');
+        let rmCreate = itemObj.querySelector("#rmCreate");
+        let rmTopicVal = itemObj.querySelector('#rmTopicVal');
+        let rmUser = itemObj.querySelector("#rmUser");
+        let rmRoomID = itemObj.querySelector('#rmRoomID');
+
+        rmJoin.value = 1;
+        rmCreate.value = 0;
+        rmTopicVal.value = topic;
+        rmUser.value = document.getElementById("userID").innerText;
+        rmRoomID.value = rooms[index]["roomID"];
+
+
+        rmNum.innerText = index + ".";
+        rmTopic.innerText = topic;
+
+
+        rmNumofUsers.innerText = usersArray.length;
+
+        rmCost.innerText = watchCost;
+        rmAge.innerText = age;
+
+        itemObj.hidden = false;
+
+        var age = rooms[index]["createDate"];
+
+        // "2022-06-21T04:38:34.000Z".replace("T", "")
+        age = age.replace("T", " ");
+        age = age.replace(".000Z", "");
+        // console.log("age of: " + roomId + " : " + age);
+        // Split timestamp into [ Y, M, D, h, m, s ]
+
+        // var t = "2010-06-09 13:12:01".split(/[- :]/);
+        var t = age.split(/[- :]/);
+
+        // Apply each element to the Date function
+        var creationDate = new Date(Date.UTC(t[0], t[1] - 1, t[2], t[3], t[4], t[5]));
+
+        const todaysdate = new Date();
+
+        var startDate = creationDate;
+
+        // Do your operations
+        var endDate = todaysdate;
+
+        //time in seconds from now to creationDate
+        var time = (endDate - startDate) / 1000;
+        rmTimeSeconds.innerText = time;
+
+        var x = itemObj.querySelector("#rmAge");
+
+        var seconds = Math.floor((endDate - startDate) / 1000);
+        var minutes = Math.floor(seconds / 60);
+        var hours = Math.floor(minutes / 60);
+        var days = Math.floor(hours / 24);
+        seconds = seconds % 60;
+        hours = hours % 24;
+        minutes = minutes % 60;
+
+        if (days == 0 && hours > 0)
+            age = hours + "h " + minutes + "m " + seconds + "s"
+        if (hours == 0 && days == 0)
+            age = minutes + "m " + seconds + "s"
+        if (hours == 0 && minutes == 0 && days == 0)
+            age = seconds + "s"
+        if (days > 0 && hours == 0 && minutes > 0)
+            age = days + "d " + minutes + "m "
+        else
+            age = days + "d " + hours + "h "
+
+        x.innerText = age;
+
+        table.appendChild(itemObj);
+
     }
+
 }
 
 listRooms();
@@ -145,7 +135,6 @@ function searchRooms() {
     for (i = 0; i < x.length; i++) {
         if (!x[i].innerHTML.toLowerCase().includes(input)) {
             x[i].style.display = "none";
-            //console.log("Remove Search Term: ", x[i].innerText)
         }
         else {
             x[i].style.display = "";
@@ -160,25 +149,28 @@ function sortTable() {
     table = document.getElementById("activeRooms");
     // Filter dropdown list
     search = document.getElementById("selector").value;
+    //for the while loop
     switching = true;
+
     var select = 0;
+
+    if (search == "Age") select = 4;
+
+    if (search == "Users") select = 2;
+
+    if (search == "Alphabetical") select = 1;
+
+    if (search == "Cost") select = 3;
+
     /*Make a loop that will continue until
     no switching has been done:*/
     while (switching) {
         //start by saying: no switching is done:
         switching = false;
         rows = table.rows;
+
         /*Loop through all table rows (except the
         first, which contains table headers):*/
-        if (search == "Age") select = 0;
-
-        if (search == "Users") select = 2;
-
-        if (search == "Alphabetical") select = 1;
-        
-        if (search == "Cost") select = 4;
-
-
         for (i = 1; i < (rows.length - 1); i++) {
             //start by saying there should be no switching:
             shouldSwitch = false;
@@ -186,21 +178,89 @@ function sortTable() {
             one from current row and one from the next:*/
             x = rows[i].getElementsByTagName("TD")[select];
             y = rows[i + 1].getElementsByTagName("TD")[select];
+            // x = rows[i].querySelector("#rmTimeSeconds")
+
+
             //check if the two rows should switch place:
             if (document.getElementById("order").innerText == "ASC") {
-                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                console.log("elem: " + x)
+                if (select == 4) {
+                    if (parseInt(x.innerHTML) > parseInt(y.innerHTML)) {
+                        shouldSwitch = true;
+
+                        break;
+                    }
+                } else if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
                     //if so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;
                 }
             } else if (document.getElementById("order").innerText == "DSC") {
-                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                if (select == 4) {
+                    if (parseInt(x.innerHTML) < parseInt(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
                     //if so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;
                 }
             }
         }
+
+        // if (select == 4) {
+        //     for (i = 0; i <= (rows.length - 1); i++) {
+
+        //         var age = rooms[i]["createDate"];
+        //         var roomId = rooms[i]["roomID"];
+
+        //         // "2022-06-21T04:38:34.000Z".replace("T", "")
+        //         age = age.replace("T", " ");
+        //         age = age.replace(".000Z", "");
+        //         // console.log("age of: "  + roomId + " : " + age);
+        //         // Split timestamp into [ Y, M, D, h, m, s ]
+
+        //         // var t = "2010-06-09 13:12:01".split(/[- :]/);
+        //         var t = age.split(/[- :]/);
+
+        //         // Apply each element to the Date function
+        //         var creationDate = new Date(Date.UTC(t[0], t[1] - 1, t[2], t[3], t[4], t[5]));
+
+        //         const todaysdate = new Date();
+
+        //         var startDate = creationDate;
+        //         // Do your operations
+        //         var endDate = todaysdate;
+        //         // var time = (endDate - startDate) / 1000;
+
+        //         // age = time;
+
+
+        //         var x = rows[i].getElementsByTagName("TD")[select];
+        //         // var seconds = parseInt(x.innerHTML); //
+        //         var seconds = Math.floor((endDate - startDate) / 1000);
+        //         var minutes = Math.floor(seconds / 60);
+        //         var hours = Math.floor(minutes / 60);
+        //         var days = Math.floor(hours / 24);
+        //         seconds = seconds % 60;
+        //         hours = hours % 60;
+        //         minutes = minutes % 60;
+        //         // var age;
+
+        //         if (days == 0 && hours > 0)
+        //             age = hours + "h " + minutes + "m " + seconds + "s"
+        //         if (hours == 0 && days == 0)
+        //             age = minutes + "m " + seconds + "s"
+        //         if (hours == 0 && minutes == 0)
+        //             age = seconds + "s"
+        //         else
+        //             age = days + "d " + hours + "h " + minutes + "m " + seconds + "s"
+
+        //         x.innerText = age;
+        //     }
+        // }
+
         if (shouldSwitch) {
             /*If a switch has been marked, make the switch
             and mark that a switch has been done:*/

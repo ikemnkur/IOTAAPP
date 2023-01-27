@@ -720,7 +720,7 @@ app.get(['/joinRoom'], (request, response) => {
 	connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, finalresult) {
 		if (err) throw err;
 
-		console.log("Joined Room Info: ", finalresult);
+		console.log("ln:(723) Joined Room Info: ", finalresult);
 		if (room.passcode == finalresult[0]["passcode"]) {
 			connection.query("SELECT * FROM userstats WHERE username = ?", [room.userID], function (err, userStatsResult) {
 				if (err) throw err;
@@ -781,10 +781,11 @@ app.post(['/modal', '/modal:id'], (request, response) => isLoggedin(request, set
 	const id = request.params.id;
 	let room = request.body;
 
+	console.log("Room ID: ", room);
 	connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, finalresult) {
 		if (err) throw err;
 		// activeRoom = JSON.stringify(finalresult);
-		console.log("Joined Room Info: ", finalresult);
+		console.log("Ln:[787] Joined Room Info: ", finalresult);
 		// Render room templateconsole.log("Post rooms.SQL: ", result);
 
 		connection.query("SELECT * FROM userstats WHERE username = ?", [request.session.account_username], function (err, userStatsResult) {
@@ -1617,16 +1618,6 @@ io.on('connection', socket => {
 			teams.forEach((item, index) => {
 				roomScores[room][index] = 0;
 			})
-
-			// function outputScores(room, rmScores) {
-			// 	console.log("rmScores OS(): ", (rmScores))
-			// 	socket.emit("Scores", room, rmScores)
-			// 	// socket.emit("Scores", room, rmScores)
-			// 	if (roomScores[room] != null)
-			// 		setTimeout(outputScores, 5000, room, rmScores)
-			// }
-
-			// outputScores(room, roomScores);
 
 			console.log("Room names: ", roomNames[roomScores.length]);
 			console.log("started score Keeping: ", roomScores[room], "for Room: ", room);
