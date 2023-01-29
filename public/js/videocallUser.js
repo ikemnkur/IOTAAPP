@@ -668,6 +668,7 @@ function draw(video, context, width, height, id, userData) {
     var ctxt = canvas.getContext('2d');
     ctxt.drawImage(video, 0, 0, width, height);
 
+    // draw the Icon
     Circle(canvas);
 
     sentImages.forEach((item, index) => {

@@ -111,9 +111,9 @@ function listRooms() {
             age = minutes + "m " + seconds + "s"
         if (hours == 0 && minutes == 0 && days == 0)
             age = seconds + "s"
-        if (days > 0 && hours == 0 && minutes > 0)
+        if (days > 0 && hours == 0)
             age = days + "d " + minutes + "m "
-        else
+        if (days > 0 && hours > 0)
             age = days + "d " + hours + "h "
 
         x.innerText = age;

@@ -73,7 +73,10 @@
             <table style="width:100%; align-content: center;">
                 <tr>
                     <!-- <th><button type="submit" action="/modal" method="POST" class="btn" onclick="joinRoom()">Join</button></th> -->
-                    <th><form action="/joinRoom" method="POST"><button type="button" class="btn" onclick="joinRoom()">Join</button></form></th>
+                    <th>
+                        <form action="/joinRoom" method="POST"><button type="button" class="btn"
+                                onclick="joinRoom()">Join</button></form>
+                    </th>
                     <!-- <th><button type="submit" class="btn" onclick="WatchRoom()">Watch</button></th> -->
                 </tr>
             </table>
@@ -81,7 +84,7 @@
             <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
         </form>
     </div>
-    <script src="/socket.io/socket.io.js" ></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
         function openFormJoin() {
             document.getElementById("myFormJoin").style.display = "block";

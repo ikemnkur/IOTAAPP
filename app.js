@@ -55,35 +55,31 @@ var activeRooms = [];
 // Unique secret key
 const secret_key = 'your secret key';
 // Update the below details with your own MySQL connection details
-var connection = mysql.createConnection({
-	host: 'localhost',
-	// port: 3306,
-	user: 'root',
-	password: '',//,password: 'root',
-	database: 'nodelogin',
-	multipleStatements: true,
-	bigNumberStrings: true,
-});
-// var connection = mysql2.createConnection({
-// 	// host: '34.136.59.230:3306',
-// 	host: '72.14.183.70',
-// 	port: 3306,
-// 	user: 'remoteiota',
-// 	password: 'Password!*',//,password: 'root',
+
+// Local Connection
+// var connection = mysql.createConnection({
+// 	host: 'localhost',
+// 	// port: 3306,
+// 	user: 'root',
+// 	password: '',//,password: 'root',
 // 	database: 'nodelogin',
 // 	multipleStatements: true,
 // 	bigNumberStrings: true,
 // });
-// var connection2 = mysql2.createConnection({
-// 	// host: '34.136.59.230:3306',
-// 	host: 'remotemysql.com',
-// 	port: 3306,
-// 	user: 'tnlcK70z3M',
-// 	password: 'ltHsANPgZX',//,password: 'root',
-// 	database: 'tnlcK70z3M',
-// 	// multipleStatements: true,
-// 	// bigNumberStrings: true,
-// });
+
+// Remote connection
+var connection = mysql2.createConnection({
+	// host: '34.136.59.230:3306',
+	host: '72.14.183.70',
+	port: 3306,
+	user: 'remoteiota',
+	password: 'Password!*',//,password: 'root',
+	database: 'nodelogin',
+	multipleStatements: true,
+	bigNumberStrings: true,
+});
+
+//Doesn't work
 // var connection3 = mysql.createConnection({
 // 	// host: '34.136.59.230:3306',
 // 	host: '139.144.34.246',
@@ -94,6 +90,8 @@ var connection = mysql.createConnection({
 // 	// multipleStatements: true,
 // 	// bigNumberStrings: true,
 // });
+
+
 // Mail settings: Update the username and passowrd below to your email and pass, the current mail host is set to gmail, but you can change that if you want.
 const transporter = nodemailer.createTransport({
 	host: 'smtp.gmail.com',
@@ -759,18 +757,24 @@ app.get(['/createRoom'], (request, response) => {
 		let tags = room.tags.toString();
 		connection.query('INSERT INTO rooms (roomID, host, users, passcode, topic, teams, private, watchCost, joinCost, tags) VALUES (?,?,?,?,?,?,?,?,?,?)',
 			[room.roomID, room.host, users, room.passcode, room.topic, teams, room.private, room.watchCost, room.joinCost, tags], function (err, finalresult) {
-				if (err) throw err;
-				console.log("room Query Info: ", finalresult);
-				connection.query('UPDATE userstats SET roomConfig = ? WHERE username = ?', [JSON.stringify(room), room.host]);
+				if (err) {
+					// failed to create room
+					response.redirect('/');
+					//  throw err;
+				} else {
+					console.log("room Query Info: ", finalresult);
+					connection.query('UPDATE userstats SET roomConfig = ? WHERE username = ?', [JSON.stringify(room), room.host]);
 
-				console.log("fetched usersname: ", room.host);
+					console.log("fetched usersname: ", room.host);
 
-				connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, finalresult) {
-					if (err) throw err;
-					newRoom = finalresult;
-					console.log("New room Info: ", newRoom);
-					response.render('modal.html', { roomObj: newRoom, roomOBJ: JSON.stringify(newRoom), userJSON: JSON.stringify(userStatsResult), userOBJ: userStatsResult });
-				});
+					connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, finalresult) {
+						if (err) throw err;
+						newRoom = finalresult;
+						console.log("New room Info: ", newRoom);
+						response.render('modal.html', { roomObj: newRoom, roomOBJ: JSON.stringify(newRoom), userJSON: JSON.stringify(userStatsResult), userOBJ: userStatsResult });
+					});
+				}
+
 			});
 	})
 });
@@ -1583,22 +1587,22 @@ io.on('connection', socket => {
 
 	function outputScores() {
 		// if (roomScores != null) {
-			console.log("rmScores: ", roomScores[roomNames[0]])
-			// roomScores.forEach((item, index) => {
-			console.log("RM Length: ", roomNames.length)
-			for (i = 0; i < roomNames.length; i++) {
-				// console.log(i);
-				let roomname = roomNames[i];
-				// console.log("RoomScores[roomname]: ", roomScores[i].roomname)
+		console.log("rmScores: ", roomScores[roomNames[0]])
+		// roomScores.forEach((item, index) => {
+		console.log("RM Length: ", roomNames.length)
+		for (i = 0; i < roomNames.length; i++) {
+			// console.log(i);
+			let roomname = roomNames[i];
+			// console.log("RoomScores[roomname]: ", roomScores[i].roomname)
 
-				// if (roomScores[roomname] != null) {
-					socket.emit("Scores", roomname, roomScores[roomNames[i]])
-				// }
+			// if (roomScores[roomname] != null) {
+			socket.emit("Scores", roomname, roomScores[roomNames[i]])
+			// }
 
-			}
+		}
 
-			// })
-			// setTimeout(outputScores, 5000)
+		// })
+		// setTimeout(outputScores, 5000)
 		// }
 	}
 
@@ -1633,7 +1637,7 @@ io.on('connection', socket => {
 
 		//delay this until define in the incrementSCore socket is triggered
 		// setTimeout(() => {
-			outputScores()
+		outputScores()
 		// }, 5000)
 	})
 
