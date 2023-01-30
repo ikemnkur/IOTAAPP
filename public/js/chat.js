@@ -60,7 +60,7 @@ try {
 
 var activeUsers;
 
-var colors = ["green", "cyan", "pink", "gold", "agua", "lightred", "thistle", "lightcyan", "salmon", "crismon", "springgreen", "sykblue", "yellowgreen", "fuchsia", "greenyellow", "lavender", "magenta"]
+var colors = ["green", "cyan", "pink", "gold", "agua", "lightblue", "lightred", "thistle", "lightcyan", "salmon", "crimson", "springgreen", "skyblue", "yellowgreen", "fuchsia", "greenyellow", "lavender", "magenta"]
 var focusedStyle = "background: radial-gradient(#ac1b1b, transparent);"
 const socket = io({
   transports: ["websocket"], pingInterval: 1000 * 60 * 5,
@@ -232,7 +232,7 @@ function msgSubmit(e, replyTo) {
   if (replyTo == null)
     socket.emit("chatMessage", msg + "ßΓ" + nickname + "ßΓ" + team + "ßΓ" + xp, null);
   else // if the user is replying to another message
-    socket.emit("replyMessage",  msg + "ßΓ" + nickname + "ßΓ" + team + "ßΓ" + xp, replyTo);
+    socket.emit("replyMessage", msg + "ßΓ" + nickname + "ßΓ" + team + "ßΓ" + xp, replyTo);
 
   // Clear input
   e.target.elements.msg.value = "";
@@ -338,10 +338,12 @@ function createMessage(message, replyTo) {
     //   msgBlock.style = `background: ${col};`
     // } else 
     if (message.team == item) {
-      let col = colors[(index + room.length % 4 + 1) % colors.length];
-      msgBlock.style = `background: ${col};`
+      let col = colors[(index + room.length + 1) % colors.length];
+      // msgBlock.style = `background: ${col};`
+      msgBlock.style.background = col;
     }
   })
+
 
 
 
@@ -567,7 +569,7 @@ function createMessage(message, replyTo) {
 
       if (mustWait == false) {
         // console.log("submitted a message")
-    
+
         // msgSubmit(e);
         var timer = document.getElementById("timer");
         timer.hidden = false;
@@ -577,11 +579,11 @@ function createMessage(message, replyTo) {
         clockIconGood.hidden = true;
         mustWait = true;
         updateChatTimer(15);
-    
+
         socket.emit("incrementScore", 1, team2addScoreTo, room)
-      // }
-    
-      // if (mustWait == false) {
+        // }
+
+        // if (mustWait == false) {
         inputMsg.placeholder = "Enter Message...";
         console.log("ReplyTo: " + replyToUser);
         // if (reply.action == true)
@@ -725,7 +727,7 @@ function teamsDisplay() {
     // })
 
     // let col = colors[(index + room.length) % colors.length];
-    let col = colors[(index + room.length % 4 + 1) % colors.length];
+    let col = colors[(index + room.length + 1) % colors.length];
     tdName.style = `background: ${col};`
 
     tdName.innerText = item;
