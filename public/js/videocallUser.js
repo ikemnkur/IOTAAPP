@@ -23,7 +23,7 @@ var canJoin = false, timer = 60; // for the temporary stream join
 var OUD = {};
 var Room = {};
 var streamers = {};
-var sentImages = [];
+var sentImages = [null, null, null, null, null];
 
 var user_Peers = {};
 const peerObj = new Peer(userID);
@@ -696,11 +696,8 @@ videoSocket.on('user-disconnected', (peerId, data, roomid, userdata) => {
 
 videoSocket.on('getActiveUsers', (roomID, data) => { // get the active user in the current room
     if (roomID == ROOM_ID) {
-        // console.log("got room update");
         Room = data;
-        // console.log("live users recieved: ", Room);
         Room.forEach((item, index) => {
-            // console.log();
             if (item.streaming == true) {
                 if (streamers[item.name] == false) {
                     if (document.getElementById("video#" + item.name) == null) {
@@ -725,19 +722,20 @@ videoSocket.on('drawImageToCanvas', (imagesrc, trgtCanvas, roomId, fromUserId, i
             console.log("drawing image:", imagesrc, " on canvas: ", trgtCanvas, "at :", `(${x},${y})`);
             console.log("Target canvas: ", targetCanvas);
 
-            imgSentToCanvas = new component(w, h, `${imagesrc}`, x - w / 2, y + h / 2, "image", targetCanvas, fromUserId, "N/A", 10000);
+            imgSentToCanvas = new component(w, h, `${imagesrc}`, x - w / 2, y, "image", targetCanvas, fromUserId, "N/A", 10000);
             imgSentToCanvas.update();
-            if (sentImages.length == 5) {
-                sentImages[0] = sentImages[1];
-                sentImages[1] = sentImages[2];
-                sentImages[2] = sentImages[3];
-                sentImages[3] = sentImages[4];
-                // sentImages[4] = sentImages[5];
-            }
-            if (sentImages.length < 5)
-                sentImages.push(imgSentToCanvas);
-            else
-                sentImages[5] = imgSentToCanvas;
+            // if (sentImages.length == 5) {
+            sentImages[1] = sentImages[0];
+            sentImages[2] = sentImages[1];
+            sentImages[3] = sentImages[2];
+            sentImages[4] = sentImages[3];
+            // sentImages[4] = sentImages[5];
+            // }
+            // if (sentImages.length < 5)
+            // sentImages.push(imgSentToCanvas);
+            // else
+            // sentImages[5] = imgSentToCanvas; 
+            sentImages[0] = imgSentToCanvas;
         }
     }
 })
@@ -746,13 +744,13 @@ videoSocket.on('soundToCanvas', (soundsrc, trgtCanvas, roomId, fromUserId, msg) 
     if (ROOM_ID == roomId) {
         let targetCanvas = document.getElementById(trgtCanvas);
         if (targetCanvas != null) {
-            let x = 15, w = 16, h = 16;;
+            let x = 8, w = 32, h = 32;
             let y = targetCanvas.height - h;
             console.log("sound sent by: ", fromUserId);
             console.log("playing sound:", soundsrc, " on canvas: ", trgtCanvas, "at :", `(${x},${y})`);
             // console.log("Target canvas: ", targetCanvas);
 
-            imgSentToCanvas = new component(w, h, `/images/soundIcon.png`, x - w / 2, y + h / 2, "image", targetCanvas, fromUserId, msg, 3000);
+            imgSentToCanvas = new component(w, h, `/images/soundIcon.png`, x-w/2, y - h / 2 - 8, "image", targetCanvas, fromUserId, msg, 3000);
             imgSentToCanvas.update();
             sentImages.push(imgSentToCanvas);
 
@@ -913,7 +911,7 @@ peerObj.on("call", (call) => {
     }
 });
 
-function endCall(peerObjid) {
+function endCall(peerObjidcanvas) {
     // Go Delete ended user element
     let title = "video#" + peerObjid;
     document.getElementById(title).remove()
@@ -941,7 +939,7 @@ function addSelfVideoStream(stream, userData) { //Draw video to canvas element t
 
     canvas.clicked = false;
     canvas.id = 'canvas#' + userData.name;
-    let w = 300, h = 220;
+    let w = 240, h = 180;
     canvas.width = w;
     canvas.height = h;
     canvas.style.width = w;
@@ -1047,7 +1045,8 @@ function draw(video, context, width, height, id, userData) {
     Circle(canvas);
 
     sentImages.forEach((item, index) => {
-        item.update();
+        if (item != null)
+            item.update();
     })
 
     drawHUD(canvas, userData);
@@ -1170,14 +1169,14 @@ function component(width, height, color, x, y, type, canvas, from, msg, time) {
 
         if (this.gif) {
             if (!this.myGif.loading) {
-                ctx.drawImage(this.myGif.image, x + 32, y, 64, 64);
+                ctx.drawImage(this.myGif.image, x + 32, y - 32, 64, 64);
                 // drawGifImage(this.myGif.image, x, y, 1, 0, ctx);
                 this.itr++;
                 if (from != null) {
                     ctx.fillStyle = 'white';
                     ctx.strokeStyle = '#003300';
                     ctx.font = '12px Arial';
-                    ctx.fillText(from, x + 32, y - 32 + 8);
+                    ctx.fillText(from, x + 64, y - 34);
                 }
             }
         } else if (type == "image") {
@@ -1186,7 +1185,7 @@ function component(width, height, color, x, y, type, canvas, from, msg, time) {
                 ctx.fillStyle = 'white';
                 ctx.strokeStyle = '#003300';
                 ctx.font = '12px Arial';
-                ctx.fillText(from, x + width / 4, y + height + 8);
+                ctx.fillText(from, x + width / 2, y + height + 10);
             }
         } else {
             ctx.fillStyle = color;
@@ -1292,7 +1291,7 @@ if (1) {
                                     console.log("adding image to target canvas: ", focusedCanvas);
                                     console.log("TRGT_CANVAS: ", targetCanvas)
 
-                                    imgSentToCanvas = new component(64, 64, `${image.src}`, targetCanvas.xcursor - 32, targetCanvas.ycursor + 32, "image", targetCanvas, userID, "N/A", 10000);
+                                    imgSentToCanvas = new component(64, 64, `${image.src}`, targetCanvas.xcursor + w / 2, targetCanvas.ycursor, "image", targetCanvas, userID, "N/A", 10000);
                                     imgSentToCanvas.update();
                                     videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID, imgSentToCanvas);
                                 }
@@ -1307,7 +1306,7 @@ if (1) {
                                     } else {
                                         let w = h = 64;
                                         targetCanvas = document.getElementById(focusedCanvas);
-                                        imgSentToCanvas = new component(w, h, `${image.src}`, targetCanvas.xcursor - w / 2, targetCanvas.ycursor + h / 2, "image", targetCanvas, userID, `from:${userID} `, 10000);
+                                        imgSentToCanvas = new component(w, h, `${image.src}`, targetCanvas.xcursor + w/2, targetCanvas.ycursor, "image", targetCanvas, userID, `from:${userID} `, 10000);
                                         imgSentToCanvas.update();
                                         videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID, imgSentToCanvas)
                                     }
@@ -1568,13 +1567,13 @@ function drawGifImage(image, x, y, scale, rot, ctx) {
 
 //      drawImage(myGif.frames[frame].image,part.x,part.y,part.scale,part.rot);
 //   });
-// }      
+// }
 
 
-var w = canvas.width;
-var h = canvas.height;
-var cw = w / 2; // center 
-var ch = h / 2;
+// var w = canvas.width;
+// var h = canvas.height;
+// var cw = w / 2; // center
+// var ch = h / 2;
 
 // // main update function
 // function update(timer) {

@@ -71,10 +71,11 @@ const socket = io({
 socket.emit("joinRoom", { username, nickname, coins, xp, room, secretMode, team, score, teams });
 
 // Get room and users
-socket.on("roomUsers", ({ roomname, users }) => {
+socket.on("roomUsers", (roomname, users) => {
   if (roomname == room) {
     activeUsers = users;
     displayUserStats();
+    console.log("activeUsers: ", users)
     outputUsers(users);
   }
 
@@ -186,7 +187,7 @@ function updates() {
 socket.on("messageTo", (message, toUser) => {
   message.username = "BOT";
   if (toUser == username)
-    createMessage(message, "No - One")
+    createMessage(message, "CHATBOT")
 
   // Scroll down
   chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -741,8 +742,9 @@ function teamsDisplay() {
     // tr.appendChild(tdBtn);
     tbody.appendChild(tr)
   });
-  tbl.appendChild(tbody);
+  
   tbl.style = "margin: auto;";
+  tbl.appendChild(tbody);
   teamBox.appendChild(tbl);
 }
 
@@ -768,10 +770,16 @@ function outputUsers(users) {
   users.forEach((user) => {
 
     const tr = document.createElement("tr");
-    const tdName = document.createElement("td"); const tdBlock = document.createElement("td"); const tdFriend = document.createElement("td"); const tdTip = document.createElement("td");
+    tr.className = "userTR"
+    const tdName = document.createElement("td");
+    tdName.id = "userTD";
+    const tdBlock = document.createElement("td");
+    const tdFriend = document.createElement("td");
+    const tdTip = document.createElement("td");
     if (user.username == userJSON[0].username) {
       const tdName = document.createElement("td"); const tdBlock = document.createElement("td"); const tdFriend = document.createElement("td"); const tdTip = document.createElement("td");
       tdName.innerText = user.username;
+      tdName.id = "userTD";
       // const tr = document.createElement("tr");
       tr.appendChild(tdName);
       tr.appendChild(tdTip);
@@ -783,6 +791,7 @@ function outputUsers(users) {
 
       //name
       const tdName = document.createElement("td");
+      tdName.id = "userTD";
       tdName.innerText = user.username;
       tr.appendChild(tdName);
 

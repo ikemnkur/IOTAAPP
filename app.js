@@ -1566,10 +1566,10 @@ io.on('connection', socket => {
 			);
 
 		// Send users and room info
-		io.to(user.room).emit('roomUsers', {
-			room: user.room,
-			users: getRoomUsers(user.room)
-		});
+		io.to(user.room).emit('roomUsers', 
+			user.room,
+			getRoomUsers(user.room)
+		);
 
 		// // update scores array
 		// if (roomScores[room] == null) {
@@ -1630,10 +1630,10 @@ io.on('connection', socket => {
 	})
 
 	socket.on("incrementScore", (amount, trgtTeam, roomId) => {
-		// to team SCores
+		// to team Scores
 		roomScores[roomId][trgtTeam] += parseInt(amount);
 		//Logg the scores
-		console.log("add to score for team: ", trgtTeam, ", result: ", roomScores[roomId][trgtTeam])
+		// console.log("add to score for team: ", trgtTeam, ", result: ", roomScores[roomId][trgtTeam])
 
 		//delay this until define in the incrementSCore socket is triggered
 		// setTimeout(() => {
@@ -1741,10 +1741,10 @@ io.on('connection', socket => {
 			);
 			console.log("user disconnect event: ", user.username);
 			// Send users and room info
-			io.to(user.room).emit('roomUsers', {
-				room: user.room,
-				users: getRoomUsers(user.room)
-			});
+			io.to(user.room).emit('roomUsers', 
+				user.room,
+				getRoomUsers(user.room)
+			);
 		}
 	});
 

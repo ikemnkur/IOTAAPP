@@ -33,8 +33,8 @@
           <h3>{{roomObj[0]["topic"]}}<h3>
         </header>
         <div class="w3-center"><br>
-          <span href="/edit_profile" onclick="document.getElementById('id01').style.display='none'"
-            class="w3-button w3-xlarge w3-hover-red w3-display-topright" title="Close Modal">&times;</span>
+          <!-- <span href="/edit_profile" onclick="document.getElementById('id01').style.display='none'" -->
+            <span id="exit" class="w3-button w3-xlarge w3-hover-red w3-display-topright" title="Close Modal">&times;</span>
         </div>
 
         <div class="w3-container">
@@ -118,7 +118,7 @@
     )
     var exitButton = document.getElementById("exit")
     exitButton.addEventListener("click", function (e) {
-
+      window.location = "/home";
     })
 
     // }
