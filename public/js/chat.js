@@ -459,7 +459,7 @@ function createMessage(message, replyTo) {
         // friendsList.forEach((item, indx) => {
         if (message.username == val) {
           friendIcon.className = "fas fa-check";
-          usernameTag.style.color = yellowgreen;
+          usernameTag.style.color = "yellowgreen";
           //console.log(val, " is followed");
           break;
         } else {
@@ -634,7 +634,12 @@ function createMessage(message, replyTo) {
       // }
     }
 
-
+    replyBtn.addEventListener('mouseenter', function (evt) {
+      replyBtn.style.fontSize = "18px";
+    })
+     replyBtn.addEventListener('mouseleave', function (evt) {
+      replyBtn.style.fontSize = "16px";
+    })
     replyBtn.addEventListener('click', function (evt) {
       cancelBtn.style = "display: block";
       // Check if your has a nickname

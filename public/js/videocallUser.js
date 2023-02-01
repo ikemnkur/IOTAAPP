@@ -744,13 +744,13 @@ videoSocket.on('soundToCanvas', (soundsrc, trgtCanvas, roomId, fromUserId, msg) 
     if (ROOM_ID == roomId) {
         let targetCanvas = document.getElementById(trgtCanvas);
         if (targetCanvas != null) {
-            let x = 8, w = 32, h = 32;
+            let x = 20, w = 32, h = 32;
             let y = targetCanvas.height - h;
             console.log("sound sent by: ", fromUserId);
             console.log("playing sound:", soundsrc, " on canvas: ", trgtCanvas, "at :", `(${x},${y})`);
             // console.log("Target canvas: ", targetCanvas);
 
-            imgSentToCanvas = new component(w, h, `/images/soundIcon.png`, x-w/2, y - h / 2 - 8, "image", targetCanvas, fromUserId, msg, 3000);
+            imgSentToCanvas = new component(w, h, `/images/soundIcon.png`, x - w / 2, y - h / 2, "image", targetCanvas, fromUserId, msg, 3000);
             imgSentToCanvas.update();
             sentImages.push(imgSentToCanvas);
 
@@ -1166,17 +1166,17 @@ function component(width, height, color, x, y, type, canvas, from, msg, time) {
         }
 
         ctx = canvas.getContext('2d');
-
+        let w = width; let h = height;
         if (this.gif) {
             if (!this.myGif.loading) {
-                ctx.drawImage(this.myGif.image, x + 32, y - 32, 64, 64);
+                ctx.drawImage(this.myGif.image, x, y, 64, 64);
                 // drawGifImage(this.myGif.image, x, y, 1, 0, ctx);
                 this.itr++;
                 if (from != null) {
                     ctx.fillStyle = 'white';
                     ctx.strokeStyle = '#003300';
                     ctx.font = '12px Arial';
-                    ctx.fillText(from, x + 64, y - 34);
+                    ctx.fillText(from, x + (w / 2) - from.length * 4, y + 64 + 10);
                 }
             }
         } else if (type == "image") {
@@ -1185,7 +1185,10 @@ function component(width, height, color, x, y, type, canvas, from, msg, time) {
                 ctx.fillStyle = 'white';
                 ctx.strokeStyle = '#003300';
                 ctx.font = '12px Arial';
-                ctx.fillText(from, x + width / 2, y + height + 10);
+                if (this.image.src.includes("soundIcon.png")) 
+                    ctx.fillText(from, x, y + height + 12);
+                else
+                    ctx.fillText(from, x - from.length * 4 + (w / 2), y + height + 8);
             }
         } else {
             ctx.fillStyle = color;
@@ -1269,7 +1272,7 @@ if (1) {
 
             removeAllChildNodes(imagePrevDiv);
             if (matches != 0) {
-                console.log(matches)
+                // console.log(matches)
                 matches.forEach(match => {
                     var btnActionTXT = document.getElementById("addToLibText")
                     if (btnActionTXT.innerText == "Image") {
@@ -1281,6 +1284,7 @@ if (1) {
                             imagePrevDiv.appendChild(image);
                             image.style = "padding: 2px"
 
+                            //
                             image.addEventListener("dblclick", () => {
                                 if (document.getElementById(focusedCanvas) == null) {
                                     console.log("Click a video stream first");
@@ -1290,13 +1294,14 @@ if (1) {
 
                                     console.log("adding image to target canvas: ", focusedCanvas);
                                     console.log("TRGT_CANVAS: ", targetCanvas)
-
-                                    imgSentToCanvas = new component(64, 64, `${image.src}`, targetCanvas.xcursor + w / 2, targetCanvas.ycursor, "image", targetCanvas, userID, "N/A", 10000);
+                                    let w = 64; let h = 64;
+                                    imgSentToCanvas = new component(w, h, `${image.src}`, targetCanvas.xcursor, targetCanvas.ycursor - h / 2, "image", targetCanvas, userID, "N/A", 10000);
                                     imgSentToCanvas.update();
                                     videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID, imgSentToCanvas);
                                 }
                             })
 
+                            //
                             image.addEventListener("click", () => {
                                 if (modeToggle == "library") {
                                     console.log("adding image to from Library to screen: ", image);
@@ -1306,7 +1311,7 @@ if (1) {
                                     } else {
                                         let w = h = 64;
                                         targetCanvas = document.getElementById(focusedCanvas);
-                                        imgSentToCanvas = new component(w, h, `${image.src}`, targetCanvas.xcursor + w/2, targetCanvas.ycursor, "image", targetCanvas, userID, `from:${userID} `, 10000);
+                                        imgSentToCanvas = new component(w, h, `${image.src}`, targetCanvas.xcursor, targetCanvas.ycursor - h / 2, "image", targetCanvas, userID, `from:${userID} `, 10000);
                                         imgSentToCanvas.update();
                                         videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID, imgSentToCanvas)
                                     }
@@ -1425,7 +1430,7 @@ if (1) {
                 // x[i].style.display = "";
             }
         }
-        console.log("Matching Search Results: ", matches)
+        // console.log("Matching Search Results: ", matches)
         if (matches != null) {
             return matches;
         } else {

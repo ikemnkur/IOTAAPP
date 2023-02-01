@@ -1587,9 +1587,9 @@ io.on('connection', socket => {
 
 	function outputScores() {
 		// if (roomScores != null) {
-		console.log("rmScores: ", roomScores[roomNames[0]])
+		// console.log("rmScores: ", roomScores[roomNames[0]])
 		// roomScores.forEach((item, index) => {
-		console.log("RM Length: ", roomNames.length)
+		// console.log("RM Length: ", roomNames.slength)
 		for (i = 0; i < roomNames.length; i++) {
 			// console.log(i);
 			let roomname = roomNames[i];
