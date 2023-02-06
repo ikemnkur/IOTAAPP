@@ -1,0 +1,317 @@
+{% extends 'layout.html' %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+
+<div class="content profile">
+
+    <h2>Messages</h2>
+
+    <div class="block">
+
+        <table>
+            <tbody>
+
+                <tr>
+                    <!-- Lists of Users and Friends -->
+                    <td style="background-color: #ccc;">
+                        <table>
+                            <tr class="searchBy">
+                                <th id="friendsTab">Friends</th>
+                                <th id="followersTab">Followers</th>
+                                <th id="userBaseTab">User Base</th>
+                            </tr>
+                        </table>
+
+                        <table class="GeneratedTable">
+                            <thead>
+                                <tr>
+                                    <th id="searchMode">Click a Tab Above</th>
+                                </tr>
+                            </thead>
+                            <tbody id="chatList">
+                                <tr id="chatListRow">
+                                    <td>
+                                        <div id="chatListItem" class="otherChatItem" hidden>
+                                            <table class="non" style="all: revert">
+                                                <tr>
+                                                    <!-- style="width: 25%;" -->
+                                                    <td>
+                                                        <img src="../images/profilepic.png" alt="Avatar"
+                                                            style="width: 32px; height: 32px;">
+                                                    </td>
+                                                    <td>
+                                                        <strong id="msgUsername"
+                                                            style="text-align: center; margin: 5px;">Username
+                                                        </strong>
+                                                    </td>
+                                                    <td>
+                                                        <text id="msgTime" style="float: right" hidden>2d 2h</text>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <p id="msgText" hidden>This was the last message sent</p>
+                                        </div>
+
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                        <!-- Codes by Quackit.com -->
+
+
+                        <div style="padding:5px">
+                            <i class="fas fa-search" style="margin: 0px 5px 0px 0px; padding:5px 0px 0px 0px;"></i>
+                            <input type="text" name="searchUser" id="lookupUser" onkeyup="searchTabs()">
+                        </div>
+                        <p id="username" hidden>{{account.username}}</p>
+                        <p id="sendToUser" hidden> {{targetUser}}</p>
+                        <p id="listOfUsers" hidden>{{userList}}</p>
+                        <p id="followers" hidden>{{followerslist}} </p>
+                        <p id="friends" hidden>{{friendlists}}</p>
+                        <p id="messageData" hidden>{{ messagesData }}</p>
+                        <p id="testMessageData" hidden>
+                            [{
+                            "msgId": "1234",
+                            "from": "admin",
+                            "to": "person",
+                            "date": ["12: 30", "11 / 8 / 2019"],
+                            "Text": "Bye Alphabetical leters",
+                            "data": ["heart", "happy", "proud"]
+                            },
+                            {
+                            "msgId": "456",
+                            "from": "swag2",
+                            "to": "admin",
+                            "date": ["12: 40", "11 / 9 / 2019"],
+                            "Text": "Happy as can be",
+                            "data": ["heart", "happy", "proud"]
+                            },
+                            {
+                            "msgId": "456",
+                            "from": "admin",
+                            "to": "person",
+                            "date": ["12: 40", "11 / 9 / 2019"],
+                            "Text": "hello Im be flexxing these bands",
+                            "data": ["heart", "happy", "proud"]
+                            },
+                            {
+                            "msgId": "456",
+                            "from": "swag2",
+                            "to": "person",
+                            "date": ["12: 40", "11 / 10 / 2019"],
+                            "Text": "Swagger as can be",
+                            "data": ["heart", "happy", "proud"]
+                            },
+                            {
+                            "msgId": "456",
+                            "from": "person",
+                            "to": "swag2",
+                            "date": ["12: 40", "11 / 19 / 2019"],
+                            "Text": "are you doing something cool today",
+                            "data": ["heart", "happy", "proud"]
+                            },
+                            {
+                            "msgId": "456",
+                            "from": "person",
+                            "to": "swag2",
+                            "date": ["12: 40", "11 / 10 / 2019"],
+                            "Text": "finessing my blessing",
+                            "data": ["heart", "happy", "proud"]
+                            },
+                            {
+                            "msgId": "456",
+                            "from": "person",
+                            "to": "member",
+                            "date": ["12: 40", "11 / 19 / 2019"],
+                            "Text": "are you doing something cool today",
+                            "data": ["heart", "happy", "proud"]
+                            },
+                            {
+                            "msgId": "123",
+                            "from": "person",
+                            "to": "bigbrain",
+                            "date": ["08: 30", "11 / 20 / 2019"],
+                            "Text": "Yes im getting dough and stacking paper to the ceiling",
+                            "data": ["heart", "happy", "proud"]
+                            },
+                            {
+                            "msgId": "123",
+                            "from": "person",
+                            "to": "admin",
+                            "date": ["08: 30", "11 / 20 / 2019"],
+                            "Text": "Yes im getting bread and stacking paper",
+                            "data": ["heart", "happy", "proud"]
+                            }]
+                        </p>
+                    </td>
+
+                    <!-- Chat Area -->
+                    <td>
+                        <div id="chatArea"
+                            style="border: 3px; padding: 3px; margin: 3px; background: lightblue; overflow-y: scroll; height: 400px;">
+                            <div id="otherChatBox" class="container" hidden>
+                                <img src="../images/profilepic.png" alt="Avatar">
+                                <p id="msg">Hello. How are you today?</p>
+                                <span id="createDate" class="time-right">11:00</span>
+                            </div>
+                            <div id="day" hidden style="text-align: center;">
+                                02/03/2022
+                            </div>
+                            <div id="youChatBox" class="container darker" hidden>
+                                <img src="../images/profilepicother.png" alt="Avatar" class="right">
+                                <p id="msg">Hey! I'm fine. Thanks for asking!</p>
+                                <span id="createDate" class="time-left">11:01</span>
+                            </div>
+                        </div>
+
+                        <form action="" method="post">
+
+                            <label for="username">Message</label>
+
+                            <br>
+                            <textarea style="width: 300px;"></textarea>
+                            <br>
+                            <div>
+                                <input class="profile-btn" type="submit" value="Send" name="send">
+                            </div>
+
+                            <p>{{ msg }}</p>
+
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div hidden>
+            <div id="chatArea"
+                style="border: 3px; padding: 3px; margin: 3px; background: lightblue; overflow-y: scroll; height: 400px;">
+                <div id="otherChatBox" class="container" hidden>
+                    <img src="../images/profilepic.png" alt="Avatar">
+                    <p id="msg">Hello. How are you today?</p>
+                    <span id="createDate" class="time-right">11:00</span>
+                </div>
+                <div id="day" hidden style="text-align: center;">
+                    02/03/2022
+                </div>
+                <div id="youChatBox" class="container darker" hidden>
+                    <img src="../images/profilepicother.png" alt="Avatar" class="right">
+                    <p id="msg">Hey! I'm fine. Thanks for asking!</p>
+                    <span id="createDate" class="time-left">11:01</span>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+</div>
+
+<script src="js/messages.js"></script>
+
+<style>
+    .content .block p {
+        padding: 0px;
+        margin: 0 0 5px 0;
+    }
+
+    .searchBy th {
+        border: 1px solid #C0C0C0;
+        padding: 5px;
+        background: #F0F0F0;
+    }
+
+    /* Chat containers */
+    .container {
+        border: 2px solid #dedede;
+        background-color: #f1f1f1;
+        border-radius: 5px;
+        padding: 5px;
+        margin: 5px 0;
+    }
+
+    /* Darker chat container */
+    .darker {
+        border-color: #ccc;
+        background-color: #ddd;
+    }
+
+    /* Clear floats */
+    .container::after {
+        content: "";
+        clear: both;
+        display: table;
+    }
+
+    /* Style images */
+    .container img {
+        float: left;
+        max-width: 32px;
+        width: 100%;
+        margin-right: 5px;
+        border-radius: 50%;
+    }
+
+    /* Style the right image */
+    .container img.right {
+        float: right;
+        margin-left: 5px;
+        margin-right: 0;
+    }
+
+    /* Style time text */
+    .time-right {
+        float: right;
+        color: #aaa;
+    }
+
+    /* Style time text */
+    .time-left {
+        float: left;
+        color: #999;
+    }
+</style>
+<style>
+    table.non {
+        all: revert;
+        width: 100%;
+        background-color: #ffffff;
+        /* border-collapse: collapse; */
+        /* border-width: 2px; */
+        /* border-color: #fff; */
+        /* border-style: solid; */
+        /* color: #000000; */
+        /* padding: 3px; */
+        /* margin: 3px; */
+    }
+
+    table.GeneratedTable {
+        width: 100%;
+        background-color: #ffffff;
+        border-collapse: collapse;
+        border-width: 2px;
+        border-color: #ffcc00;
+        border-style: solid;
+        color: #000000;
+        padding: 3px;
+        /* margin: 3px; */
+    }
+
+    table.GeneratedTable td {
+        all: revert;
+    }
+
+    table.GeneratedTable th {
+        border-width: 2px;
+        border-color: #ffcc00;
+        border-style: solid;
+        padding: 3px;
+    }
+
+    table.GeneratedTable thead {
+        background-color: #ffcc00;
+    }
+</style>
+{% endblock %}

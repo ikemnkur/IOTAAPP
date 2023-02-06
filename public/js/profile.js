@@ -7,6 +7,7 @@ socket.on("connect", () => {
     socketid = socket.id;
 })
 
+var username = document.getElementById("username").innerText;
 
 // Show thee friends list
 function showBlocked() {
@@ -21,6 +22,11 @@ function showBlocked() {
             var itemObjPrototype = document.getElementById("blockedTblItem");
             var itemObj = itemObjPrototype.cloneNode(true);
             let uname = itemObj.querySelector('#uname');
+            let unblockbtn = itemObj.querySelector('#unblockBtn');
+            unblockbtn.addEventListener("click", function(event) {
+                blockUser(targetUser, "null", username)
+            })
+            let removebtn = itemObj.querySelector('#removeBtn');
             uname.innerText = item;
             itemObj.hidden = false;
             tbl.appendChild(itemObj);
@@ -73,12 +79,27 @@ function showFriends() {
     if (tblDataJSON != null) {
         console.log("Table Data: ", tblDataJSON);
         tblDataJSON.forEach((item, index) => {
-            console.log(`Tbl Obj: ${index}. ${item}`);
+            targetUser = item;
+            console.log(`Tbl Obj: ${index}. ${targetUser}`);
             var itemObjPrototype = document.getElementById("friendTblItem")
             var itemObj = itemObjPrototype.cloneNode(true);
             let uname = itemObj.querySelector('#uname');
-            uname.innerText = item;
+            uname.innerText = targetUser
             itemObj.hidden = false
+            var giftBtn = itemObj.querySelector("#giftBtn");
+            var removeFriendBtn = itemObj.querySelector("#removeFriendBtn");
+            var sendMessageBtn = itemObj.querySelector("#sendMessageBtn");
+            // sendMessageBtn.href = "/message:"+targetUser
+
+            giftBtn.addEventListener("click", function (e) {
+                tipUsers(username, targetUser, 10);
+            })
+            removeFriendBtn.addEventListener("click", function (e) {
+                addFriend(username, targetUser, "remove");
+            })
+            sendMessageBtn.addEventListener("click", function (e) {
+                location.href = "/message:"+targetUser;
+            })
             tbl.appendChild(itemObj);
         });
     } else {
@@ -88,46 +109,111 @@ function showFriends() {
     console.log("Done");
 }
 
+var roomsNumber = 0;
+
+showRoomConfig();
 //Shows the saved room settings for making a new room
 function showRoomConfig() {
     var tbl = document.getElementById("roomCfgTable");
+    var tbody = document.getElementById("tbody");
     var tblData = document.getElementById("roomCfgTblData");
     var tblDataJSON = JSON.parse(tblData.innerText);
 
     console.log("Table Data: ", tblDataJSON);
+    // var roomCfgTd1 = tbl.querySelector("#rmCfgTb1");
+    // var roomCfgTd2 = tbl.querySelector("#rmCfgTb2");
+    // var roomCfgTd3 = tbl.querySelector("#rmCfgTb3");
+    // var roomCfgTd4 = tbl.querySelector("#rmCfgTb4");
+    // var roomCfgTd5 = tbl.querySelector("#rmCfgTb5");
+    // var roomCfgTd6 = tbl.querySelector("#rmCfgTb6");
+    // var roomCfgTd7 = tbl.querySelector("#rmCfgTb7");
 
-    var roomCfg = tbl.querySelector("#rmCfg");
-    var roomCfgTd1 = tbl.querySelector("#rmCfgTb1");
-    var roomCfgTd2 = tbl.querySelector("#rmCfgTb2");
-    var roomCfgTd3 = tbl.querySelector("#rmCfgTb3");
-    var roomCfgTd4 = tbl.querySelector("#rmCfgTb4");
-    var roomCfgTd5 = tbl.querySelector("#rmCfgTb5");
-    var roomCfgTd6 = tbl.querySelector("#rmCfgTb6");
-    var roomCfgTd7 = tbl.querySelector("#rmCfgTb7");
+    // tblDataJSON.forEach((item, index) => {
+    var roomCfg = tbl.querySelector("#tbody").querySelector("#rmCfg");
 
-    tblDataJSON.forEach((item, index) => {
-        console.log(`Tbl Obj: ${index}. ${item}`);
-        var newRoomCfg = roomCfg.cloneNode(true);
-        tbl.append(newRoomCfg);
-    })
+    // console.log(`Tbl Obj: ${index}. ${item}`);
+    var newRoomCfg = roomCfg.cloneNode(true);
+    newRoomCfg.hidden = false
+    var roomCfgTd0 = newRoomCfg.querySelector("#rmCfgTb0");
+    roomsNumber++;
+    roomCfgTd0.innerText = roomsNumber + ". ";
+    var roomCfgTd1 = newRoomCfg.querySelector("#rmCfgTb1");
+    roomCfgTd1.innerText = tblDataJSON["topic"];
+    var roomCfgTd2 = newRoomCfg.querySelector("#rmCfgTb2");
+    roomCfgTd2.innerText = tblDataJSON["roomID"];
+    var roomCfgTd3 = newRoomCfg.querySelector("#rmCfgTb3");
+    roomCfgTd3.innerText = tblDataJSON["teams"];
+    var roomCfgTd4 = newRoomCfg.querySelector("#rmCfgTb4");
+    roomCfgTd4.innerText = tblDataJSON["tags"];
+    var roomCfgTd5 = newRoomCfg.querySelector("#rmCfgTb5");
+    roomCfgTd5.innerText = tblDataJSON["joinCost"];
+    var roomCfgTd6 = newRoomCfg.querySelector("#rmCfgTb6");
+    roomCfgTd6.innerText = tblDataJSON["private"];
+    var roomCfgTd7 = newRoomCfg.querySelector("#rmCfgTb7");
+    roomCfgTd7.innerText = tblDataJSON["passcode"];
+    var roomCfgTd8 = newRoomCfg.querySelector("#rmCfgTb8");
+    var joinBtn = roomCfgTd8.querySelector("#joinBtn");
 
-    tblDataJSON.forEach((item, index) => {
-        console.log(`Tbl Obj: ${index}. ${item}`);
-        var tr = document.createElement("tr");
-        var td = document.createElement("td");
-        var tdBtn = document.createElement("td");
+    // joinBtn.addEventListen();
+    var tbody = document.getElementById("tbody");
+    tbody.append(newRoomCfg);
+    // })
 
-        var btn = document.createElement("button");
-        btn.innerText = "Remove";
-        btn.style = "padding-left: 2px; color: black;";
-        td.innerText = item;
-        tdBtn.appendChild(btn);
-        tr.appendChild(td);
-        tr.appendChild(tdBtn);
-        tbody.appendChild(tr);
-    });
+    // tblDataJSON.forEach((item, index) => {
+    //     console.log(`Tbl Obj: ${index}. ${item}`);
+    //     var tr = document.createElement("tr");
+    //     var td = document.createElement("td");
+    //     var tdBtn = document.createElement("td");
+
+    //     var btn = document.createElement("button");
+    //     btn.innerText = "Remove";
+    //     btn.style = "padding-left: 2px; color: black;";
+    //     td.innerText = item;
+    //     tdBtn.appendChild(btn);
+    //     tr.appendChild(td);
+    //     tr.appendChild(tdBtn);
+    //     tbody.appendChild(tr);
+    // });
     tbl.appendChild(tbody);
     console.log("Done");
+}
+
+socket.on('tipEvent', (tipperUsername, msg_username, coinsAmount, roomid) => {
+    if (roomid == room) {
+        if (msg_username == username) {
+            coins += coinsAmount;
+            console.log("You have been tipped by ", tipperUsername);
+        }
+        if (tipperUsername == username) {
+            coins -= coinsAmount;
+            console.log("You just tipped ", msg_username);
+        }
+    }
+})
+
+
+async function addFriend(currentUser, userToFollow, action) {
+    // used to follow a user, add them to the friend list once
+    var payload = {
+        "currentUser": currentUser,
+        "userToFollow": userToFollow,
+        "action": action
+    };
+    postData("http://localhost:" + portnum + "/follow", payload).then((data) => {
+        console.log(data);
+    });
+}
+
+async function blockUser(userToBlock, roomId, currentUser) {
+    // remove friend from follow list and hide thier messages from the chat
+    var payload = {
+      "userToBlock": userToBlock,
+      "roomId": roomId,
+      "currentUser": currentUser
+    };
+    postData("http://localhost:" + portnum + "/block", payload).then((data) => {
+      //console.log(data);
+    });
 }
 
 console.log("Profile Page");

@@ -134,29 +134,29 @@ app.use(express.static(path.join(__dirname, 'static')));
 app.use(cookieParser());
 
 app.use(
-    fileUpload({
-        limits: {
-            fileSize: 10000000,
-        },
-        abortOnLimit: true,
-    })
+	fileUpload({
+		limits: {
+			fileSize: 10000000,
+		},
+		abortOnLimit: true,
+	})
 );
 
 app.post('/upload', (req, res) => {
-    // Get the file that was set to our field named "image"
-    const { image } = req.files;
+	// Get the file that was set to our field named "image"
+	const { image } = req.files;
 
-    // If no image submitted, exit
-    if (!image) return res.sendStatus(400);
+	// If no image submitted, exit
+	if (!image) return res.sendStatus(400);
 
-    // If does not have image mime type prevent from uploading
-    if (/^image/.test(image.mimetype)) return res.sendStatus(400);
+	// If does not have image mime type prevent from uploading
+	if (/^image/.test(image.mimetype)) return res.sendStatus(400);
 
-    // Move the uploaded image to our upload folder
-    image.mv(__dirname + '/upload/' + image.name);
+	// Move the uploaded image to our upload folder
+	image.mv(__dirname + '/upload/' + image.name);
 
-    // All good
-    res.sendStatus(200);
+	// All good
+	res.sendStatus(200);
 });
 
 // http://localhost:3000/ - display login page
@@ -621,8 +621,16 @@ app.get('/profile', (request, response) => isLoggedin(request, settings => {
 			// Format the registered date
 			// console.log("USER-Stats: ", userstats)
 			accounts[0].registered = new Date(accounts[0].registered).toISOString().split('T')[0];
+
+			let userLists;
+			connection.query('SELECT username FROM userstats', (error, listofusers, fields) => {
+				userLists = JSON.stringify(listofusers);
+
+				console.log("ULs: ", userLists)
+			});
+
 			// Render profile page
-			response.render('profile.html', { account: accounts[0], stats: userstats, role: request.session.account_role });
+			response.render('profile.html', { account: accounts[0], stats: userstats, role: request.session.account_role, userList: userLists });
 		})
 
 	});
@@ -639,6 +647,33 @@ app.get('/edit_profile', (request, response) => isLoggedin(request, settings => 
 		accounts[0].registered = new Date(accounts[0].registered).toISOString().split('T')[0];
 		// Render profile page
 		response.render('profile-edit.html', { account: accounts[0], role: request.session.account_role });
+	});
+}, () => {
+	// Redirect to login page
+	response.redirect('/');
+}));
+
+// http://localhost:3000/edit_profile - displat the edit profile page
+app.get(['/messages', '/message:id'], (request, response) => isLoggedin(request, settings => {
+	// Get all the users account details so we can populate them on the profile page
+	const id = request.params.id;
+	connection.query('SELECT * FROM accounts WHERE username = ?', [request.session.account_username], (error, accounts, fields) => {
+		// Format the registered date
+		accounts[0].registered = new Date(accounts[0].registered).toISOString().split('T')[0];
+		connection.query('SELECT messages FROM userstats WHERE username = ?', [request.session.account_username], (error, messages, fields) => {
+			let userLists, followersList, friendLists;
+			connection.query('SELECT username FROM userstats', (error, listofusers, fields) => {
+				userLists = JSON.stringify(listofusers); connection.query('SELECT followers FROM userstats WHERE username = ?', [request.session.account_username], (error, followerslist, fields) => {
+					followersList = JSON.stringify(followerslist); connection.query('SELECT friends FROM userstats WHERE username = ?', [request.session.account_username], (error, friendofLists, fields) => {
+						friendLists = JSON.stringify(friendofLists);
+						let message = JSON.stringify(messages);
+						// Render profile page
+						response.render('messages.html', { account: accounts[0], messagesData: message, role: request.session.account_role,
+							 targetUser: id, userList: userLists, followerslist: followersList, friendlists: friendLists });
+					})
+				})
+			})
+		});
 	});
 }, () => {
 	// Redirect to login page
@@ -1599,7 +1634,7 @@ io.on('connection', socket => {
 			);
 
 		// Send users and room info
-		io.to(user.room).emit('roomUsers', 
+		io.to(user.room).emit('roomUsers',
 			user.room,
 			getRoomUsers(user.room)
 		);
@@ -1774,7 +1809,7 @@ io.on('connection', socket => {
 			);
 			console.log("user disconnect event: ", user.username);
 			// Send users and room info
-			io.to(user.room).emit('roomUsers', 
+			io.to(user.room).emit('roomUsers',
 				user.room,
 				getRoomUsers(user.room)
 			);

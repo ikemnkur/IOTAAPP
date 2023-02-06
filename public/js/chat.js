@@ -767,7 +767,7 @@ function displayUserStats() {
   } catch { }
 }
 
-// Add users to DOM table
+// Add users to user search table
 // this supposed to code for the add friend table
 function outputUsers(users) {
   userList.innerHTML = "";
