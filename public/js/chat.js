@@ -635,10 +635,10 @@ function createMessage(message, replyTo) {
     }
 
     replyBtn.addEventListener('mouseenter', function (evt) {
-      replyBtn.style.fontSize = "18px";
+      replyBtn.style.color = "red";
     })
      replyBtn.addEventListener('mouseleave', function (evt) {
-      replyBtn.style.fontSize = "16px";
+      replyBtn.style.color = "blue";
     })
     replyBtn.addEventListener('click', function (evt) {
       cancelBtn.style = "display: block";
@@ -812,8 +812,16 @@ function outputUsers(users) {
         tdTip.appendChild(coinBtn);
         tr.appendChild(tdTip);
 
+        coinBtn.addEventListener("mouseleave", (event) => {
+          coin.style.color = "silver"
+        });
+        
+        coinBtn.addEventListener("mouseover", function () {
+          coin.style.color = "gold"
+        });
+
         tdTip.addEventListener("click", function () {
-          alert("Tip me");
+          // alert("Tip me");
           if (username != tdName.innerText) {
             tipUsers(username, tdName.innerText, 1);
             console.log(`${username} Tipped ${tdName.innerText}`);

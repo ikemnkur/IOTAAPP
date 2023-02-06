@@ -18,18 +18,24 @@
 
     <div class="block">
 
-        <p>Your account details are below.</p>
+        <p>Profile Pic</p>
+        <image id="profilepic" src="../images/profilepic.png" width=256 hieght=265></image>"
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <input type="file" name="image" />
+            <button type="submit">Upload</button>
+        </form>
 
         <div class="profile-detail">
             <strong>Username:</strong>{{ account.username }}
         </div>
 
         <div class="profile-detail">
-            <strong>XP: </strong>{{ stats.xp }}
+            <strong>XP: </strong>{{ stats[0].xp }}
         </div>
 
         <div class="profile-detail">
-            <strong>Coins: </strong>{{ stats.coins }}
+            <strong>Coins: </strong>{{ stats[0].coins }}
+            <button>Get More</button>
         </div>
 
         <div class="profile-detail">
@@ -75,37 +81,55 @@
                 </tbody>
             </table>
             <!-- Codes by Quackit.com -->
-            <p hidden id="roomCfgTblData">{{ stats.roomConfig }}</p>
+            <p id="roomCfgTblData">{{ stats[0].roomConfig }}</p>
         </div>
         <!-- List of Friends -->
         <div class="profile-detail">
             <strong>Friends</strong>
+            <div style="display: flex;">
+                <i class="fas fa-search" style="margin: 0px 5px 0px 5px; padding:5px 0px 0px 0px;"></i>
+                <input id="searchbarFriend" onkeyup="searchFriends()" type="text" name="search"
+                    placeholder="Search for your friends..." style="min-width: 300px;">
+            </div>
             <table id="friendTbl">
                 <tbody>
-                    <tr id="friendTblItem" hidden>
+                    <tr hidden id="friendTblItem">
+                        <td id="uname" class="friend"> Test USER NAme</td>
                         <td><button> Gift </button></td>
                         <td><button> Remove </button></td>
                         <td><button> Message </button></td>
-                        <td id="uname"> Test USER NAme</td>
+                    </tr>
+                    <tr id="loser" hidden>
+                        <td>You have no friends, loser.</td>
                     </tr>
                 </tbody>
             </table>
-            <p hidden id="friendTblData">{{ stats.friends }}</p>
+            <p hidden id="friendTblData">{{ stats[0].friends }}</p>
         </div>
 
         <!-- List of Blocked users -->
         <div class="profile-detail">
             <strong>Blocked Users</strong>
+            <div style="display: flex;">
+                <i class="fas fa-search" style="margin: 0px 5px 0px 5px; padding:5px 0px 0px 0px;"></i>
+                <input id="searchbarBlocked" onkeyup="searchFriends()" type="text" name="search"
+                    placeholder="Search thur blocked users..." style="min-width: 300px;">
+            </div>
             <table id="blockedTbl">
                 <tbody>
                     <tr id="blockedTblItem" hidden>
+                        <td id="uname" class="blocked"> Test USER NAme</td>
                         <td><button> Unblock </button></td>
                         <td><button> Remove </button></td>
-                        <td id="uname"> Test USER NAme</td>
+                    </tr>
+                    <tr id="noblocks" hidden>
+                        <td>
+                            You have no annoying blocked users.
+                        </td>
                     </tr>
                 </tbody>
             </table>
-            <p hidden id="blockedTblData">{{ stats.blockedUsers }}</p>
+            <p hidden id="blockedTblData">{{ stats[0].blockedUsers }}</p>
         </div>
         <a class="profile-btn" href="/edit_profile">Edit Details</a>
 
@@ -149,6 +173,7 @@
 
 
 
-
+<script src="/socket.io/socket.io.js"></script>
 <script src="js/profile.js"></script>
+
 {% endblock %}

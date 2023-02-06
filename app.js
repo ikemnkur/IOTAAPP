@@ -21,7 +21,7 @@ const url = require('url');
 // const { instrument } = require("@socket.io/admin-ui");
 // const io = require('socket.io')(2999, {
 // 	cors: {
-// 		origin: ["http://localhost:3000/", "https://admin.socket.io"]
+// 		origin: ["http://localhost:3000/", "https:/n/admin.socket.io"]
 // 	},
 // })
 // instrument(io, {
@@ -31,6 +31,8 @@ const url = require('url');
 const app = express()
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
+
+const fileUpload = require('express-fileupload');
 
 // const { Server } = require('socket.io');
 // const server2 = http.createServer(app);
@@ -57,27 +59,27 @@ const secret_key = 'your secret key';
 // Update the below details with your own MySQL connection details
 
 // Local Connection
-// var connection = mysql.createConnection({
-// 	host: 'localhost',
-// 	// port: 3306,
-// 	user: 'root',
-// 	password: '',//,password: 'root',
-// 	database: 'nodelogin',
-// 	multipleStatements: true,
-// 	bigNumberStrings: true,
-// });
-
-// Remote connection
-var connection = mysql2.createConnection({
-	// host: '34.136.59.230:3306',
-	host: '72.14.183.70',
-	port: 3306,
-	user: 'remoteiota',
-	password: 'Password!*',//,password: 'root',
+var connection = mysql.createConnection({
+	host: 'localhost',
+	// port: 3306,
+	user: 'root',
+	password: '',//,password: 'root',
 	database: 'nodelogin',
 	multipleStatements: true,
 	bigNumberStrings: true,
 });
+
+// Remote connection
+// var connection = mysql2.createConnection({
+// 	// host: '34.136.59.230:3306',
+// 	host: '72.14.183.70',
+// 	port: 3306,
+// 	user: 'remoteiota',
+// 	password: 'Password!*',//,password: 'root',
+// 	database: 'nodelogin',
+// 	multipleStatements: true,
+// 	bigNumberStrings: true,
+// });
 
 //Doesn't work
 // var connection3 = mysql.createConnection({
@@ -130,6 +132,32 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'static')));
 app.use(cookieParser());
+
+app.use(
+    fileUpload({
+        limits: {
+            fileSize: 10000000,
+        },
+        abortOnLimit: true,
+    })
+);
+
+app.post('/upload', (req, res) => {
+    // Get the file that was set to our field named "image"
+    const { image } = req.files;
+
+    // If no image submitted, exit
+    if (!image) return res.sendStatus(400);
+
+    // If does not have image mime type prevent from uploading
+    if (/^image/.test(image.mimetype)) return res.sendStatus(400);
+
+    // Move the uploaded image to our upload folder
+    image.mv(__dirname + '/upload/' + image.name);
+
+    // All good
+    res.sendStatus(200);
+});
 
 // http://localhost:3000/ - display login page
 app.get(['/', '/login'], (request, response) => isLoggedin(request, () => {
@@ -589,11 +617,12 @@ app.get(['/home'], (request, response) => isLoggedin(request, settings => {
 app.get('/profile', (request, response) => isLoggedin(request, settings => {
 	// Get all the users account details so we can populate them on the profile page
 	connection.query('SELECT * FROM accounts WHERE username = ?', [request.session.account_username], (error, accounts, fields) => {
-		connection.query('SELECT * FROM userstats WHERE username = ?', [request.session.account_username], (error, stats, fields) => {
+		connection.query('SELECT * FROM userstats WHERE username = ?', [request.session.account_username], (error, userstats, fields) => {
 			// Format the registered date
+			// console.log("USER-Stats: ", userstats)
 			accounts[0].registered = new Date(accounts[0].registered).toISOString().split('T')[0];
 			// Render profile page
-			response.render('profile.html', { account: accounts[0], stat: stats, role: request.session.account_role });
+			response.render('profile.html', { account: accounts[0], stats: userstats, role: request.session.account_role });
 		})
 
 	});
@@ -732,6 +761,10 @@ app.get(['/joinRoom'], (request, response) => {
 
 	})
 });
+//delete this
+// app.get(['/chat'], (request, response) => {
+// 	response.render('room.html', { roomObj: newRoom, roomOBJ: JSON.stringify(newRoom), userJSON: JSON.stringify(userStatsResult), userOBJ: userStatsResult });
+// })
 
 app.get(['/createRoom'], (request, response) => {
 	let data = request.query.data;
