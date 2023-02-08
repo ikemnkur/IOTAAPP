@@ -1998,42 +1998,66 @@ app.post('/block', (request, response) => isLoggedin(request, settings => {
 
 
 app.post('/sendMessage', (request, response) => isLoggedin(request, settings => {
-	var toUser = request.body.toUser;
-	var fromUser = request.body.fromUser;
-	var blockedUsers;
-	connection.query("SELECT messsage FROM userstats WHERE username = ?", [toUser], (error, msg) => {
+	console.log("Msg: ", msg);
+	var toUser = request.body.touser;
+	var fromUser = request.body.fromuser;
+	var text = request.body.msg.Text;
+	var msgID = request.body.msg.msgId;
+	var data = request.body.msg.data;
+	var date = request.body.msg.date
+
+	var message, messageFrom;
+	connection.query("SELECT messsages FROM userstats WHERE username = ?", [fromUser], (error, msg) => {
 		if (error) throw error;
 		console.log("Msg Results: ", msg);
-		//userFriends = JSON.parse(JSON.stringify((friendresults1)));//friendresults1;
 		try {
-			blockedUsers = JSON.parse(blockedUsersresults[0]["blockedUsers"]);
+			messageFrom = JSON.parse(msg);
 		} catch (e) {
-			blockedUsers = [""];
+			messageFrom = [""];
+		}
+		console.log("Blocked Users Array: ", messageFrom);
+	})
+	connection.query("SELECT messsages FROM userstats WHERE username = ?", [toUser], (error, msg) => {
+		if (error) throw error;
+		console.log("Msg Results: ", msg);
+		//userFriends = JSOotherChatUserN.parse(JSON.stringify((friendresults1)));//friendresults1;
+		try {
+			message = JSON.parse(msg);
+		} catch (e) {
+			message = [""];
 		}
 		// userFriends = JSON.parse(friendresults[0].friends);
-		console.log("Blocked Users Array: ", blockedUsers);
+		console.log("Blocked Users Array: ", message);
 		setTimeout(doSumn, 500);
 	});
 
 	function doSumn() {
 		try {
-			if (blockedUsers.indexOf(blockedUser) < 0) {
-				console.log("Removing ", blockedUser, " from blocked list");
-				blockedUsers = blockedUsers.filter(blkdUser => blkdUser !== blockedUser);
-			} else {
-				blockedUsers.push(blockedUser); // adds to array
-				// filters out duplicates
-				blockedUsers = blockedUsers.filter((item, index) => index == blockedUsers.indexOf(item));
-				console.log("Adding ", blockedUser, " to blocked list");
-			}
-			connection.query("UPDATE userstats SET blockedUsers = ? WHERE username = ?", [JSON.stringify(blockedUsers), currentUser], (error, results2, fields) => {
+			const d = new Date();
+
+			var payload = {
+				"touser": toUser,
+				"fromuser": fromUser,
+				"msg": {
+					"msgId": fromUser + `${d.getHours()}:${d.getMinutes()} ` + `${d.getMonth} / ${d.getDay} / ${d.getFullYear}` + toUser,
+					"from": fromUser,
+					"to": toUser,
+					"date": [`${d.getHours()}:${d.getMinutes()} `, `${d.getMonth} / ${d.getDay} / ${d.getFullYear}`],
+					"Text": text,
+					"data": data
+				}
+			};
+
+			message[message.length] = payload;
+			connection.query("UPDATE userstats SET messages = ? WHERE username = ?", [JSON.stringify(message), toUser], (error, results2, fields) => {
 				if (error) throw error;
 				//console.log("Current User Friends: ", results2);
 			});
+
 		} catch (e) {
 			throw e;
 		}
-		console.log("Done Block Opperation");
+		console.log("Sent Message Opperation");
 	};
 
 }));

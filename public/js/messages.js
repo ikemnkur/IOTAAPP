@@ -1,6 +1,6 @@
 
 var username = document.getElementById('username').innerText;
-
+var chatToUser = null;
 var messageData = document.getElementById('messageData').innerText;
 let msg = JSON.parse(messageData);
 
@@ -37,6 +37,7 @@ userBaseTab.addEventListener('click', function (e) {
         newChatItem.addEventListener('click', function (e) {
             //clear out the background color for all the list items
             let others = document.getElementsByClassName("otherChatItem");
+            chatToUser = users[i].username;
             for (let i = 0; i < others.length; i++) {
                 others[i].style.background = "white";
             }
@@ -268,20 +269,26 @@ testData.forEach((item, index) => {
 
 });
 
+let enterMessage = document.getElementById("enterMsg");
+let sendMsg = document.getElementById("sendMsgBtn");
 
+sendMsg.addEventListener("click", function (e) {
+    if (chatToUser != null)
+        sendMessage(chatToUser, username, enterMessage.value);
+})
 
-async function sendMessage(toUser, fromUser) {
+async function sendMessage(toUser, fromUser, text) {
     // remove friend from follow list and hide thier messages from the chat
     const d = new Date();
     var payload = {
         "touser": toUser,
         "fromuser": fromUser,
         "msg": {
-            "msgId": fromUser + "1234" + toUser,
+            "msgId": fromUser + `${d.getHours()}:${d.getMinutes()} ` + `${d.getMonth} / ${d.getDay} / ${d.getFullYear}` + toUser,
             "from": fromUser,
             "to": toUser,
             "date": [`${d.getHours()}:${d.getMinutes()} `, `${d.getMonth} / ${d.getDay} / ${d.getFullYear}`],
-            "Text": "Bye Alphabetical leters",
+            "Text": text,
             "data": ["heart", "happy", "proud"]
         }
     };
