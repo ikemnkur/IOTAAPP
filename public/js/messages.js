@@ -7,6 +7,7 @@ let msg = JSON.parse(messageData);
 var followerData = document.getElementById('followers').innerText;
 let followers = JSON.parse(followerData);
 
+var portnum = 3000;
 
 var friendData = document.getElementById('friends').innerText;
 // friendData.replace('\',)
@@ -21,8 +22,15 @@ var searchModeText = document.getElementById('searchMode');
 var chatItem = document.getElementById('chatListItem');
 var chatList = document.getElementById('chatList');
 
+function removeAllChildNodes(parent) {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+}
+
 var userBaseTab = document.getElementById('userBaseTab')
 userBaseTab.addEventListener('click', function (e) {
+    removeAllChildNodes(chatList);
     userBaseTab.style.background = "grey";
     followersTab.style.background = "lightgrey";
     friendsTab.style.background = "lightgrey";
@@ -124,6 +132,7 @@ function searchTabs() {
 
 var chatArea = document.getElementById('chatArea');
 var testMessageData = document.getElementById('testMessageData').innerText;
+var chatWith = document.getElementById('chattingWithUser');
 // var TMD = JSON.parse(testMessageData);
 var TMD;
 
@@ -178,9 +187,13 @@ let xyz = [{
 }]
 
 function loadChats(otherChatUser) {
+
+    chatWith.innerText = "Chatting with " + otherChatUser;
+
     var yourChatBox = document.getElementById('youChatBox');
     var otherChatBox = document.getElementById('otherChatBox');
     var day = document.getElementById('day');
+
     //clear the chatArea's old chats
     let element = document.getElementById("chatArea");
     while (element.firstChild) {
@@ -192,35 +205,37 @@ function loadChats(otherChatUser) {
         // if the other user selected in the chat userlist area is in the messageData then create a chat box in the chat area
         if (otherChatUser == testData[index]["from"] || otherChatUser == testData[index]["to"]) {
             // add a date stamp if the message date changes
-            if (index > 0) {
-                //If the message date changes
-                if (testData[index - 1]["date"][1] != testData[index]["date"][1]) {
+            if (TMD["from"] == username || TMD["to"] == username) {
+                if (index > 0) {
+                    //If the message date changes
+                    if (testData[index - 1]["date"][1] != testData[index]["date"][1]) {
+                        let dayStamp = day.cloneNode(true);
+                        dayStamp.innerText = testData[index]["date"][1];
+                        dayStamp.hidden = false;
+                        chatArea.append(dayStamp)
+                    }
+                } else {
                     let dayStamp = day.cloneNode(true);
                     dayStamp.innerText = testData[index]["date"][1];
                     dayStamp.hidden = false;
                     chatArea.append(dayStamp)
                 }
-            } else {
-                let dayStamp = day.cloneNode(true);
-                dayStamp.innerText = testData[index]["date"][1];
-                dayStamp.hidden = false;
-                chatArea.append(dayStamp)
             }
-
             if (TMD["from"] == username) {
                 let yourChat = yourChatBox.cloneNode(true);
                 yourChat.querySelector("#msg").innerText = TMD["Text"];
                 yourChat.querySelector("#createDate").innerText = TMD["date"][0];
                 yourChat.hidden = false;
                 chatArea.appendChild(yourChat);
-            } else
-                if (TMD["to"] == username) {
-                    let otherChat = otherChatBox.cloneNode(true);
-                    otherChat.querySelector("#msg").innerText = TMD["Text"];
-                    otherChat.hidden = false;
-                    chatArea.appendChild(otherChat);
-                }
-            console.log("Msg: " + item["Text"]);
+            }
+            if (TMD["to"] == username) {
+                let otherChat = otherChatBox.cloneNode(true);
+                otherChat.querySelector("#msg").innerText = TMD["Text"];
+                otherChat.querySelector("#createDate").innerText = TMD["date"][0];
+                otherChat.hidden = false;
+                chatArea.appendChild(otherChat);
+            }
+            // console.log("Msg: " + item["Text"]);
         }
 
     });
@@ -229,27 +244,31 @@ function loadChats(otherChatUser) {
 var yourChatBox = document.getElementById('youChatBox');
 var otherChatBox = document.getElementById('otherChatBox');
 var day = document.getElementById('day');
+
 //clear the chatArea's old chats
 let element = document.getElementById("chatArea");
 while (element.firstChild) {
     element.removeChild(element.firstChild);
 }
+
 testData.forEach((item, index) => {
     let TMD = item;
     // add a date stamp if the message date changes
-    if (index > 0) {
-        //If the message date changes
-        if (testData[index - 1]["date"][1] != testData[index]["date"][1]) {
+    if (TMD["from"] == username || TMD["to"] == username) {
+        if (index > 0) {
+            //If the message date changes
+            if (testData[index - 1]["date"][1] != testData[index]["date"][1]) {
+                let dayStamp = day.cloneNode(true);
+                dayStamp.innerText = testData[index]["date"][1];
+                dayStamp.hidden = false;
+                chatArea.append(dayStamp)
+            }
+        } else {
             let dayStamp = day.cloneNode(true);
             dayStamp.innerText = testData[index]["date"][1];
             dayStamp.hidden = false;
             chatArea.append(dayStamp)
         }
-    } else {
-        let dayStamp = day.cloneNode(true);
-        dayStamp.innerText = testData[index]["date"][1];
-        dayStamp.hidden = false;
-        chatArea.append(dayStamp)
     }
 
     if (TMD["from"] == username) {
@@ -258,14 +277,15 @@ testData.forEach((item, index) => {
         yourChat.querySelector("#createDate").innerText = TMD["date"][0];
         yourChat.hidden = false;
         chatArea.appendChild(yourChat);
-    } else
-        if (TMD["to"] == username) {
-            let otherChat = otherChatBox.cloneNode(true);
-            otherChat.querySelector("#msg").innerText = TMD["Text"];
-            otherChat.hidden = false;
-            chatArea.appendChild(otherChat);
-        }
-    console.log("Msg: " + item["Text"]);
+    }
+    if (TMD["to"] == username) {
+        let otherChat = otherChatBox.cloneNode(true);
+        otherChat.querySelector("#msg").innerText = TMD["Text"];
+        otherChat.querySelector("#createDate").innerText = TMD["date"][0];
+        otherChat.hidden = false;
+        chatArea.appendChild(otherChat);
+    }
+    // console.log("Msg: " + item["Text"]);
 
 });
 
@@ -273,6 +293,7 @@ let enterMessage = document.getElementById("enterMsg");
 let sendMsg = document.getElementById("sendMsgBtn");
 
 sendMsg.addEventListener("click", function (e) {
+    e.preventDefault();
     if (chatToUser != null)
         sendMessage(chatToUser, username, enterMessage.value);
 })
@@ -284,10 +305,10 @@ async function sendMessage(toUser, fromUser, text) {
         "touser": toUser,
         "fromuser": fromUser,
         "msg": {
-            "msgId": fromUser + `${d.getHours()}:${d.getMinutes()} ` + `${d.getMonth} / ${d.getDay} / ${d.getFullYear}` + toUser,
+            "msgId": fromUser + "#" + `${d.getHours()}:${d.getMinutes()} ` + "#" + `${d.getMonth()} / ${d.getDay()} / ${d.getFullYear()}` + "#" + toUser,
             "from": fromUser,
             "to": toUser,
-            "date": [`${d.getHours()}:${d.getMinutes()} `, `${d.getMonth} / ${d.getDay} / ${d.getFullYear}`],
+            "date": [`${d.getHours()}:${d.getMinutes()} `, `${d.getMonth()} / ${d.getDay()} / ${d.getFullYear()}`],
             "Text": text,
             "data": ["heart", "happy", "proud"]
         }

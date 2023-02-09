@@ -712,9 +712,7 @@ function teamsDisplay() {
 
 
   teams.forEach((item, index) => {
-    //console.log(`teams Obj: ${index}. ${item}`);
-    // let score = Math.ceil(Math.random() * 1000);
-    // scores[item] = 0;
+    
     let tr = document.createElement("tr");
     let tdName = document.createElement("td");
     let tdScore = document.createElement("td");

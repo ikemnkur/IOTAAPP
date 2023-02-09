@@ -93,7 +93,7 @@
                             "msgId": "456",
                             "from": "admin",
                             "to": "person",
-                            "date": ["12: 40", "11 / 9 / 2019"],
+                            "date": ["12: 40", "5 / 9 / 2019"],
                             "Text": "hello Im be flexxing these bands",
                             "data": ["heart", "happy", "proud"]
                             },
@@ -101,7 +101,7 @@
                             "msgId": "456",
                             "from": "swag2",
                             "to": "person",
-                            "date": ["12: 40", "11 / 10 / 2019"],
+                            "date": ["12: 40", "12 / 10 / 2019"],
                             "Text": "Swagger as can be",
                             "data": ["heart", "happy", "proud"]
                             },
@@ -149,9 +149,15 @@
                     </td>
 
                     <!-- Chat Area -->
+
                     <td>
+                        <div id="chattingWithUser"
+                            style="text-align: center;border: 3px; padding: 3px; margin: 3px; background: lightblue;">
+                            Chatting with User
+                        </div>
                         <div id="chatArea"
-                            style="border: 3px; padding: 3px; margin: 3px; background: lightblue; overflow-y: scroll; height: 400px;">
+                            style="border: 3px; padding: 3px; margin: 3px; background: lightseagreen; overflow-y: scroll; height: 400px;">
+
                             <div id="otherChatBox" class="container" hidden>
                                 <img src="../images/profilepic.png" alt="Avatar">
                                 <p id="msg">Hello. How are you today?</p>
@@ -167,12 +173,13 @@
                             </div>
                         </div>
 
-                        <form action="" method="post">
+                        <form action="/sendMessage" method="post">
 
                             <label for="username">Message</label>
                             <textarea id="enterMsg" style="width: 300px;"></textarea>
                             <div>
-                                <input id="sendMsgBtn" class="profile-btn" type="submit" value="Send" name="send">
+                                <button id="sendMsgBtn" class="profile-btn" type="submit" value="Send"
+                                    name="send">Send</button>
                             </div>
                             <p>{{ msg }}</p>
 

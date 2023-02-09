@@ -1666,18 +1666,9 @@ io.on('connection', socket => {
 			// if (roomScores[roomname] != null) {
 			socket.emit("Scores", roomname, roomScores[roomNames[i]])
 			// }
-
 		}
-
-		// })
-		// setTimeout(outputScores, 5000)
-		// }
+		
 	}
-
-	// //delay this until define in the startScoreKeeping socket is triggered
-	// setTimeout(() => {
-	// 	outputScores()
-	// }, 5000)
 
 	// Add to te Room scores array
 	socket.on("startScoreKeeping", (room, teams) => {
@@ -1998,14 +1989,15 @@ app.post('/block', (request, response) => isLoggedin(request, settings => {
 
 
 app.post('/sendMessage', (request, response) => isLoggedin(request, settings => {
-	console.log("Msg: ", msg);
+	var msg = request.body.msg;
 	var toUser = request.body.touser;
 	var fromUser = request.body.fromuser;
+	console.log("Msg: ", msg);
 	var text = request.body.msg.Text;
 	var msgID = request.body.msg.msgId;
 	var data = request.body.msg.data;
 	var date = request.body.msg.date
-
+	
 	var message, messageFrom;
 	connection.query("SELECT messsages FROM userstats WHERE username = ?", [fromUser], (error, msg) => {
 		if (error) throw error;
