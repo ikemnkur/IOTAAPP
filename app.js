@@ -668,8 +668,10 @@ app.get(['/messages', '/message:id'], (request, response) => isLoggedin(request,
 						friendLists = JSON.stringify(friendofLists);
 						let message = JSON.stringify(messages);
 						// Render profile page
-						response.render('messages.html', { account: accounts[0], messagesData: message, role: request.session.account_role,
-							 targetUser: id, userList: userLists, followerslist: followersList, friendlists: friendLists });
+						response.render('messages.html', {
+							account: accounts[0], messagesData: message, role: request.session.account_role,
+							targetUser: id, userList: userLists, followerslist: followersList, friendlists: friendLists
+						});
 					})
 				})
 			})
@@ -1667,7 +1669,7 @@ io.on('connection', socket => {
 			socket.emit("Scores", roomname, roomScores[roomNames[i]])
 			// }
 		}
-		
+
 	}
 
 	// Add to te Room scores array
@@ -1892,7 +1894,7 @@ app.post('/follow', (request, response) => isLoggedin(request, settings => {
 		// userFriends = JSON.parse(friendresults[0].friends);
 		console.log("userFriends: ", userFriends);
 
-		connection.query("SELECT follower FROM userstats WHERE username = ?", [userToBeFollowed], (error, followedUser) => {
+		connection.query("SELECT followers FROM userstats WHERE username = ?", [userToBeFollowed], (error, followedUser) => {
 			if (error) throw error;
 			console.log("Follower Results: ", followedUser[0]["followers"]);
 			//userFriends = JSON.parse(JSON.stringify((friendresults1)));//friendresults1;
@@ -1997,7 +1999,7 @@ app.post('/sendMessage', (request, response) => isLoggedin(request, settings => 
 	var msgID = request.body.msg.msgId;
 	var data = request.body.msg.data;
 	var date = request.body.msg.date
-	
+
 	var message, messageFrom;
 	connection.query("SELECT messsages FROM userstats WHERE username = ?", [fromUser], (error, msg) => {
 		if (error) throw error;
@@ -2008,21 +2010,21 @@ app.post('/sendMessage', (request, response) => isLoggedin(request, settings => 
 			messageFrom = [""];
 		}
 		console.log("Blocked Users Array: ", messageFrom);
-	})
-	connection.query("SELECT messsages FROM userstats WHERE username = ?", [toUser], (error, msg) => {
-		if (error) throw error;
-		console.log("Msg Results: ", msg);
-		//userFriends = JSOotherChatUserN.parse(JSON.stringify((friendresults1)));//friendresults1;
-		try {
-			message = JSON.parse(msg);
-		} catch (e) {
-			message = [""];
-		}
-		// userFriends = JSON.parse(friendresults[0].friends);
-		console.log("Blocked Users Array: ", message);
-		setTimeout(doSumn, 500);
-	});
 
+		connection.query("SELECT messsages FROM userstats WHERE username = ?", [toUser], (error, msg) => {
+			if (error) throw error;
+			console.log("Msg Results: ", msg);
+			//userFriends = JSOotherChatUserN.parse(JSON.stringify((friendresults1)));//friendresults1;
+			try {
+				message = JSON.parse(msg);
+			} catch (e) {
+				message = [""];
+			}
+			// userFriends = JSON.parse(friendresults[0].friends);
+			console.log("Blocked Users Array: ", message);
+			setTimeout(doSumn, 500);
+		});
+	})
 	function doSumn() {
 		try {
 			const d = new Date();
