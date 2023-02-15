@@ -621,11 +621,49 @@ videoSocket.on("connect", () => {
 
 })
 
+var currentSound;
+var currentSound2;
+var currentSound3;
+
 //Sounds
 function playSound(sound) {
-    var audio = new Audio(`/sounds/${sound}`);
+    // var audio = new Audio(`/sounds/${sound}`);
     // var audio = new Audio(`sounds/GameStart.mp3`);
-    audio.play();
+    // currentSound = new Audio(`/sounds/${sound}`);
+
+    // if there is no current sound playing
+    if (!isPlaying(currentSound)) {
+        currentSound = new Audio(`/sounds/${sound}`);
+        currentSound.play();
+    } else {
+        // currentSound.pause();
+    }
+}
+
+function isPlaying(sound) {
+    if (sound == null) {
+        return false;
+    }
+
+    var infoPlaying = false
+
+    var currentTime = sound.currentTime == 0 ? true : false
+    var paused = sound.paused ? true : false
+    var ended = !sound.ended ? true : false
+    var readyState = sound.readyState == 0 ? true : false
+    if (currentTime && paused && ended && readyState) {
+        infoPlaying = true
+    } else if (!currentTime && !paused && ended && !readyState) {
+        infoPlaying = true
+    }
+    return infoPlaying
+}
+
+function stopSounds() {
+    if (currentSound != null) {
+        currentSound.pause();
+        // currentSound = null
+    }
 }
 
 function updateRoom() {
@@ -1185,7 +1223,7 @@ function component(width, height, color, x, y, type, canvas, from, msg, time) {
                 ctx.fillStyle = 'white';
                 ctx.strokeStyle = '#003300';
                 ctx.font = '12px Arial';
-                if (this.image.src.includes("soundIcon.png")) 
+                if (this.image.src.includes("soundIcon.png"))
                     ctx.fillText(from, x, y + height + 12);
                 else
                     ctx.fillText(from, x - from.length * 4 + (w / 2), y + height + 8);
@@ -1348,7 +1386,26 @@ if (1) {
                             }
 
                             playbtn.addEventListener("click", () => {
-                                playSound(match);
+                                let playbtnText = playbtn.querySelector("#playSndText");
+                                if (playbtnText.innerText == "Stop") {
+                                    stopSounds();
+                                    playbtnText.innerText = "Play";
+                                } else {
+                                    playbtnText.innerText = "Stop";
+                                    playSound(match);
+                                }
+
+                                function changePlaybtnText() {
+                                    if (playbtnText.innerText == "Stop")
+                                        if (!isPlaying(currentSound)) {
+                                            playbtnText.innerText = "Play";
+                                        } else {
+                                            setTimeout(changePlaybtnText, 1000)
+                                        }
+                                }
+                                setTimeout(changePlaybtnText, 1000)
+                                //    changePlaybtnText();
+
                             })
 
                             sendBtn.addEventListener("click", () => {
@@ -1378,7 +1435,7 @@ if (1) {
             errorMSG.id = "errorMSG";
         }
         errorMSG.innerText = msg;
-        console.log("MSG: ", msg);
+        // console.log("MSG: ", msg);
         // imagePrevDiv.append(errorMSG);
     }
 
@@ -1462,15 +1519,39 @@ if (1) {
                         soundElmt = thing.cloneNode(true);
                         soundElmt.id = snd;
                         let playbtn = soundElmt.querySelector('#playSnd');
-                        // let addToLibBtn = soundElmt.querySelector('#addToLib');
+                        let removeFromLib = soundElmt.querySelector('#removeFromLib');
+                        removeFromLib.hidden = false;
                         let soundName = soundElmt.querySelector('#sndName');
                         soundName.innerText = snd;
-                        // addToLibBtn.addEventListener("click", () => {
-                        //     console.log("adding sound to library: ", snd);
-                        //     library["sounds"].push(snd);
+                        removeFromLib.addEventListener("click", (e) => {
+                            console.log("removing sound from library: ", snd);
+                            // library["sounds"].push(snd);
+                            library["sounds"] = library["sounds"].filter(sound => sound == snd);
+                            removeFromLib.parentNode.parentNode.removeChild(removeFromLib.parentNode);
+                        })
+                        // playbtn.addEventListener("click", () => {
+                        //     playSound(snd);
                         // })
                         playbtn.addEventListener("click", () => {
-                            playSound(snd);
+                            let playbtnText = playbtn.querySelector("#playSndText");
+                            if (playbtnText.innerText == "Stop") {
+                                stopSounds();
+                                playbtnText.innerText = "Play";
+                            } else {
+                                playbtnText.innerText = "Stop";
+                                playSound(snd);
+                            }
+
+                            function changePlaybtnText() {
+                                if (playbtnText.innerText == "Stop")
+                                    if (!isPlaying(currentSound)) {
+                                        playbtnText.innerText = "Play";
+                                    } else {
+                                        setTimeout(changePlaybtnText, 1000)
+                                    }
+                            }
+                            setTimeout(changePlaybtnText, 1000)
+                            //    changePlaybtnText();
                         })
 
                         soundElmt.hidden = false;
@@ -1507,24 +1588,82 @@ if (1) {
         var imgSearchBar = document.getElementById("mediaSearch");
         var icon = document.getElementById("mediaIcon");
 
-        if (mediaType == "Sound") {
-            mediaType = "Image";
-            icon.className = 'fas fa-image';
-            mediaTypeText.innerText = "Image";
-            removeAllChildNodes(imagePrevDiv);
-            previewImg(imgSearchBar.value)
-            imgSearchBar.placeholder = "Search For Images";
-            showErrorMsg("Search For Images");
+        if (modeToggle == "search") {
+            if (mediaType == "Sound") {
+                mediaType = "Image";
+                icon.className = 'fas fa-image';
+                mediaTypeText.innerText = "Image";
+                removeAllChildNodes(imagePrevDiv);
+                previewImg(imgSearchBar.value)
+                imgSearchBar.placeholder = "Search For Images";
+                showErrorMsg("Search For Images");
 
-            delay(100);
-        } else if (mediaType == "Image") {
-            mediaType = "Sound";
-            icon.className = 'fas fa-volume-down';
-            mediaTypeText.innerText = "Sound";
-            imgSearchBar.placeholder = "Search For Sounds";
-            removeAllChildNodes(imagePrevDiv);
-            showErrorMsg("Search For Sounds");
-            previewImg(imgSearchBar.value)
+                delay(100);
+            } else if (mediaType == "Image") {
+                mediaType = "Sound";
+                icon.className = 'fas fa-volume-down';
+                mediaTypeText.innerText = "Sound";
+                imgSearchBar.placeholder = "Search For Sounds";
+                removeAllChildNodes(imagePrevDiv);
+                showErrorMsg("Search For Sounds");
+                previewImg(imgSearchBar.value)
+            }
+        } else if (modeToggle == "library") {
+            if (mediaTypeText.innerText == "Sound") {
+                if (library["sounds"] != []) {
+                    library["sounds"].forEach(snd => {
+                        var thing = document.getElementById("soundElem");
+
+                        var soundElmt = document.createElement("div");
+                        soundElmt = thing.cloneNode(true);
+                        soundElmt.id = snd;
+                        let playbtn = soundElmt.querySelector('#playSnd');
+                        let removeFromLib = soundElmt.querySelector('#removeFromLib');
+                        removeFromLib.hidden = false;
+                        let soundName = soundElmt.querySelector('#sndName');
+                        soundName.innerText = snd;
+                        removeFromLib.addEventListener("click", (e) => {
+                            console.log("removing sound from library: ", snd);
+                            // library["sounds"].push(snd);
+                            library["sounds"] = library["sounds"].filter(sound => sound == snd);
+                            removeFromLib.parentNode.parentNode.removeChild(removeFromLib.parentNode);
+                        })
+                        // playbtn.addEventListener("click", () => {
+                        //     playSound(snd);
+                        // })
+                        playbtn.addEventListener("click", () => {
+                            let playbtnText = playbtn.querySelector("#playSndText");
+                            if (playbtnText.innerText == "Stop") {
+                                stopSounds();
+                                playbtnText.innerText = "Play";
+                            } else {
+                                playbtnText.innerText = "Stop";
+                                playSound(snd);
+                            }
+
+                            function changePlaybtnText() {
+                                if (playbtnText.innerText == "Stop")
+                                    if (!isPlaying(currentSound)) {
+                                        playbtnText.innerText = "Play";
+                                    } else {
+                                        setTimeout(changePlaybtnText, 1000)
+                                    }
+                            }
+                            setTimeout(changePlaybtnText, 1000)
+                            //    changePlaybtnText();
+                        })
+
+                        soundElmt.hidden = false;
+                        imagePrevDiv.append(soundElmt);
+                    });
+                }
+            } else {
+                if (library["images"] != []) {
+                    library["images"].forEach(img => {
+                        imagePrevDiv.append(img);
+                    });
+                }
+            }
         }
         delay(100);
     })
