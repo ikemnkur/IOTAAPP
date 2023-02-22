@@ -25,7 +25,8 @@ function listRooms() {
         var watchCost = rooms[index]["watchCost"];
         var userslist = rooms[index]["users"];
         var age = rooms[index]["createDate"];
-        // var username = rooms[index]["username"];
+        var roomtime = rooms[index]["time"];
+        var host = rooms[index]["host"];
 
 
         var usersArray;
@@ -41,9 +42,11 @@ function listRooms() {
 
         let rmNum = itemObj.querySelector('#rmNum');
         let rmTopic = itemObj.querySelector('#rmTopic');
+        let rmHost = itemObj.querySelector('#rmHost');
         let rmNumofUsers = itemObj.querySelector('#rmNumofUsers');
         let rmCost = itemObj.querySelector('#rmCost');
         let rmAge = itemObj.querySelector('#rmAge');
+        let rmTime = itemObj.querySelector('#timeLeftText');
         let rmTimeSeconds = itemObj.querySelector('#rmTimeSeconds');
 
         let rmJoin = itemObj.querySelector('#rmJoin');
@@ -61,12 +64,12 @@ function listRooms() {
 
         rmNum.innerText = index + ".";
         rmTopic.innerText = topic;
-
-
+        rmHost.innerText = host;
         rmNumofUsers.innerText = usersArray.length;
 
         rmCost.innerText = watchCost;
         rmAge.innerText = age;
+        // rmTime.innerText = roomtime;
 
         itemObj.hidden = false;
 
@@ -95,33 +98,47 @@ function listRooms() {
         var time = (endDate - startDate) / 1000;
         rmTimeSeconds.innerText = time;
 
-        var x = itemObj.querySelector("#rmAge");
+        var roomAge = itemObj.querySelector("#rmAge");
 
         var seconds = Math.floor((endDate - startDate) / 1000);
-        var minutes = Math.floor(seconds / 60);
-        var hours = Math.floor(minutes / 60);
-        var days = Math.floor(hours / 24);
-        seconds = seconds % 60;
-        hours = hours % 24;
-        minutes = minutes % 60;
 
-        if (days == 0 && hours > 0)
-            age = hours + "h " + minutes + "m " + seconds + "s"
-        if (hours == 0 && days == 0)
-            age = minutes + "m " + seconds + "s"
-        if (hours == 0 && minutes == 0 && days == 0)
-            age = seconds + "s"
-        if (days > 0 && hours == 0)
-            age = days + "d " + minutes + "m "
-        if (days > 0 && hours > 0)
-            age = days + "d " + hours + "h "
+        roomAge.innerText = convert2Timestamp(seconds);
 
-        x.innerText = age;
+        var timeleft = roomtime - seconds;
+        if (timeleft < 0) 
+            timeleft = 0;
+        console.log("Timeleft: " + timeleft);
 
+        rmTime.innerText = convert2Timestamp(timeleft)
+
+        // if (timeleft > 0)
         table.appendChild(itemObj);
 
     }
 
+}
+
+function convert2Timestamp(seconds) {
+    // var seconds = Math.floor((endDate - startDate) / 1000);
+    var minutes = Math.floor(seconds / 60);
+    var hours = Math.floor(minutes / 60);
+    var days = Math.floor(hours / 24);
+    seconds = seconds % 60;
+    hours = hours % 24;
+    minutes = minutes % 60;
+
+    if (days == 0 && hours > 0)
+        time = hours + "h " + minutes + "m " + seconds + "s"
+    if (hours == 0 && days == 0)
+        time = minutes + "m " + seconds + "s"
+    if (hours == 0 && minutes == 0 && days == 0)
+        time = seconds + "s"
+    if (days > 0 && hours == 0)
+        time = days + "d " + minutes + "m "
+    if (days > 0 && hours > 0)
+        time = days + "d " + hours + "h "
+
+    return time;
 }
 
 listRooms();
@@ -130,16 +147,65 @@ listRooms();
 function searchRooms() {
     let input = document.getElementById('searchbar').value
     input = input.toLowerCase();
-    let x = document.getElementsByClassName('rooms');
+    let inputs;
+    let mode;
 
-    for (i = 0; i < x.length; i++) {
-        if (!x[i].innerHTML.toLowerCase().includes(input)) {
-            x[i].style.display = "none";
-        }
-        else {
-            x[i].style.display = "";
+    if (input.includes('&&')) {
+        // mode =  search the search for the term after the "&&&" symbols
+        inputs = input.split("&&");
+        mode = "and";
+    } else if (input.includes('++')) {
+        // mode =  search for both of the term separated by the "+++" symbols
+        inputs = input.split("++");
+        mode = "or";
+    } else {
+        inputs = input;
+    }
+
+
+    let x = document.getElementsByClassName('rooms');
+    // let loops = 0;
+    try {
+        inputs.forEach((item, index) => {
+            // if (mode == null)
+            // console.log("ST" + "(" + index + ")" + ":", item)
+            if (index > 0) {
+                // if there is more than 1 search term to look for do this
+                // console.log("Nolde")
+                for (i = 0; i < x.length; i++) {
+                    if (!x[i].innerHTML.toLowerCase().includes(item)) {
+                        if (x[i].style.display != "none")
+                            x[i].style.display = "none";
+                    }
+                }
+            } else {
+                for (i = 0; i < x.length; i++) {
+
+                    // For the 1st searchterm do this
+                    if (!x[i].innerHTML.toLowerCase().includes(item)) {
+                        x[i].style.display = "none";
+                    }
+                    else {
+                        x[i].style.display = "";
+                    }
+
+                }
+            }
+        })
+    } catch (error) {
+        for (i = 0; i < x.length; i++) {
+            // if there is more than 1 search term to look for do this
+
+            if (!x[i].innerHTML.toLowerCase().includes(input)) {
+                x[i].style.display = "none";
+            }
+            else {
+                x[i].style.display = "";
+            }
         }
     }
+
+
 }
 
 
@@ -156,11 +222,13 @@ function sortTable() {
 
     if (search == "Age") select = 4;
 
-    if (search == "Users") select = 2;
+    if (search == "Users") select = 3;
 
-    if (search == "Alphabetical") select = 1;
+    if (search == "Topic") select = 1;
 
-    if (search == "Cost") select = 3;
+    if (search == "Cost") select = 5;
+    if (search == "Host") select = 2;
+    if (search == "Time Left") select = 5;
 
     /*Make a loop that will continue until
     no switching has been done:*/
@@ -208,58 +276,6 @@ function sortTable() {
                 }
             }
         }
-
-        // if (select == 4) {
-        //     for (i = 0; i <= (rows.length - 1); i++) {
-
-        //         var age = rooms[i]["createDate"];
-        //         var roomId = rooms[i]["roomID"];
-
-        //         // "2022-06-21T04:38:34.000Z".replace("T", "")
-        //         age = age.replace("T", " ");
-        //         age = age.replace(".000Z", "");
-        //         // console.log("age of: "  + roomId + " : " + age);
-        //         // Split timestamp into [ Y, M, D, h, m, s ]
-
-        //         // var t = "2010-06-09 13:12:01".split(/[- :]/);
-        //         var t = age.split(/[- :]/);
-
-        //         // Apply each element to the Date function
-        //         var creationDate = new Date(Date.UTC(t[0], t[1] - 1, t[2], t[3], t[4], t[5]));
-
-        //         const todaysdate = new Date();
-
-        //         var startDate = creationDate;
-        //         // Do your operations
-        //         var endDate = todaysdate;
-        //         // var time = (endDate - startDate) / 1000;
-
-        //         // age = time;
-
-
-        //         var x = rows[i].getElementsByTagName("TD")[select];
-        //         // var seconds = parseInt(x.innerHTML); //
-        //         var seconds = Math.floor((endDate - startDate) / 1000);
-        //         var minutes = Math.floor(seconds / 60);
-        //         var hours = Math.floor(minutes / 60);
-        //         var days = Math.floor(hours / 24);
-        //         seconds = seconds % 60;
-        //         hours = hours % 60;
-        //         minutes = minutes % 60;
-        //         // var age;
-
-        //         if (days == 0 && hours > 0)
-        //             age = hours + "h " + minutes + "m " + seconds + "s"
-        //         if (hours == 0 && days == 0)
-        //             age = minutes + "m " + seconds + "s"
-        //         if (hours == 0 && minutes == 0)
-        //             age = seconds + "s"
-        //         else
-        //             age = days + "d " + hours + "h " + minutes + "m " + seconds + "s"
-
-        //         x.innerText = age;
-        //     }
-        // }
 
         if (shouldSwitch) {
             /*If a switch has been marked, make the switch

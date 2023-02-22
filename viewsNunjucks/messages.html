@@ -38,8 +38,7 @@
                                                 <tr>
                                                     <!-- style="width: 25%;" -->
                                                     <td>
-                                                        <img src="../images/profilepic.png" alt="Avatar"
-                                                            style="width: 32px; height: 32px;">
+                                                        <img id="profilePic" src="../images/profilepicother.png" >
                                                     </td>
                                                     <td>
                                                         <strong id="msgUsername"
@@ -53,14 +52,11 @@
                                             </table>
                                             <p id="msgText" hidden>This was the last message sent</p>
                                         </div>
-
                                     </td>
                                 </tr>
-
                             </tbody>
                         </table>
                         <!-- Codes by Quackit.com -->
-
 
                         <div style="padding:5px">
                             <i class="fas fa-search" style="margin: 0px 5px 0px 0px; padding:5px 0px 0px 0px;"></i>
@@ -71,6 +67,7 @@
                         <p id="listOfUsers" hidden>{{userList}}</p>
                         <p id="followers" hidden>{{followerslist}} </p>
                         <p id="friends" hidden>{{friendlists}}</p>
+                        <p id="pfps" hidden>{{ pfps }}</p>
                         <p id="messageData" hidden>{{ messagesData }}</p>
                         <p id="testMessageData" hidden>
                             [{
@@ -159,7 +156,7 @@
                             style="border: 3px; padding: 3px; margin: 3px; background: lightseagreen; overflow-y: scroll; height: 400px;">
 
                             <div id="otherChatBox" class="container" hidden>
-                                <img src="../images/profilepic.png" alt="Avatar">
+                                <img id="profilePic" src="../upload/{{account.username}}-profilePic.png" alt="Avatar">
                                 <p id="msg">Hello. How are you today?</p>
                                 <span id="createDate" class="time-right">11:00</span>
                             </div>
@@ -167,7 +164,7 @@
                                 02/03/2022
                             </div>
                             <div id="youChatBox" class="container darker" hidden>
-                                <img src="../images/profilepicother.png" alt="Avatar" class="right">
+                                <img id="profilePic" src="../images/profilepicother.png" alt="Avatar" class="right">
                                 <p id="msg">Hey! I'm fine. Thanks for asking!</p>
                                 <span id="createDate" class="time-left">11:01</span>
                             </div>
@@ -206,7 +203,6 @@
                 </div>
             </div>
         </div>
-
 
     </div>
 

@@ -73,11 +73,11 @@
               <!-- <span style="float: left; margin-right: 2px; margin: 5px 2px 0px 0px;">Type: </span> -->
             </td>
             <td>
-              <button id="addToLibBtn"
+              <button id="mediaTypeBtn"
                 style="padding: 2px 5px 2px 5px; background-color:greenyellow; float: right; border-radius: 3px;">
                 <div style="display: flex;">
                   <i id="mediaIcon" class="fas fa-image"></i>
-                  <text id="addToLibText" style="padding: 0px 5px 0px 5px;"> Image</text>
+                  <text id="mediaTypeText" style="padding: 0px 5px 0px 5px;"> Image</text>
                 </div>
 
               </button>
@@ -108,42 +108,150 @@
           </textarea>
         </td>
         <td>
-          <!-- <div>
-            <text>Rotate: </text>
-            <button id="rotate+" style="padding: 5px 5px;">+</button>
-            <button id="rotate-" style="padding: 5px 5px;">-</button>
-          </div> 
+          <!-- <tr> -->
+          <!-- <td> -->
+          <h3>Tools</h3>
+          <!-- </td> -->
+          <!-- <td> -->
+          <div id="coinCostTool">
+            <!-- <i id="coinIcon" class="fas fa-coins" style="font-size: 16px; margin: 0px 0px 0px 5px; color: gold;"> -->
+            <text>Coins: <strong id="coinCost">3</strong></text>
+          </div>
+          <!-- </td> -->
+          <!-- </tr> -->
 
-          <div id="imgEditDiv" style="
-            border: 3px solid #667aff; 
-            background-color: white;
-            /* margin-right: 5%;
-            margin-left: 5%; */
-            max-height: 80px;/* max-width: 80px; */
-            min-height: 64px;min-width: 64px;
-            padding: 5px;
-            margin-top: 2px;">
-          </div> -->
+
+          <div id="volumeTool" hidden>
+            <text>Volume: <strong id="volume">50</strong>%</text>
+            <input id="volumeAmount" type="range" min="1" max="100" value="50">
+          </div>
+          <div id="durationTool" hidden>
+            <text>Time: <strong id="duration">50</strong>%</text>
+            <input id="durationAmount" type="range" min="10" max="100" value="50">
+          </div>
+          <div id="testSoundBtn" hidden>
+            <!-- <text>Output Audio: </text>
+            <button>Test Audio</button> -->
+            <audio id="soundPlayer" controls src="/media/cc0-audio/t-rex-roar.mp3">
+              <a id="soundPlayerLink" href="/media/cc0-audio/t-rex-roar.mp3">
+                Download audio
+              </a>
+            </audio>
+          </div>
+          <div id="scaleTool">
+            <text>Scale: <strong id="scale">100</strong>%</text>
+            <input id="scaleAmount" type="range" min="50" max="200" value="100">
+          </div>
+          <div id="rotateTool">
+            <text>Rotate: <strong id="rotation">0</strong>°</text>
+            <input id="rotationAmount" type="range" min="0" max="360" value="0">
+            <!-- <button id="rotate+" style="padding: 5px 5px;">+</button>
+            <button id="rotate-" style="padding: 5px 5px;">-</button> -->
+          </div>
+
+
+          <div id="imgPrevEditDiv">
+            <table>
+              <tr>
+                <td style="padding: 20px;">
+                  <div id="imgEditDiv" style="
+                  border: 3px solid #667aff; 
+                  background-color: white;
+                  margin-right: 25%;
+                  margin-left: 25%;
+                  /* margin: 0 40%; */
+                  max-height: 80px;max-width: 128px;
+                  min-height: 64px;min-width: 96px;
+                  padding: 5px;">
+                  </div>
+                </td>
+                <td style="padding: 20px;"><button id="sendImageBtn" style="padding: 5px;"> Send Image</button></td>
+              </tr>
+
+            </table>
+
+
+          </div>
         </td>
       </tr>
     </tbody>
-
-
 
   </table>
 
 </div>
 <div hidden>
   <div id="soundElem" hidden style="display: flex; padding: 1px 1px 1px 1px; margin: 2px; border: #667aff;">
-    <button id="playSnd" style=" display: flex; margin-left: 2px; margin-right: 2px;"><i class="fas fa-volume-down"></i>
-      <text id="playSndText" style="padding-left: 2px;">Play</text> </button>
-    <button id="addToLib" hidden style="padding: 5px;"><i class="fas fa-book-medical"style="padding-left: 5px;"></i> Add </button>
-    <button id="removeFromLib" hidden style="margin: 5px;"><i class="fas fa-delete" style="padding-left: 5px;"></i> Remove</button>
-    <text id="sndName" style="padding: 1px 10px 1px 10px; margin: auto;"> SoundName.ext</text>
+    <button id="playSnd" style="margin-left: 2px; margin-right: 2px; padding: 2px;"><i class="fas fa-volume-down"></i>
+      <text id="playSndText" style="padding: 2px;">Play</text>
+    </button>
+    <button id="addToLib" hidden style="padding: 2px;"><i class="fas fa-book-medical"></i> Add </button>
+    <button id="removeFromLib" hidden style="padding: 2px;"><i class="fas fa-remove"></i> Remove</button>
+    <marquee id="sndName" width="160px" direction="right" scrollamount="5" height="16px"
+      style="padding: 3px; margin-left: 3px; margin-right: 3px;"> SoundName.ext</marquee>
+    <button id="editSnd" style=" float: right;"> Edit </button>
     <button id="sendSnd" style=" float: right;"> Send </button>
   </div>
 </div>
 
+<script>
+  let mediaTypeButton = document.getElementById("mediaTypeBtn");
+  let coinCost = document.getElementById("coinCost");
+  let volume = document.getElementById("volume");
+  let volumeAmount = document.getElementById("volumeAmount");
+  let duration = document.getElementById("duration");
+  let durationAmount = document.getElementById("durationAmount");
+  let rotation = document.getElementById("rotation");
+  let rotationAmount = document.getElementById("rotationAmount");
+  let scale = document.getElementById("scale");
+  let scaleAmount = document.getElementById("scaleAmount");
+  let imgEditPrevDiv = document.getElementById("imgPrevEditDiv");
+  let testSoundBtn = document.getElementById("testSoundBtn");
+  let rt = document.getElementById("rotateTool");
+  let st = document.getElementById("scaleTool");
+  let vt = document.getElementById("volumeTool");
+  let dt = document.getElementById("durationTool");
+
+
+  let mediaMode = document.getElementById("mediaTypeText");
+  mediaTypeButton.addEventListener("click", () => {
+
+    console.log("Button Mode: ", mediaMode.innerText);
+    if (mediaMode.innerText != "Sound") {
+      dt.hidden = false;
+      vt.hidden = false;
+      rt.hidden = true;
+      st.hidden = true;
+      testSoundBtn.hidden = false;
+      imgEditPrevDiv.hidden = true;
+    }
+    if (mediaMode.innerText != "Image") {
+      dt.hidden = true;
+      vt.hidden = true;
+      rt.hidden = false;
+      st.hidden = false;
+      testSoundBtn.hidden = true;
+      imgEditPrevDiv.hidden = false;
+    }
+  })
+
+  scaleAmount.addEventListener("input", () => {
+    scale.innerText = scaleAmount.value;
+  })
+  volumeAmount.addEventListener("input", () => {
+    volume.innerText = volumeAmount.value;
+  })
+  rotationAmount.addEventListener("input", () => {
+    rotation.innerText = rotationAmount.value;
+    let image = document.getElementById("editImage");
+  })
+  durationAmount.addEventListener("input", () => {
+    duration.innerText = durationAmount.value;
+  })
+
+
+
+
+</script>
 
 <style>
   .videoDiv {
@@ -162,7 +270,6 @@
   #video-grid {
     grid-template-columns: repeat(auto-fill, 300px);
     grid-auto-rows: 300px;
-    /* padding: 10px; */
     overflow-x: scroll;
     margin-left: 0%;
     margin-right: 0%;

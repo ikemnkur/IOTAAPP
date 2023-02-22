@@ -627,9 +627,6 @@ var currentSound3;
 
 //Sounds
 function playSound(sound) {
-    // var audio = new Audio(`/sounds/${sound}`);
-    // var audio = new Audio(`sounds/GameStart.mp3`);
-    // currentSound = new Audio(`/sounds/${sound}`);
 
     // if there is no current sound playing
     if (!isPlaying(currentSound)) {
@@ -662,7 +659,6 @@ function isPlaying(sound) {
 function stopSounds() {
     if (currentSound != null) {
         currentSound.pause();
-        // currentSound = null
     }
 }
 
@@ -977,7 +973,7 @@ function addSelfVideoStream(stream, userData) { //Draw video to canvas element t
 
     canvas.clicked = false;
     canvas.id = 'canvas#' + userData.name;
-    let w = 240, h = 180;
+    let w = 300, h = 220;
     canvas.width = w;
     canvas.height = h;
     canvas.style.width = w;
@@ -1077,6 +1073,9 @@ function draw(video, context, width, height, id, userData) {
 
     var canvas = document.getElementById(id);
     var ctxt = canvas.getContext('2d');
+
+
+
     ctxt.drawImage(video, 0, 0, width, height);
 
     // draw the Icon
@@ -1093,6 +1092,15 @@ function draw(video, context, width, height, id, userData) {
     }
 
     setTimeout(draw, 10, video, context, width, height, id, userData);
+}
+
+function drawRotated(degrees) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(degrees * Math.PI / 180);
+    ctx.drawImage(image, -image.width / 2, -image.width / 2);
+    ctx.restore();
 }
 
 function drawHUD(canvas, userData) {
@@ -1238,7 +1246,6 @@ function component(width, height, color, x, y, type, canvas, from, msg, time) {
         this.x += this.speedX;
         this.y += this.speedY;
     }
-
 }
 
 if (1) {
@@ -1252,11 +1259,11 @@ if (1) {
     library["sounds"] = [];
 
     var modeToggle = "search", mediaType = "Image";
-    var mediaTypeBtn = document.getElementById("addToLibBtn")
-    var mediaTypeText = document.getElementById("addToLibText")
+    var mediaTypeBtn = document.getElementById("mediaTypeBtn")
+    var mediaTypeText = document.getElementById("mediaTypeText")
     var modeToggleBtn = document.getElementById("searchModeBtn")
     var modeToggleText = document.getElementById("searchModeText")
-    var addBtn = document.getElementById("addToLibBtn")
+    var addBtn = document.getElementById("mediaTypeBtn")
     var imagePrevDiv = document.getElementById("imgPrevDiv");
 
     if (fullImgList.length == undefined || fullSndList.length == undefined) {
@@ -1267,7 +1274,6 @@ if (1) {
         console.log("searching....");
         previewImg(search.value);
     })
-
 
     videoSocket.on("fetchMediaList", (img, snd) => {
         fullImgList = img;
@@ -1312,7 +1318,7 @@ if (1) {
             if (matches != 0) {
                 // console.log(matches)
                 matches.forEach(match => {
-                    var btnActionTXT = document.getElementById("addToLibText")
+                    var btnActionTXT = document.getElementById("mediaTypeText")
                     if (btnActionTXT.innerText == "Image") {
                         if (match != null) {
                             var image = document.createElement("img");
@@ -1320,15 +1326,15 @@ if (1) {
                             image.height = 64;
                             image.width = 64;
                             imagePrevDiv.appendChild(image);
-                            image.style = "padding: 2px"
-
-                            //
-                            image.addEventListener("dblclick", () => {
+                            image.style = "padding: 2px";
+                            image.id = "editImage";
+                            //click the sen Image button in th tool menu
+                            let sendImageBtn = imgEditDiv.querySelector("#sendImageBtn")
+                            sendImageBtn.addEventListener("click", () => {
                                 if (document.getElementById(focusedCanvas) == null) {
                                     console.log("Click a video stream first");
                                     errorMSG("Click a video stream first");
                                 } else {
-                                    targetCanvas = document.getElementById(focusedCanvas);
 
                                     console.log("adding image to target canvas: ", focusedCanvas);
                                     console.log("TRGT_CANVAS: ", targetCanvas)
@@ -1337,9 +1343,32 @@ if (1) {
                                     imgSentToCanvas.update();
                                     videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID, imgSentToCanvas);
                                 }
+
+                            });
+                            // Double click on a image
+                            image.addEventListener("dblclick", () => {
+                                // if (document.getElementById(focusedCanvas) == null) {
+                                //     console.log("Click a video stream first");
+                                //     errorMSG("Click a video stream first");
+                                // } else {
+                                targetCanvas = document.getElementById(focusedCanvas);
+
+                                let editImage = image.cloneNode(true);
+                                let imgEditDiv = document.getElementById("imgEditDiv");
+                                try {
+                                    imgEditDiv.querySelector("#editImage").remove();
+                                } catch (error) {
+                                    imgEditDiv.appendChild(editImage);
+                                }
+
+                                imgEditDiv.appendChild(editImage);
+
+
+
+                                // }
                             })
 
-                            //
+                            // Click on a image
                             image.addEventListener("click", () => {
                                 if (modeToggle == "library") {
                                     console.log("adding image to from Library to screen: ", image);
@@ -1369,17 +1398,17 @@ if (1) {
                             soundElmt.id = match;
                             let playbtn = soundElmt.querySelector('#playSnd');
                             let sendBtn = soundElmt.querySelector('#sendSnd');
-                            let addToLibBtn = soundElmt.querySelector('#addToLib');
+                            let mediaTypeBtn = soundElmt.querySelector('#addToLib');
                             let soundName = soundElmt.querySelector('#sndName');
                             soundName.innerText = match;
                             let snd = match;
 
                             if (modeToggle == "library") {
-                                addToLibBtn.hidden = true;
-                                addToLibBtn.remove();
+                                mediaTypeBtn.hidden = true;
+                                mediaTypeBtn.remove();
                             } else {
-                                addToLibBtn.hidden = false;
-                                addToLibBtn.addEventListener("click", () => {
+                                mediaTypeBtn.hidden = false;
+                                mediaTypeBtn.addEventListener("click", () => {
                                     console.log("adding sound to library: ", snd);
                                     library["sounds"].push(snd);
                                 })
@@ -1514,10 +1543,17 @@ if (1) {
                 if (library["sounds"] != []) {
                     library["sounds"].forEach(snd => {
                         var thing = document.getElementById("soundElem");
+                        // var soundElmt = document.createElement("div");
 
-                        var soundElmt = document.createElement("div");
-                        soundElmt = thing.cloneNode(true);
+                        var soundElmt = thing.cloneNode(true);
                         soundElmt.id = snd;
+                        soundElmt.addEventListener("mouseover", () => {
+                            soundElmt.style.background = "lightblue";
+                        })
+                        soundElmt.addEventListener("mouseout", () => {
+                            soundElmt.style.background = "white";
+                        })
+
                         let playbtn = soundElmt.querySelector('#playSnd');
                         let removeFromLib = soundElmt.querySelector('#removeFromLib');
                         removeFromLib.hidden = false;
@@ -1529,9 +1565,22 @@ if (1) {
                             library["sounds"] = library["sounds"].filter(sound => sound == snd);
                             removeFromLib.parentNode.parentNode.removeChild(removeFromLib.parentNode);
                         })
-                        // playbtn.addEventListener("click", () => {
-                        //     playSound(snd);
-                        // })
+                        var sendSnd = soundElmt.querySelector('#sendSnd');
+                        sendSnd.addEventListener("click", () => {
+                            let msg = `from: ${userID}`;
+                            videoSocket.emit("sendSoundToCanvas", snd, focusedCanvas, ROOM_ID, userID, msg);
+                            console.log("Sending sound: ", snd)
+                        })
+
+                        let soundPlayer = document.getElementById("soundPlayer");
+                        let soundPlayerLink = document.getElementById("soundPlayerLink");
+                        var editSoundBtn = soundElmt.querySelector("#editSnd");
+                        editSoundBtn.addEventListener("click", () => {
+                            soundPlayer.src = snd;
+                            soundPlayerLink.src = snd;
+                        })
+
+
                         playbtn.addEventListener("click", () => {
                             let playbtnText = playbtn.querySelector("#playSndText");
                             if (playbtnText.innerText == "Stop") {
@@ -1597,6 +1646,11 @@ if (1) {
                 previewImg(imgSearchBar.value)
                 imgSearchBar.placeholder = "Search For Images";
                 showErrorMsg("Search For Images");
+
+                // the coin cost calculation tool
+                let coinCost = document.getElementById("coinCostTool");
+                // the sound volume tool
+                let vol = document.getElementById("volumeTool");
 
                 delay(100);
             } else if (mediaType == "Image") {
@@ -1669,8 +1723,6 @@ if (1) {
     })
 
 }
-
-
 
 // Function draws an image
 function drawGifImage(image, x, y, scale, rot, ctx) {

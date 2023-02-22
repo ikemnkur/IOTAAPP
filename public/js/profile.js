@@ -1,6 +1,7 @@
 
 const socket = io();
 var socketid;
+portnum = 3000;
 
 socket.on("connect", () => {
     console.log(`you connected with socket.id ${socket.id}`);
@@ -8,6 +9,41 @@ socket.on("connect", () => {
 })
 
 var username = document.getElementById("username").innerText;
+var pfpLink = document.getElementById("pfpLink").innerText;
+var profilePic = document.getElementById("profilepic");
+
+// let srcJPG = "../upload/" + username + "-" + "profilePic" + ".jpg"
+// let srcGIF = "../upload/" + username + "-" + "profilePic" + ".gif"
+// let srcPNG = "../upload/" + username + "-" + "profilePic" + ".png"
+
+// if (imageExists(srcJPG)) {
+//     profilePic.src = srcJPG;
+// } else if (imageExists(srcPNG)) {
+//     profilePic.src = srcPNG;
+// } else if (imageExists(srcGIF)) {
+//     profilePic.src = srcGIF;
+// } else {
+    // profilePic.src = "../images/profilepicother.png";
+// }
+
+profilePic.src = pfpLink;
+
+function imageExists(image_url) {
+
+    var http = new XMLHttpRequest();
+
+    http.open('HEAD', image_url, false);
+    try {
+        http.send();
+    } catch (error) {
+        console.log("Img not found: " + image_url);
+    }
+
+    return http.status != 404;
+
+}
+
+
 
 // Show thee friends list
 function showBlocked() {
@@ -23,7 +59,7 @@ function showBlocked() {
             var itemObj = itemObjPrototype.cloneNode(true);
             let uname = itemObj.querySelector('#uname');
             let unblockbtn = itemObj.querySelector('#unblockBtn');
-            unblockbtn.addEventListener("click", function(event) {
+            unblockbtn.addEventListener("click", function (event) {
                 blockUser(targetUser, "null", username)
             })
             let removebtn = itemObj.querySelector('#removeBtn');
@@ -98,7 +134,7 @@ function showFriends() {
                 addFriend(username, targetUser, "remove");
             })
             sendMessageBtn.addEventListener("click", function (e) {
-                location.href = "/message:"+targetUser;
+                location.href = "/message:" + targetUser;
             })
             tbl.appendChild(itemObj);
         });
@@ -191,6 +227,35 @@ socket.on('tipEvent', (tipperUsername, msg_username, coinsAmount, roomid) => {
     }
 })
 
+// var submitImgBtn = document.getElementById("submitImageBtn");
+// submitImgBtn.addEventListener("click", (e) => {
+//     let imgFile = document.getElementById("imgFile");
+//     if (imgFile.value == null) {
+
+//     } else {
+//         var payload = {
+//             "username": username,
+//             "image": imgFile
+//         };
+//         // e.preventDefault();
+//         postData("http://localhost:" + portnum + "/upload", payload).then((data) => {
+//             console.log(data);
+//         });
+//     }
+// });
+
+// function uploadPic() {
+
+//     var payload = {
+//         "username": username,
+//         "image": document.getElementById("imgFile")
+//     };
+
+//     postData("http://localhost:" + portnum + "/upload", payload).then((data) => {
+//         console.log(data);
+//     });
+// }
+
 
 async function addFriend(currentUser, userToFollow, action) {
     // used to follow a user, add them to the friend list once
@@ -207,13 +272,33 @@ async function addFriend(currentUser, userToFollow, action) {
 async function blockUser(userToBlock, roomId, currentUser) {
     // remove friend from follow list and hide thier messages from the chat
     var payload = {
-      "userToBlock": userToBlock,
-      "roomId": roomId,
-      "currentUser": currentUser
+        "userToBlock": userToBlock,
+        "roomId": roomId,
+        "currentUser": currentUser
     };
     postData("http://localhost:" + portnum + "/block", payload).then((data) => {
-      //console.log(data);
+        //console.log(data);
     });
+}
+
+
+async function postData(url = "", data = {}) {
+    // Default options are marked with *
+    const response = await fetch(url, {
+        method: "POST", // *GET, POST, PUT, DELETE, etc.
+        mode: "cors", // no-cors, *cors, same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        headers: {
+            "Content-Type": "application/json"
+            // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: JSON.stringify(data) // body data type must match "Content-Type" header
+    });
+    console.log("Posted data: ", data);
+    return response.json(); // parses JSON response into native JavaScript objects
 }
 
 console.log("Profile Page");

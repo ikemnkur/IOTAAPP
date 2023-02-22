@@ -136,7 +136,7 @@ app.use(cookieParser());
 app.use(
 	fileUpload({
 		limits: {
-			fileSize: 10000000,
+			fileSize: 3000000,
 		},
 		abortOnLimit: true,
 	})
@@ -144,22 +144,73 @@ app.use(
 
 app.post('/upload', (req, res) => {
 	// Get the file that was set to our field named "image"
+
+	var username = req.body.username;
+	console.log("Res-body: ", req.body);
+	console.log("Res-files: ", req.files);
+	if (req.files == null)
+		res.redirect('/profile');
+
 	const { image } = req.files;
 
-	// If no image submitted, exit
+	// If no image submitte/uploadd, exit
 	if (!image) return res.sendStatus(400);
 
 	// If does not have image mime type prevent from uploading
-	if (/^image/.test(image.mimetype)) return res.sendStatus(400);
+	// if (/^image/.test(image.mimetype)) return res.sendStatus(400);
+
+	if (!(image.name.includes(".png") || image.name.includes(".gif") || image.name.includes("jpg")))
+		// return res.sendStatus(400);
+		res.redirect('/profile');
+
+	var ext;
+	if (image.name.includes(".png")) {
+		ext = ".png";
+		removeProfilePic('./public/upload/' + "-" + username + "-" + "profilePic" + ".gif");
+		removeProfilePic('./public/upload/' + "-" + username + "-" + "profilePic" + ".jpg");
+	} if (image.name.includes(".jpg")) {
+		ext = ".jpg";
+		removeProfilePic('./public/upload/' + "-" + username + "-" + "profilePic" + ".png");
+		removeProfilePic('./public/upload/' + "-" + username + "-" + "profilePic" + ".gif");
+	} if (image.name.includes(".gif")) {
+		ext = ".gif";
+		removeProfilePic('./public/upload/' + "-" + username + "-" + "profilePic" + ".png");
+		removeProfilePic('./public/upload/' + "-" + username + "-" + "profilePic" + ".jpg");
+	}
+
+	let pfpLink = '../upload/' + "-" + username + "-" + "profilePic" + ext;
 
 	// Move the uploaded image to our upload folder
-	image.mv(__dirname + '/upload/' + image.name);
+	image.mv(__dirname + '/public/upload/' + "-" + username + "-" + "profilePic" + ext);
+
+	connection.query('UPDATE userstats SET profilePic = ? WHERE username = ?', [pfpLink, username]);
+
+
+
 
 	// All good
-	res.sendStatus(200);
+	// res.sendStatus(200);
+	// delay(100)
+	res.redirect('/profile');
 });
 
-// http://localhost:3000/ - display login page
+// const dirPath = "./public/upload/"
+function removeProfilePic(file){
+	// fs.unlinkSync(file);
+	fs.unlink(file, function (err) {
+		if (err && err.code == 'ENOENT') {
+			// file doens't exist
+			console.info("File doesn't exist, won't remove it.");
+		} else if (err) {
+			// other errors, e.g. maybe we don't have enough permission
+			console.error("Error occurred while trying to remove file");
+		} else {
+			console.info(`removed`);
+		}
+	});
+}
+
+// http://localhost:3000/ - display login page 
 app.get(['/', '/login'], (request, response) => isLoggedin(request, () => {
 	// User is logged in, redirect to home page
 	response.redirect('/home');
@@ -626,11 +677,11 @@ app.get('/profile', (request, response) => isLoggedin(request, settings => {
 			connection.query('SELECT username FROM userstats', (error, listofusers, fields) => {
 				userLists = JSON.stringify(listofusers);
 
-				console.log("ULs: ", userLists)
+				// console.log("ULs: ", userLists)
 			});
 
 			// Render profile page
-			response.render('profile.html', { account: accounts[0], stats: userstats, role: request.session.account_role, userList: userLists });
+			response.render('profile.html', { account: accounts[0], stats: userstats, role: request.session.account_role, userList: userLists, username: request.session.account_username });
 		})
 
 	});
@@ -660,18 +711,26 @@ app.get(['/messages', '/message:id'], (request, response) => isLoggedin(request,
 	connection.query('SELECT * FROM accounts WHERE username = ?', [request.session.account_username], (error, accounts, fields) => {
 		// Format the registered date
 		accounts[0].registered = new Date(accounts[0].registered).toISOString().split('T')[0];
-		connection.query('SELECT messages FROM userstats WHERE username = ?', [request.session.account_username], (error, messages, fields) => {
+		connection.query('SELECT * FROM userstats WHERE username = ?', [request.session.account_username], (error, messages, fields) => {
 			let userLists, followersList, friendLists;
+			let msg = messages[0].messages;
+			console.log(request.session.account_username + " : Messages : " + msg);
 			connection.query('SELECT username FROM userstats', (error, listofusers, fields) => {
-				userLists = JSON.stringify(listofusers); connection.query('SELECT followers FROM userstats WHERE username = ?', [request.session.account_username], (error, followerslist, fields) => {
-					followersList = JSON.stringify(followerslist); connection.query('SELECT friends FROM userstats WHERE username = ?', [request.session.account_username], (error, friendofLists, fields) => {
-						friendLists = JSON.stringify(friendofLists);
-						let message = JSON.stringify(messages);
-						// Render profile page
-						response.render('messages.html', {
-							account: accounts[0], messagesData: message, role: request.session.account_role,
-							targetUser: id, userList: userLists, followerslist: followersList, friendlists: friendLists
-						});
+				userLists = JSON.stringify(listofusers);
+				connection.query('SELECT followers FROM userstats WHERE username = ?', [request.session.account_username], (error, followerslist, fields) => {
+					followersList = JSON.stringify(followerslist);
+					connection.query('SELECT friends FROM userstats WHERE username = ?', [request.session.account_username], (error, friendofLists, fields) => {
+						connection.query('SELECT profilePic FROM userstats', [request.session.account_username], (error, pfpLinks, fields) => {
+							friendLists = JSON.stringify(friendofLists);
+							let message = JSON.stringify(msg);
+							let pfpsLinkz = JSON.stringify(pfpLinks);
+							// Render profile page
+							response.render('messages.html', {
+								account: accounts[0], messagesData: message, role: request.session.account_role, pfps: pfpsLinkz,
+								targetUser: id, userList: userLists, followerslist: followersList, friendlists: friendLists
+							});
+						})
+
 					})
 				})
 			})
@@ -798,6 +857,7 @@ app.get(['/joinRoom'], (request, response) => {
 
 	})
 });
+
 //delete this
 // app.get(['/chat'], (request, response) => {
 // 	response.render('room.html', { roomObj: newRoom, roomOBJ: JSON.stringify(newRoom), userJSON: JSON.stringify(userStatsResult), userOBJ: userStatsResult });
@@ -825,8 +885,9 @@ app.get(['/createRoom'], (request, response) => {
 		let teams = room.teams.toString();
 		console.log("Teams:", teams)
 		let tags = room.tags.toString();
-		connection.query('INSERT INTO rooms (roomID, host, users, passcode, topic, teams, private, watchCost, joinCost, tags) VALUES (?,?,?,?,?,?,?,?,?,?)',
-			[room.roomID, room.host, users, room.passcode, room.topic, teams, room.private, room.watchCost, room.joinCost, tags], function (err, finalresult) {
+
+		connection.query('INSERT INTO rooms (roomID, host, users, passcode, topic, teams, private, watchCost, joinCost, tags, time) VALUES (?,?,?,?,?,?,?,?,?,?, ?)',
+			[room.roomID, room.host, users, room.passcode, room.topic, teams, room.private, room.watchCost, room.joinCost, tags, room.time], function (err, finalresult) {
 				if (err) {
 					// failed to create room
 					response.redirect('/');

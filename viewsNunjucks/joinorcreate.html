@@ -28,13 +28,17 @@
 
             <table style="width:100%;">
                 <tr>
-                    <th> <label for="costJoin">Cost to Join:</label>
+                    <th> <label for="costJoin">Join Fee:</label>
                         <input type="text" placeholder="Enter amount of points to join Stream" name="joincost"
                             id="joincost" required>
                     </th>
-                    <th> <label for="costWatch">Cost to Watch:</label>
+                    <th> <label for="costWatch">Watch Fee:</label>
                         <input type="text" placeholder="Enter smaller amount to join Stream" name="watchcost"
                             id="watchcost" required>
+                    </th>
+                    <th> <label for="roomTime">Duration:</label>
+                        <input type="text" placeholder="length of Time for room" name="roomtime" 
+                            id="roomTime" required>
                     </th>
                 </tr>
             </table>
@@ -53,6 +57,7 @@
             </div>
             <button type="button" class="btn" id="create" onclick="createRoom()">Create</button>
             <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+
         </form>
     </div>
 
@@ -84,6 +89,7 @@
             <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
         </form>
     </div>
+    
     <script src="/socket.io/socket.io.js"></script>
     <script>
         function openFormJoin() {

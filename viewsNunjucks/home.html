@@ -35,7 +35,9 @@
                         <select id="selector" onclick="sortTable()" name="roomSearchFilter">
                             <option value="Users">Users</option>
                             <option value="Age">Age</option>
-                            <option value="Alphabetical">Alphabetical</option>
+                            <option value="Topic">Topic</option>
+                            <option value="Time Left">Time Left</option>
+                            <option value="Host">Host</option>
                             <option value="Cost">Cost</option>
                         </select>
                         </code>
@@ -64,10 +66,12 @@
                     <tr>
                         <th>#</th>
                         <th>Topic</th>
+                        <th>Host</th>
                         <th> Users </th>
                         <th> Age </th>
                         <th>Cost</th>
-                        <th>Join Rooms</th>
+                        <th>Time Left</th>
+                        <th>Join Room</th>
                     </tr>
                 </thead>
             </table>
@@ -77,13 +81,14 @@
 
                     <td id="rmNum">10. </td>
                     <td id="rmTopic">pets</td>
+                    <td id="rmHost">Admin</td>
                     <td id="rmNumofUsers">3</td>
 
                     <td id="rmTimeSeconds" hidden>X</td>
 
-                    <td id="rmAge">86d 29h 50m 52s</td>
-                    <td id="rmCost">2</td>
-
+                    <td id="rmAge"style="display: flex;">86d 29h 50m 52s</td>
+                    <td id="rmCost">360</td>
+                    <td id="rmTime" style="display: flex;"><text id="timeLeftText" style="margin: 0px 5px 0px 5px;">2</text><img src="/images/plussign.png" width="16px" height="16px" style="margin: 0px 1px 0px 10px;"></i></td>
                     <td>
                         <form action="/modal" method="POST">
                             <button type="submit" value="JoinRm">Join</button>

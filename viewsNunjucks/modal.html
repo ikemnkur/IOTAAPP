@@ -34,7 +34,8 @@
         </header>
         <div class="w3-center"><br>
           <!-- <span href="/edit_profile" onclick="document.getElementById('id01').style.display='none'" -->
-            <span id="exit" class="w3-button w3-xlarge w3-hover-red w3-display-topright" title="Close Modal">&times;</span>
+          <span id="exit" class="w3-button w3-xlarge w3-hover-red w3-display-topright"
+            title="Close Modal">&times;</span>
         </div>
 
         <div class="w3-container">
@@ -58,11 +59,17 @@
               </tbody>
             </table>
             <form method="POST" action="/room">
+              
               <label><b>Username:</b></label>
               <h3 id="regularname" style="background: lightgrey;"> {{userOBJ[0]["username"]}} </h3>
 
               <input class="w3-input w3-border w3-margin-bottom" style="display: none;" type="text"
                 placeholder="Enter Nickname" name="nickname" id="nickname">
+
+              <label><b>Passcode:</b></label>
+              <h3 id="password" style="background: lightsteelblue;"> </h3>
+              <input class="w3-input w3-border w3-margin-bottom" style="display: block;" type="text"
+                placeholder="Enter Passcode" name="passcode" id="code">
 
               <div class="w3-input" style="margin: auto;">
                 <label for="teams">Choose a Team:</label>

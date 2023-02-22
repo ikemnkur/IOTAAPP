@@ -1,17 +1,22 @@
 
 var username = document.getElementById('username').innerText;
 var chatToUser = null;
+
 var messageData = document.getElementById('messageData').innerText;
 let msg = JSON.parse(messageData);
 
 var followerData = document.getElementById('followers').innerText;
-let followers = JSON.parse(followerData);
+let followerLists = JSON.parse(followerData);
+let followers = JSON.parse(followerLists[0].followers);
+
+var pfpsData = document.getElementById('pfps').innerText;
+let pfpsLinks = JSON.parse(pfpsData);
 
 var portnum = 3000;
 
 var friendData = document.getElementById('friends').innerText;
-// friendData.replace('\',)
-let friends = JSON.parse(friendData);
+var friendLists = JSON.parse(friendData);
+let friends = JSON.parse(friendLists[0].friends);
 console.log(friends);
 
 var usersData = document.getElementById('listOfUsers').innerText;
@@ -28,19 +33,85 @@ function removeAllChildNodes(parent) {
     }
 }
 
+function imageExists(image_url) {
+    var http = new XMLHttpRequest();
+    http.open('HEAD', image_url, false);
+    try {
+        http.send();
+    } catch (error) {
+        console.log("Img not found: " + image_url);
+    }
+    return http.status != 404;
+}
+
+
+function setProfilePic2(profilePic, username) {
+
+    for (var i = 0; i < pfpsLinks.length; i++) {
+        console.log("PFP: ", pfpsLinks[i].profilePic)
+        if (pfpsLinks[i].profilePic.includes(username)) {
+            profilePic.src = pfpsLinks[i].profilePic;
+        }
+    }
+
+    profilePic.style = "width: 32px; height: 32px;";
+}
+
+function setProfilePic(profilePic, username) {
+    setTimeout(() => {
+        // var image = document.createElement('img');
+        let srcJPG = "../upload/" + "-" + username + "-" + "profilePic" + ".jpg"
+        let srcGIF = "../upload/" + "-" + username + "-" + "profilePic" + ".gif"
+        let srcPNG = "../upload/" + "-" + username + "-" + "profilePic" + ".png"
+
+        if (imageExists(srcJPG)) {
+            profilePic.src = srcJPG;
+        } else if (imageExists(srcPNG)) {
+            profilePic.src = srcPNG;
+        } else if (imageExists(srcGIF)) {
+            profilePic.src = srcGIF;
+        } else {
+            profilePic.src = "../images/profilepicother.png";
+        }
+
+
+        // //profilePic.src = "../upload/" + username + "-" + "profilePic" + ".png";
+        // setTimeout(() => {
+        //     if (profilePic.width == 16)
+        //         profilePic.src = "../upload/" + username + "-" + "profilePic" + ".jpg";
+        //     setTimeout(() => {
+        //         if (profilePic.width == 16)
+        //             profilePic.src = "../upload/" + username + "-" + "profilePic" + ".gif";
+        //         setTimeout(() => {
+        //             if (profilePic.width == 16){
+        //                 console.log("Failed to load profile pic"); 
+        //                 profilePic.src = "../images/profilepicother.png";
+        //             }
+        //         }, 25)
+        //     }, 25)
+        // }, 25)
+    }, 25)
+    profilePic.style = "width: 32px; height: 32px;";
+}
+
+
 var userBaseTab = document.getElementById('userBaseTab')
 userBaseTab.addEventListener('click', function (e) {
     removeAllChildNodes(chatList);
+    //change the color of the tabs
     userBaseTab.style.background = "grey";
     followersTab.style.background = "lightgrey";
     friendsTab.style.background = "lightgrey";
+    //change the title of the header
     searchModeText.innerText = "Users Base Chats";
     // users.forEach((index, item) => {
     for (let i = 0; i < users.length; i++) {
         let newChatItem = chatItem.cloneNode(true);
         newChatItem.hidden = false;
         newChatItem.querySelector("#msgText").hidden = true;
-        newChatItem.querySelector("#msgTime").hidden = true;
+        let pfp = newChatItem.querySelector("#profilePic"); ///.src = users[i].username + "-profilePic" + ".png";
+        setProfilePic(pfp, users[i].username)
+        newChatItem.querySelector("#msgTime").hidden = false;
         newChatItem.querySelector("#msgUsername").innerText = users[i].username;
         newChatItem.addEventListener('click', function (e) {
             //clear out the background color for all the list items
@@ -64,55 +135,132 @@ userBaseTab.addEventListener('click', function (e) {
     //)
 })
 
+
 var friendsTab = document.getElementById('friendsTab')
 friendsTab.addEventListener('click', function (e) {
+    removeAllChildNodes(chatList);
+    //change the color of the tabs
     userBaseTab.style.background = "lightgrey";
     followersTab.style.background = "lightgrey";
     friendsTab.style.background = "grey";
+    //change the title of the header
     searchModeText.innerText = "Friend Chats";
-    friends.forEach((index, item) => {
+
+    if (friendLists.length == 0) {// if the user has noo friends then show the error msg
         let newChatItem = chatItem.cloneNode(true);
         newChatItem.hidden = false;
-        newChatItem.querySelector("#msgUsername").innerText = users[index].username;
+        newChatItem.querySelector("#msgText").hidden = false;
+        newChatItem.querySelector("#msgText").innerText = "You have no friends";
+        newChatItem.querySelector("#profilePic").hidden = true;
+        newChatItem.querySelector("#msgTime").hidden = true;
+        newChatItem.querySelector("#msgUsername").hidden = true;
+        chatList.appendChild(newChatItem);
+    }
+    for (let i = 0; i < friends.length; i++) {
+        let newChatItem = chatItem.cloneNode(true);
+        newChatItem.hidden = false;
+        newChatItem.querySelector("#msgText").hidden = true;
+        let pfp = newChatItem.querySelector("#profilePic"); ///.src = friendss[i].friendsname + "-profilePic" + ".png";
+        setProfilePic(pfp, friends[i])
+        newChatItem.querySelector("#msgTime").hidden = false;
+        newChatItem.querySelector("#msgUsername").innerText = friends[i];
         newChatItem.addEventListener('click', function (e) {
+            //clear out the background color for all the list items
             let others = document.getElementsByClassName("otherChatItem");
+            chatToUser = friends[i];
             for (let i = 0; i < others.length; i++) {
                 others[i].style.background = "white";
             }
+
+            //toggle the background color for the clicked item
             if (newChatItem.style.background == "lightblue") {
                 newChatItem.style.background = "white";
             } else {
                 newChatItem.style.background = "lightblue";
             }
+            // update the chatArea with relevant chat and draw chatboxes from the selected friends
+            loadChats(friends[i])
         })
         chatList.appendChild(newChatItem);
-    });
+    }
+    //)
 })
 
 var followersTab = document.getElementById('followersTab')
 followersTab.addEventListener('click', function (e) {
+    removeAllChildNodes(chatList);
+    //change the color of the tabs
     userBaseTab.style.background = "lightgrey";
     followersTab.style.background = "grey";
     friendsTab.style.background = "lightgrey";
-    searchModeText.innerText = "Follower Chats";
-    followers.forEach((index, item) => {
+    //change the title of the header
+    searchModeText.innerText = "Followers Chats";
+    if (followers.length == 0) {
         let newChatItem = chatItem.cloneNode(true);
         newChatItem.hidden = false;
-        newChatItem.querySelector("#msgUsername").innerText = followers[index].username;
-        newChatItem.addEventListener('click', function (e) {
-            let others = document.getElementsByClassName("otherChatItem");
-            for (let i = 0; i < others.length; i++) {
-                others[i].style.background = "white";
-            }
-            if (newChatItem.style.background == "lightblue") {
-                newChatItem.style.background = "white";
-            } else {
-                newChatItem.style.background = "lightblue";
-            }
-        })
+        newChatItem.querySelector("#msgText").hidden = false;
+        newChatItem.querySelector("#msgText").innerText = "You have no followers";
+        newChatItem.querySelector("#profilePic").hidden = true;
+        newChatItem.querySelector("#msgTime").hidden = true;
+        newChatItem.querySelector("#msgUsername").hidden = true;
         chatList.appendChild(newChatItem);
-    });
+    } else {
+        for (let i = 0; i < followers.length; i++) {
+            let newChatItem = chatItem.cloneNode(true);
+            newChatItem.hidden = false;
+            newChatItem.querySelector("#msgText").hidden = true;
+            let pfp = newChatItem.querySelector("#profilePic");
+            setProfilePic(pfp, followers[i])
+            newChatItem.querySelector("#msgTime").hidden = false;
+            newChatItem.querySelector("#msgUsername").innerText = followers[i];
+            newChatItem.addEventListener('click', function (e) {
+                //clear out the background color for all the list items
+                let others = document.getElementsByClassName("otherChatItem");
+                chatToUser = followers[i];
+                for (let i = 0; i < others.length; i++) {
+                    others[i].style.background = "white";
+                }
+
+                //toggle the background color for the clicked item
+                if (newChatItem.style.background == "lightblue") {
+                    newChatItem.style.background = "white";
+                } else {
+                    newChatItem.style.background = "lightblue";
+                }
+                // update the chatArea with relevant chat and draw chatboxes from the selected followers
+                loadChats(followers[i])
+            })
+            chatList.appendChild(newChatItem);
+        }
+    }
+
+    //)
 })
+
+// var followersTab = document.getElementById('followersTab')
+// followersTab.addEventListener('click', function (e) {
+//     userBaseTab.style.background = "lightgrey";
+//     followersTab.style.background = "grey";
+//     friendsTab.style.background = "lightgrey";
+//     searchModeText.innerText = "Follower Chats";
+//     followers.forEach((index, item) => {
+//         let newChatItem = chatItem.cloneNode(true);
+//         newChatItem.hidden = false;
+//         newChatItem.querySelector("#msgUsername").innerText = followers[index].username;
+//         newChatItem.addEventListener('click', function (e) {
+//             let others = document.getElementsByClassName("otherChatItem");
+//             for (let i = 0; i < others.length; i++) {
+//                 others[i].style.background = "white";
+//             }
+//             if (newChatItem.style.background == "lightblue") {
+//                 newChatItem.style.background = "white";
+//             } else {
+//                 newChatItem.style.background = "lightblue";
+//             }
+//         })
+//         chatList.appendChild(newChatItem);
+//     });
+// })
 
 // JavaScript code
 function searchTabs() {
@@ -226,13 +374,41 @@ function loadChats(otherChatUser) {
                 yourChat.querySelector("#msg").innerText = TMD["Text"];
                 yourChat.querySelector("#createDate").innerText = TMD["date"][0];
                 yourChat.hidden = false;
+
+                var username = document.getElementById("username").innerText;
+                var profilePic = yourChat.querySelector("profilepic");
+
+                setProfilePic(profilePic, username)
+
                 chatArea.appendChild(yourChat);
             }
             if (TMD["to"] == username) {
                 let otherChat = otherChatBox.cloneNode(true);
                 otherChat.querySelector("#msg").innerText = TMD["Text"];
-                otherChat.querySelector("#createDate").innerText = TMD["date"][0];
+                otherChat.querySelector.innerText = TMD["date"][0];
                 otherChat.hidden = false;
+
+                var username = document.getElementById("username").innerText;
+
+                var profilePic = otherChat.querySelector("profilepic");
+                setProfilePic(profilePic, username)
+
+                // setTimeout(() => {
+                //     profilePic.src = "../upload/" + TMD["from"] + "-" + "profilePic" + ".png";
+                //     setTimeout(() => {
+                //         if (profilePic.width == 16)
+                //             profilePic.src = "../upload/" + TMD["from"] + "-" + "profilePic" + ".jpg";
+                //         setTimeout(() => {
+                //             if (profilePic.width == 16)
+                //                 profilePic.src = "../upload/" + TMD["from"] + "-" + "profilePic" + ".gif";
+                //             setTimeout(() => {
+                //                 if (profilePic.width == 16)
+                //                     profilePic.src = "../images/profilepicother.png";
+                //             }, 25)
+                //         }, 25)
+                //     }, 25)
+                // }, 25)
+
                 chatArea.appendChild(otherChat);
             }
             // console.log("Msg: " + item["Text"]);

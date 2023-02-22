@@ -17,18 +17,31 @@
     <h2>Profile Page</h2>
 
     <div class="block">
-
+        <p hidden id="username">{{username}}</p>
+        <p hidden id="pfpLink">{{stats[0].profilePic}}</p>
         <p>Profile Pic</p>
-        <image id="profilepic" src="../images/profilepic.png" width=256 hieght=265></image>"
-        <form action="/upload" method="POST" enctype="multipart/form-data">
-            <input type="file" name="image" />
-            <button id="submitImage" type="submit">Upload</button>
-            <script>
+        <image id="profilepic" src="../images/profilepicother.png" width=128 hieght=128></image>
+
+        <form action="/upload" method="POST" enctype="multipart/form-data" onsubmit="uploadPic();">
+        <!-- <div> -->
+            <input id="imgFile" type="file" name="image" />
+            
+            <div hidden>
+                <input id="username" name="username" value="{{username}}" />
+            </div>
+            <button id="submitImageBtn">Upload</button>
+            <!-- <button id="submitImageBtn" type="submit">Upload</button> -->
+           <!-- <script>
+                // function onFormSubmit() {
+                //     event.preventDefault();
+                // }
                 var submitImgBtn = document.getElementById("submitImage");
                 submitImgBtn.addEventListener("submit", (e) => {
-                    e.preventDefault();
+                     e.preventDefault();
                 });
-            </script>
+            </script> -->
+        <!-- </div> -->
+
         </form>
 
         <div class="profile-detail">

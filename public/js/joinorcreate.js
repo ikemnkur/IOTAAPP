@@ -17,7 +17,7 @@ var socketid;
 
 function createRoom() {
     // used to follow a user, add them to the friend list once
-    let topic, roomID, joinCost, watchCost, private, passcode, tags, teams, saveRmCfg;
+    let topic, roomID, joinCost, watchCost, private, passcode, tags, teams, saveRmCfg, time;
     topic = document.getElementById("topic").value;
     roomID = document.getElementById("roomID").value;
     joinCost = document.getElementById("joincost").value;
@@ -27,8 +27,20 @@ function createRoom() {
     tags = document.getElementById("tagsInput").value;
     passcode = document.getElementById("passcode").value;
     saveRmCfg = document.getElementById("saveConfigBox").value;
+    time = document.getElementById("roomTime").value;
     let host = document.getElementById("host").value;
     let randNum = Math.floor(Math.random() * 100);
+
+    if (!isNaN(time)) {
+        time = 600;
+    } if (!isNaN(watchCost)) {
+        watchCost = 1;
+    } if (!isNaN(joinCost)) {
+        joinCost = 5;
+    }if (teams.split(",").length == 1) {
+        teams = ["Team 1", "Team 2"];
+    }
+
     var payload = {
         "topic": topic,
         "roomID": roomID,
@@ -40,7 +52,8 @@ function createRoom() {
         "private": private,
         "saveRmCfg": saveRmCfg,
         "host": host,
-        "randNum": randNum
+        "randNum": randNum,
+        "time": time
     };
 
     // homeSocket.emit('createRoomHome', payload);
