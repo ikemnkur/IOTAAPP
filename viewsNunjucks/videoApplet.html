@@ -97,13 +97,13 @@
             /* margin-right: 5%;
             margin-left: 5%; */
             overflow-y: scroll;
-            /* min-width: 300px; */
-            max-height: 100px;
-            min-height: 64px;
+            max-width: 300px;
+            max-height: 128px;
+            min-height: 48px;
             padding: 5px;
             margin-top: 2px;">
           </div>
-          <textarea id="errorMsg" style=" width: 300px; height: 32px;">
+          <textarea id="errorMsg" style=" width: 300px; height: 64px;">
             Type in the "Search" bar to get started
           </textarea>
         </td>
@@ -113,10 +113,7 @@
           <h3>Tools</h3>
           <!-- </td> -->
           <!-- <td> -->
-          <div id="coinCostTool">
-            <!-- <i id="coinIcon" class="fas fa-coins" style="font-size: 16px; margin: 0px 0px 0px 5px; color: gold;"> -->
-            <text>Coins: <strong id="coinCost">3</strong></text>
-          </div>
+
           <!-- </td> -->
           <!-- </tr> -->
 
@@ -149,7 +146,6 @@
             <button id="rotate-" style="padding: 5px 5px;">-</button> -->
           </div>
 
-
           <div id="imgPrevEditDiv">
             <table>
               <tr>
@@ -165,12 +161,17 @@
                   padding: 5px;">
                   </div>
                 </td>
-                <td style="padding: 20px;"><button id="sendImageBtn" style="padding: 5px;"> Send Image</button></td>
+                <td>
+                  <button id="sendImageBtn" style="padding: 5px;"> Send Image</button>
+                  <div id="coinCostTool" style="padding: 5px; margin: 10px 10px;">
+                    <i id="coinIcon" class="fas fa-coins"
+                      style=" font-size: 20px; margin: 0px 0px 0px 5px; color: gold;"></i>
+                    <text style="color: black;font-size: 20px; ">Coins: <strong style="color: black;font-size: 20px; " id="coinCost">3</strong></text>
+                  </div>
+                </td>
               </tr>
 
             </table>
-
-
           </div>
         </td>
       </tr>
@@ -180,13 +181,13 @@
 
 </div>
 <div hidden>
-  <div id="soundElem" hidden style="display: flex; padding: 1px 1px 1px 1px; margin: 2px; border: #667aff;">
+  <div id="soundElem" hidden style="display: flex; background: lightgrey; padding: 5px 7px 5px 7px; margin: 2px; border: #667aff;">
     <button id="playSnd" style="margin-left: 2px; margin-right: 2px; padding: 2px;"><i class="fas fa-volume-down"></i>
       <text id="playSndText" style="padding: 2px;">Play</text>
     </button>
     <button id="addToLib" hidden style="padding: 2px;"><i class="fas fa-book-medical"></i> Add </button>
     <button id="removeFromLib" hidden style="padding: 2px;"><i class="fas fa-remove"></i> Remove</button>
-    <marquee id="sndName" width="160px" direction="right" scrollamount="5" height="16px"
+    <marquee id="sndName" width="150px" direction="right" scrollamount="5" height="16px"
       style="padding: 3px; margin-left: 3px; margin-right: 3px;"> SoundName.ext</marquee>
     <button id="editSnd" style=" float: right;"> Edit </button>
     <button id="sendSnd" style=" float: right;"> Send </button>

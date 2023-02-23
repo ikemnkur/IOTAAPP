@@ -1330,21 +1330,22 @@ if (1) {
                             image.id = "editImage";
                             //click the sen Image button in th tool menu
                             let sendImageBtn = imgEditDiv.querySelector("#sendImageBtn")
-                            sendImageBtn.addEventListener("click", () => {
-                                if (document.getElementById(focusedCanvas) == null) {
-                                    console.log("Click a video stream first");
-                                    errorMSG("Click a video stream first");
-                                } else {
+                            if (sendImageBtn != null)
+                                sendImageBtn.addEventListener("click", () => {
+                                    if (document.getElementById(focusedCanvas) == null) {
+                                        console.log("Click a video stream first");
+                                        errorMSG("Click a video stream first");
+                                    } else {
 
-                                    console.log("adding image to target canvas: ", focusedCanvas);
-                                    console.log("TRGT_CANVAS: ", targetCanvas)
-                                    let w = 64; let h = 64;
-                                    imgSentToCanvas = new component(w, h, `${image.src}`, targetCanvas.xcursor, targetCanvas.ycursor - h / 2, "image", targetCanvas, userID, "N/A", 10000);
-                                    imgSentToCanvas.update();
-                                    videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID, imgSentToCanvas);
-                                }
+                                        console.log("adding image to target canvas: ", focusedCanvas);
+                                        console.log("TRGT_CANVAS: ", targetCanvas)
+                                        let w = 64; let h = 64;
+                                        imgSentToCanvas = new component(w, h, `${image.src}`, targetCanvas.xcursor, targetCanvas.ycursor - h / 2, "image", targetCanvas, userID, "N/A", 10000);
+                                        imgSentToCanvas.update();
+                                        videoSocket.emit("sendImageToCanvas", image.src, focusedCanvas, ROOM_ID, userID, imgSentToCanvas);
+                                    }
 
-                            });
+                                });
                             // Double click on a image
                             image.addEventListener("dblclick", () => {
                                 // if (document.getElementById(focusedCanvas) == null) {
@@ -1362,8 +1363,6 @@ if (1) {
                                 }
 
                                 imgEditDiv.appendChild(editImage);
-
-
 
                                 // }
                             })
@@ -1413,6 +1412,25 @@ if (1) {
                                     library["sounds"].push(snd);
                                 })
                             }
+
+                            soundElmt.addEventListener("mouseover", () => {
+                                soundElmt.style.background = "lightblue";
+                            })
+                            soundElmt.addEventListener("mouseout", () => {
+                                soundElmt.style.background = "667aff";
+                            })
+                            soundElmt.addEventListener("click", () => {
+                                let soundPlayer = document.getElementById("soundPlayer");
+                                let soundPlayerLink = document.getElementById("soundPlayerLink");
+                                if (soundElmt.style.background == "lightblue") {
+                                    soundElmt.style.background = "667aff";
+                                } else {
+                                    soundElmt.style.background = "lightblue";
+                                }
+                                soundPlayer.src = "./sounds/"+snd;
+                                soundPlayerLink.src = "./sounds/"+snd;
+                            })
+
 
                             playbtn.addEventListener("click", () => {
                                 let playbtnText = playbtn.querySelector("#playSndText");
@@ -1546,14 +1564,25 @@ if (1) {
                         // var soundElmt = document.createElement("div");
 
                         var soundElmt = thing.cloneNode(true);
-                        soundElmt.id = snd;
+                        // soundElmt.id = snd;
+                        // console.log("snd: ", snd);
                         soundElmt.addEventListener("mouseover", () => {
                             soundElmt.style.background = "lightblue";
                         })
                         soundElmt.addEventListener("mouseout", () => {
-                            soundElmt.style.background = "white";
+                            soundElmt.style.background = "667aff";
                         })
-
+                        soundElmt.addEventListener("click", () => {
+                            let soundPlayer = document.getElementById("soundPlayer");
+                            let soundPlayerLink = document.getElementById("soundPlayerLink");
+                            if (soundElmt.style.background == "lightblue") {
+                                soundElmt.style.background = "667aff";
+                            } else {
+                                soundElmt.style.background = "lightblue";
+                            }
+                            soundPlayer.src = "./sounds/"+snd;
+                            soundPlayerLink.src = "./sounds/"+snd;
+                        })
                         let playbtn = soundElmt.querySelector('#playSnd');
                         let removeFromLib = soundElmt.querySelector('#removeFromLib');
                         removeFromLib.hidden = false;
@@ -1572,13 +1601,14 @@ if (1) {
                             console.log("Sending sound: ", snd)
                         })
 
-                        let soundPlayer = document.getElementById("soundPlayer");
-                        let soundPlayerLink = document.getElementById("soundPlayerLink");
-                        var editSoundBtn = soundElmt.querySelector("#editSnd");
-                        editSoundBtn.addEventListener("click", () => {
-                            soundPlayer.src = snd;
-                            soundPlayerLink.src = snd;
-                        })
+                        // let soundPlayer = document.getElementById("soundPlayer");
+                        // let soundPlayerLink = document.getElementById("soundPlayerLink");
+                        // var editSoundBtn = soundElmt.querySelector("#editSnd");
+                        // editSoundBtn.addEventListener("click", () => {
+                        //     console.log("snd: ", snd);
+                        //     soundPlayer.src = snd;
+                        //     soundPlayerLink.src = snd;
+                        // })
 
 
                         playbtn.addEventListener("click", () => {
@@ -1614,16 +1644,13 @@ if (1) {
                     });
                 }
             }
-
-
-            // imgSearchBar.value = "";
             delay(500);
+
         } else {
             //switch to search mode
             modeToggle = "search";
             imgSearchBar.placeholder = "Search For Media";
             modeToggleText.innerText = "Find";
-            // imgSearchBar.value = "";
             ficon.className = "fas fa-magnifying-glass";
             removeAllChildNodes(imagePrevDiv);
             searchMedia(imgSearchBar.value, mediaType)
@@ -1682,9 +1709,25 @@ if (1) {
                             library["sounds"] = library["sounds"].filter(sound => sound == snd);
                             removeFromLib.parentNode.parentNode.removeChild(removeFromLib.parentNode);
                         })
-                        // playbtn.addEventListener("click", () => {
-                        //     playSound(snd);
-                        // })
+                        
+                        soundElmt.addEventListener("mouseover", () => {
+                            soundElmt.style.background = "lightblue";
+                        })
+                        soundElmt.addEventListener("mouseout", () => {
+                            soundElmt.style.background = "667aff";
+                        })
+                        soundElmt.addEventListener("click", () => {
+                            let soundPlayer = document.getElementById("soundPlayer");
+                            let soundPlayerLink = document.getElementById("soundPlayerLink");
+                            if (soundElmt.style.background == "lightblue") {
+                                soundElmt.style.background = "lightgrey";
+                            } else {
+                                soundElmt.style.background = "lightblue";
+                            }
+                            soundPlayer.src = "./sounds/"+snd;
+                            soundPlayerLink.src = "./sounds/"+snd;
+                        })
+
                         playbtn.addEventListener("click", () => {
                             let playbtnText = playbtn.querySelector("#playSndText");
                             if (playbtnText.innerText == "Stop") {
