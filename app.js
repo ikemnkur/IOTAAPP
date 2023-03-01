@@ -195,7 +195,7 @@ app.post('/upload', (req, res) => {
 });
 
 // const dirPath = "./public/upload/"
-function removeProfilePic(file){
+function removeProfilePic(file) {
 	// fs.unlinkSync(file);
 	fs.unlink(file, function (err) {
 		if (err && err.code == 'ENOENT') {
@@ -1589,16 +1589,16 @@ io.on('connection', socket => {
 		io.emit('getActiveUsers', roomId, activeRoomandUsers[roomId]);
 	});
 
-	socket.on("sendImageToCanvas", (imagesrc, targetCanvas, roomId, userId, imgSentToCanvas) => {
+	socket.on("sendImageToCanvas", (imagesrc, targetCanvas, roomId, userId, imgSentToCanvas, rotation, scale) => {
 		// var files = fs.readdirSync('./public/images/');
 		console.log("Imgs to room:", roomId, "by user:", userId);
-		io.emit('drawImageToCanvas', imagesrc, targetCanvas, roomId, userId, imgSentToCanvas);
+		io.emit('drawImageToCanvas', imagesrc, targetCanvas, roomId, userId, imgSentToCanvas, rotation, scale);
 	})
 
-	socket.on("sendSoundToCanvas", (soundsrc, targetCanvas, roomId, userId, msg) => {
+	socket.on("sendSoundToCanvas", (soundsrc, targetCanvas, roomId, userId, msg, volume) => {
 		// var files = fs.readdirSync('./public/images/');
 		console.log("Sound to room:", roomId, "by user:", userId);
-		io.emit('soundToCanvas', soundsrc, targetCanvas, roomId, userId, msg);
+		io.emit('soundToCanvas', soundsrc, targetCanvas, roomId, userId, msg, volume);
 	})
 
 	// Run once when connecting to room for each user to get list of sounds and images

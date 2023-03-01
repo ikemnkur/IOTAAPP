@@ -60,7 +60,7 @@ try {
 
 var activeUsers;
 
-var colors = ["green", "cyan", "pink", "gold", "agua", "lightblue", "lightred", "thistle", "lightcyan", "salmon", "crimson", "springgreen", "skyblue", "yellowgreen", "fuchsia", "greenyellow", "lavender", "magenta"]
+var colors = ["green", "cyan", "pink", "goldrod", "mediumseagreen", "lightblue", "lightred", "thistle", "lightcyan", "salmon", "#ff5c6f", "springgreen", "skyblue", "yellowgreen", "#ff9cff", "greenyellow", "#a3a3f5", "#f3a776"]
 var focusedStyle = "background: radial-gradient(#ac1b1b, transparent);"
 const socket = io({
   transports: ["websocket"], pingInterval: 1000 * 60 * 5,

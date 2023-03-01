@@ -36,9 +36,9 @@
                 mutemsg = vid.muted;
                 var mm = document.getElementById("muteMsg")
                 if (!mutemsg)
-                  mm.innerText = "(muted)";
+                  mm.innerText = "(unmuted)";
                 else
-                  mm.innerText = "(unmuted)"
+                  mm.innerText = "(muted)"
               }
             </script>
           </div>
@@ -87,6 +87,7 @@
       </table>
     </div>
   </div>
+
   <table style="all:revert; margin: auto;">
     <tbody>
       <tr>
@@ -97,161 +98,157 @@
             /* margin-right: 5%;
             margin-left: 5%; */
             overflow-y: scroll;
-            max-width: 300px;
-            max-height: 128px;
-            min-height: 48px;
+            width: 320px;
+            /* max-height: 128px;
+            min-height: 64px; */
+            height: 128px;
             padding: 5px;
             margin-top: 2px;">
           </div>
-          <textarea id="errorMsg" style=" width: 300px; height: 64px;">
-            Type in the "Search" bar to get started
-          </textarea>
-        </td>
-        <td>
-          <!-- <tr> -->
-          <!-- <td> -->
-          <h3>Tools</h3>
-          <!-- </td> -->
-          <!-- <td> -->
-
-          <!-- </td> -->
-          <!-- </tr> -->
-
-
-          <div id="volumeTool" hidden>
-            <text>Volume: <strong id="volume">50</strong>%</text>
-            <input id="volumeAmount" type="range" min="1" max="100" value="50">
-          </div>
-          <div id="durationTool" hidden>
-            <text>Time: <strong id="duration">50</strong>%</text>
-            <input id="durationAmount" type="range" min="10" max="100" value="50">
-          </div>
-          <div id="testSoundBtn" hidden>
-            <!-- <text>Output Audio: </text>
-            <button>Test Audio</button> -->
-            <audio id="soundPlayer" controls src="/media/cc0-audio/t-rex-roar.mp3">
-              <a id="soundPlayerLink" href="/media/cc0-audio/t-rex-roar.mp3">
-                Download audio
-              </a>
-            </audio>
-          </div>
-          <div id="scaleTool">
-            <text>Scale: <strong id="scale">100</strong>%</text>
-            <input id="scaleAmount" type="range" min="50" max="200" value="100">
-          </div>
-          <div id="rotateTool">
-            <text>Rotate: <strong id="rotation">0</strong>°</text>
-            <input id="rotationAmount" type="range" min="0" max="360" value="0">
-            <!-- <button id="rotate+" style="padding: 5px 5px;">+</button>
-            <button id="rotate-" style="padding: 5px 5px;">-</button> -->
-          </div>
-
-          <div id="imgPrevEditDiv">
+          <div>
             <table>
-              <tr>
-                <td style="padding: 20px;">
-                  <div id="imgEditDiv" style="
-                  border: 3px solid #667aff; 
-                  background-color: white;
-                  margin-right: 25%;
-                  margin-left: 25%;
-                  /* margin: 0 40%; */
-                  max-height: 80px;max-width: 128px;
-                  min-height: 64px;min-width: 96px;
-                  padding: 5px;">
-                  </div>
+              <tr style=" max-width: 320px;">
+                <td id="errorMsg"
+                  style=" max-width: 240px; height: 38px; padding: 2px 0px; background-color: aliceblue; border: 3px solid #667aff; ">
+                  Type in the "Search" bar to get started
                 </td>
-                <td>
-                  <button id="sendImageBtn" style="padding: 5px;"> Send Image</button>
-                  <div id="coinCostTool" style="padding: 5px; margin: 10px 10px;">
-                    <i id="coinIcon" class="fas fa-coins"
-                      style=" font-size: 20px; margin: 0px 0px 0px 5px; color: gold;"></i>
-                    <text style="color: black;font-size: 20px; ">Coins: <strong style="color: black;font-size: 20px; " id="coinCost">3</strong></text>
-                  </div>
+                <td id="removeFromLibBtn"
+                style=" padding: 5px 8px;  color: grey; border: 3px solid #667aff;">
+                  <!-- <div id="removeFromLibBtn"
+                    style=" padding: 5px 10px;  color: grey; border: 3px solid #667aff;"> -->
+                    <i class="fas fa-remove" style=" padding: 0px 1px;"></i>
+                    Remove
+                  <!-- </div> -->
                 </td>
               </tr>
-
             </table>
+
           </div>
+        </td>
+        <td>
+          <table>
+            <tr>
+              <!-- <td> -->
+              <h3>Media Edit Tools</h3>
+              <!-- </td> -->
+            </tr>
+            <tr id="volumeTool" hidden>
+              <td style="margin: 0px;"><text>Volume: <strong id="volume">50</strong>%</text></td>
+              <td><input id="volumeAmount" type="range" min="1" max="100" value="50"></td>
+            </tr>
+            <tr id="TimeTool" hidden>
+              <td style="margin: 0px;"><text>Time: <strong id="time">50</strong>%</text><text>Volume: <strong
+                    id="volume">50</strong>%</text>
+              </td>
+              <td><input id="TimeAmount" type="range" min="1" max="15" value="5"><input id="volumeAmount" type="range"
+                  min="1" max="100" value="50"></td>
+            </tr>
+            <tr id="durationTool" hidden>
+              <td style="margin: 0px;"><text>Time: <strong id="duration">50</strong>%</text></td>
+              <td><input id="durationAmount" type="range" min="10" max="100" value="50"></td>
+            </tr>
+            <tr id="rotateTool">
+              <td style="margin: 0px;"><text>Rotate: <strong id="rotation">0</strong>°</text></td>
+              <td><input id="rotationAmount" type="range" min="0" max="360" value="0"></td>
+            </tr>
+            <tr id="scaleTool">
+              <td style="margin: 0px;"><text>Scale: <strong id="scale">100</strong>%</text></td>
+              <td><input id="scaleAmount" type="range" min="50" max="200" value="100"></td>
+            </tr>
+            <tr id="soundEditor" hidden style="margin: 0px;">
+              <td>
+                <audio id="soundPlayer" controls src="/sounds/Gamestart.mp3">
+                  <a id="soundPlayerLink" href="/sounds/Gamestart.mp3">
+                    Download audio
+                  </a>
+                </audio>
+              </td>
+              <td id="soundEditor">
+                <button id="sendSoundBtn" style="padding: 5px;"> Send Sound</button>
+
+                <p id="sendSoundData" hidden></p>
+              </td>
+
+
+            </tr>
+            <!-- <tr id="soundEditor">
+              <button id="sendSoundBtn" style="padding: 5px;"> Send Sound</button>
+
+              <p id="sendSoundData" hidden></p>
+            </tr> -->
+            <tr>
+              <div id="imgPrevEditDiv">
+                <table id="imageEditor">
+                  <tr>
+                    <td style="padding: 20px;">
+                      <div id="imgEditDiv" style="
+                        border: 3px solid #667aff; 
+                        background-color: white;
+                        /* margin-right: 25%; */
+                        /* margin-left: 25%; */
+                        /* margin: 0 40%; */
+                        /* max-height: 80px;max-width: 128px; */
+                        min-height: 64px;min-width: 96px;
+                        padding: 5px;">
+                      </div>
+                    </td>
+                    <td>
+                      <button id="sendImageBtn" style="padding: 5px;"> Send Image</button>
+                      <p id="sendImageData" hidden></p>
+                      <div id="coinCostTool" style="padding: 5px; margin: 10px 10px;">
+                        <i id="coinIcon" class="fas fa-coins"
+                          style=" font-size: 20px; margin: 0px 0px 0px 5px; color: gold;"></i>
+                        <text style="color: black;font-size: 20px; ">Coins: <strong
+                            style="color: black;font-size: 20px; " id="coinCost">3</strong></text>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </tr>
+          </table>
         </td>
       </tr>
     </tbody>
-
   </table>
 
 </div>
 <div hidden>
-  <div id="soundElem" hidden style="display: flex; background: lightgrey; padding: 5px 7px 5px 7px; margin: 2px; border: #667aff;">
-    <button id="playSnd" style="margin-left: 2px; margin-right: 2px; padding: 2px;"><i class="fas fa-volume-down"></i>
+  <div id="soundElem" hidden
+    style="display: flex; background: lightgrey; padding: 5px 7px 5px 7px; margin: 2px; border: #667aff;">
+    <!-- <button id="playSnd" style="margin-left: 2px; margin-right: 2px; padding: 2px;"><i class="fas fa-volume-down"></i>
       <text id="playSndText" style="padding: 2px;">Play</text>
-    </button>
-    <button id="addToLib" hidden style="padding: 2px;"><i class="fas fa-book-medical"></i> Add </button>
-    <button id="removeFromLib" hidden style="padding: 2px;"><i class="fas fa-remove"></i> Remove</button>
-    <marquee id="sndName" width="150px" direction="right" scrollamount="5" height="16px"
+    </button> -->
+
+    <div background="grey" id="addToLib" hidden style="padding: 2px;"><i class="fas fa-book-medical"
+        style="color: purple; font-size: 12px;"> </i> </div>
+    <div background="grey" id="removeFromLib" hidden style="padding: 2px;"><i class="fas fa-remove"></i> </div>
+    <marquee id="sndName" direction="right" scrollamount="5" height="16px"
       style="padding: 3px; margin-left: 3px; margin-right: 3px;"> SoundName.ext</marquee>
-    <button id="editSnd" style=" float: right;"> Edit </button>
-    <button id="sendSnd" style=" float: right;"> Send </button>
+    <!-- <div id="editSnd" style=" float: right;"> Edit </div> -->
+    <!-- <div background="grey" id="sendSnd" style=" float: right;"> -->
+    <i id="sendSnd" class='fas fa-paper-plane' style="color: green; font-size: 12px;"></i>
+    <!-- </div> -->
   </div>
 </div>
 
 <script>
-  let mediaTypeButton = document.getElementById("mediaTypeBtn");
-  let coinCost = document.getElementById("coinCost");
-  let volume = document.getElementById("volume");
-  let volumeAmount = document.getElementById("volumeAmount");
-  let duration = document.getElementById("duration");
-  let durationAmount = document.getElementById("durationAmount");
-  let rotation = document.getElementById("rotation");
-  let rotationAmount = document.getElementById("rotationAmount");
-  let scale = document.getElementById("scale");
-  let scaleAmount = document.getElementById("scaleAmount");
-  let imgEditPrevDiv = document.getElementById("imgPrevEditDiv");
-  let testSoundBtn = document.getElementById("testSoundBtn");
-  let rt = document.getElementById("rotateTool");
-  let st = document.getElementById("scaleTool");
-  let vt = document.getElementById("volumeTool");
-  let dt = document.getElementById("durationTool");
-
-
-  let mediaMode = document.getElementById("mediaTypeText");
-  mediaTypeButton.addEventListener("click", () => {
-
-    console.log("Button Mode: ", mediaMode.innerText);
-    if (mediaMode.innerText != "Sound") {
-      dt.hidden = false;
-      vt.hidden = false;
-      rt.hidden = true;
-      st.hidden = true;
-      testSoundBtn.hidden = false;
-      imgEditPrevDiv.hidden = true;
-    }
-    if (mediaMode.innerText != "Image") {
-      dt.hidden = true;
-      vt.hidden = true;
-      rt.hidden = false;
-      st.hidden = false;
-      testSoundBtn.hidden = true;
-      imgEditPrevDiv.hidden = false;
-    }
-  })
-
-  scaleAmount.addEventListener("input", () => {
-    scale.innerText = scaleAmount.value;
-  })
-  volumeAmount.addEventListener("input", () => {
-    volume.innerText = volumeAmount.value;
-  })
-  rotationAmount.addEventListener("input", () => {
-    rotation.innerText = rotationAmount.value;
-    let image = document.getElementById("editImage");
-  })
-  durationAmount.addEventListener("input", () => {
-    duration.innerText = durationAmount.value;
-  })
-
-
-
-
+  
+  // function removeFromLibBtnClick(x) {
+  //   // alert("Row index is: " + x.rowIndex);
+  //   // removeImgFromLibrary = true;
+  //   // removeFromLibBtn.style.background = "lightred";
+  //   setTimeout(() => {
+  //     // alert("Row index is: " + x.rowIndex);
+  //     removeImgFromLibrary = true;
+  //     removeFromLibBtn.style.background = "lightred";
+  //   }, 500);
+  //   setTimeout(() => {
+  //     removeImgFromLibrary = false;
+  //     removeFromLibBtn.style.background = "";
+  //     console.log("clicked")
+  //   }, 5000);
+  // };
 </script>
 
 <style>
