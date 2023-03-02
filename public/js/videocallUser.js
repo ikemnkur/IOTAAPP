@@ -1323,9 +1323,9 @@ if (1) {
             let cntrCvnX = 125 - 8, cntrCvnY = 150 - 16;
 
             if (modeToggle == "library") {
-                matches = searchLibrary(searchTerm, mediaTypeText.innerText);
+                matches = searchLibrary(searchTerm, mediaType);
             } else {
-                matches = searchMedia(searchTerm, mediaTypeText.innerText);
+                matches = searchMedia(searchTerm, mediaType);
             }
 
             if (focusedCanvas == null) {
@@ -1352,7 +1352,19 @@ if (1) {
                     if (btnActionTXT.innerText == "Image") {
                         if (match != null) {
                             var image = document.createElement("img");
-                            image.src = `../images/${match}`;
+                            if (modeToggle == "library" && mediaType == "Image") {
+                                console.log("match: ", match.src);
+                                image.src = match.src;
+                            } else {
+                                image.src = `../images/${match}`;
+                            }
+                            // let Msrc = JSON.stringify(match.src);
+                            // if (Msrc.includes("http")) {
+                                // image.src = match.src;
+                            // } else {
+                                // image.src = `../images/${match}`;
+                            // }
+                            
                             image.height = 64;
                             image.width = 64;
                             imagePrevDiv.appendChild(image);
@@ -1420,17 +1432,19 @@ if (1) {
                                 // hold_menu.toggle();
                                 //Do what is needed as the long click and hold events
                                 targetCanvas = document.getElementById(focusedCanvas);
+                                let editImage = document.getElementById("editImage");
+                                // let editImage = image.cloneNode(true);
+                                // editImage.id = "editImage";
+                                editImage.src = image.src;
 
-                                let editImage = image.cloneNode(true);
-                                editImage.id = "editImage";
                                 let imgEditDiv = document.getElementById("imgEditDiv");
                                 // if there is an image already in the image edit prev div 
-                                //then try to remove it and add the new image
-                                try {
-                                    imgEditDiv.querySelector("#editImage").remove();
-                                } catch (error) {
-                                    imgEditDiv.appendChild(editImage);
-                                }
+                                // //then try to remove it and add the new image
+                                // try {
+                                //     imgEditDiv.querySelector("#editImage").remove();
+                                // } catch (error) {
+                                //     imgEditDiv.appendChild(editImage);
+                                // }
 
                                 // Set the image data so that the send button can send images to the stream and others
                                 let sendImageDataObj = document.getElementById("sendImageData");
@@ -1471,13 +1485,14 @@ if (1) {
                             // Click on a image
                             image.addEventListener("click", () => {
                                 if (modeToggle == "library") {
-                                    if (removeFromLibBtn) // Remove the image from the library
+                                    if (removeImgFromLibrary) // Remove the image from the library
                                         for (var i = 0; i < library["images"].length; i++) {
-                                            if (library["images"][i] == image.src) {
+                                            if (library["images"][i].src == image.src) {
                                                 // delete library["images"][i];
                                                 library["images"].splice(i, 1);
-                                                showErrorMsg("Image ", image.src, " was removed from the library");
+                                                showErrorMsg("Image #" + i + " was removed from the library");
                                                 playSound("pieceKilled.wav", 1, 0, 100);
+                                                image.hidden = true
                                                 break;
                                             }
                                         }
@@ -1642,9 +1657,13 @@ if (1) {
 
         search = search.toLowerCase();
 
+        if (type == "Image" || type == "image" || type == "images")
+            type = "images";
+        else type = "sounds";
+
         let x = library[type];
         var matches = [], errored = false;
-        console.log("var x:", x)
+        // console.log("var x:", x)
 
         try {
             for (i = 0; i < x.length; i++) {
@@ -1670,6 +1689,11 @@ if (1) {
     function searchMedia(search, type) {
         search = search.toLowerCase();
         var x;
+
+        // if (type == "Image")
+        //     type = "images";
+        // else type = "sounds";
+
         if (type == "Sound") {
             x = fullSndList;
         } else {
@@ -1825,6 +1849,7 @@ if (1) {
             // console.log("clicked")
             // showErrorMsg("Click on a image to remove it from library")
         }, 5000);
+
     });
 
     //Click on Library/Find Button
