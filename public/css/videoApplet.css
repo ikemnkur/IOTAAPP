@@ -1,0 +1,108 @@
+.videoDiv {
+    border: 3px solid #3c39dd;
+    background: #e6e9ff;
+}
+
+#muteMsg {
+    padding: 2px 2px 2px 2px;
+    margin: 2px 2px 2px 2px;
+}
+
+#video {
+    border: 3px solid #667aff;
+}
+
+#mediaTypeBtn {
+    padding: 2px 5px 2px 5px;
+    background-color: greenyellow;
+    float: right;
+    border-radius: 3px;
+}
+
+#mediaSearch {
+    border: 3px solid #667aff;
+    max-width: -webkit-fill-available;
+}
+
+#settingsDiv {
+    border: 3px solid #667aff;
+    max-width: -webkit-fill-available;
+}
+
+#editImage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.chat-sidebar table td {
+    border: 1px solid #b3adad;
+    text-align: center;
+    padding: 3px;
+    background: #e6e9ff;
+    color: #313030;
+}
+
+#video-grid {
+    grid-template-columns: repeat(auto-fill, 300px);
+    grid-auto-rows: 300px;
+    overflow-x: scroll;
+    margin-left: 0%;
+    margin-right: 0%;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    border: 2px solid #667aff;
+    padding: 5px;
+    background-color: #e6e9ff;
+    border-radius: 3px;
+}
+
+#video-table {
+    max-width: 1100px;
+    background: #fff;
+    margin: 30px auto;
+    overflow: hidden;
+    padding: 10px;
+}
+
+table {
+    border: 5px;
+}
+
+video {
+    width: 0%;
+    height: 0%;
+    object-fit: cover;
+}
+
+#video {
+    width: 25%;
+    height: 25%;
+    object-fit: cover;
+}
+
+canvas {
+    object-fit: cover;
+}
+
+#settingBtn {
+    padding: 3px;
+}
+
+#mediaTypeText {
+    padding: 0px 5px 0px 5px;
+}
+
+#imgEditDiv {
+    border: 3px solid #667aff;
+    background-color: white;
+    height: 148px;
+    width: 148px;
+    padding: 5px;
+}
+
+#sndName {
+    padding: 3px;
+    margin-left: 3px;
+    margin-right: 3px;
+}

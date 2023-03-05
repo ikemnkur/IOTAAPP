@@ -776,7 +776,7 @@ videoSocket.on('drawImageToCanvas', (imagesrc, trgtCanvas, roomId, fromUserId, i
             console.log("drawing image:", imagesrc, " on canvas: ", trgtCanvas, "at :", `(${x},${y})`);
             console.log("Target canvas: ", targetCanvas);
 
-            imgSentToCanvas = new canvasImage(w, h, `${imagesrc}`, x - w / 2, y, "image", targetCanvas, fromUserId, "N/A", 10000, rotation);
+            imgSentToCanvas = new canvasImage(w, h, `${imagesrc}`, x - w / 2, y, "image", targetCanvas, fromUserId, "N/A", 10000, rotation, scale);
             imgSentToCanvas.update();
             // if (sentImages.length == 5) {
             sentImages[1] = sentImages[0];
@@ -803,10 +803,8 @@ videoSocket.on('soundToCanvas', (soundsrc, trgtCanvas, roomId, fromUserId, msg, 
             var newSound = new Audio(`/sounds/${soundsrc}`);
             console.log("sound sent by: ", fromUserId);
             console.log("playing sound:", soundsrc, " on canvas: ", trgtCanvas, "for: ", parseInt(newSound.duration + 0.5), "seconds");
-            // console.log("Target canvas: ", targetCanvas);
 
-
-            imgSentToCanvas = new canvasImage(w, h, `/images/soundIcon.png`, x - w / 2, y - h / 2, "image", targetCanvas, fromUserId, msg, newSound.duration * 1000 + 500, 0);
+            imgSentToCanvas = new canvasImage(w, h, `/images/soundIcon.png`, x - w / 2, y - h / 2, "image", targetCanvas, fromUserId, msg, newSound.duration * 1000 + 500, 0, 1);
             imgSentToCanvas.update();
             sentImages.push(imgSentToCanvas);
 
@@ -1023,7 +1021,6 @@ function addSelfVideoStream(stream, userData) { //Draw video to canvas element t
 
     var videoID = "video#" + userData.name;;
     video.id = videoID;
-    // video.srcObject = stream
 
     video.addEventListener('loadedmetadata', () => {
         console.log("User " + userData.name + "'s Video play event. ");
@@ -1073,7 +1070,6 @@ function addSelfVideoStream(stream, userData) { //Draw video to canvas element t
     buttonDiv.appendChild(muteBtn);
     buttonDiv.appendChild(clearBtn);
 
-    // tdc.appendChild(d);
     tdc.id = "td#" + userData.name;
     tdc.appendChild(video);
     tdc.appendChild(buttonDiv)
@@ -1095,8 +1091,6 @@ function draw(video, context, width, height, id, userData) {
 
     var canvas = document.getElementById(id);
     var ctxt = canvas.getContext('2d');
-
-
 
     ctxt.drawImage(video, 0, 0, width, height);
 
@@ -1225,10 +1219,9 @@ function canvasImage(width, height, color, x, y, type, canvas, from, msg, time, 
         console.log("Time of image: " + time)
     }, time)
 
-
     if (from == null) this.from = "";
     else this.from = from;
-    // console.log("canvas: ", canvas)
+
     this.update = function () {
         if (this.kill == true) {
             this.gif = false
@@ -1241,8 +1234,7 @@ function canvasImage(width, height, color, x, y, type, canvas, from, msg, time, 
         // if a gif image
         if (this.gif) {
             if (!this.myGif.loading) {
-                ctx.drawImage(this.myGif.image, x, y, 64, 64);
-                // drawGifImage(this.myGif.image, x, y, 1, 0, ctx);
+                ctx.drawImage(this.myGif.image, x, y, Math.round(64*scale/1000),Math.round(64*scale/1000));
                 this.itr++;
                 if (from != null) {
                     ctx.fillStyle = 'white';
@@ -1257,7 +1249,7 @@ function canvasImage(width, height, color, x, y, type, canvas, from, msg, time, 
                 ctx.fillStyle = 'white';
                 ctx.strokeStyle = '#003300';
                 ctx.font = '12px Arial';
-                if (this.image.src.includes("soundIcon.png"))
+                if (this.image.src.includes("soundIcon.png")) // draws sound icon
                     ctx.fillText(from, x, y + height + 12);
                 else
                     ctx.fillText(from, x - from.length * 4 + (w / 2), y + height + 8);
@@ -1298,7 +1290,6 @@ if (1) {
     }
 
     search.addEventListener("keyup", () => {
-        // console.log("searching....");
         previewMedia(search.value);
     })
 
@@ -1351,38 +1342,30 @@ if (1) {
                     var btnActionTXT = document.getElementById("mediaTypeText")
                     if (btnActionTXT.innerText == "Image") {
                         if (match != null) {
+
                             var image = document.createElement("img");
+                            //This check if user is in library mode and images mode to load library source files
                             if (modeToggle == "library" && mediaType == "Image") {
                                 console.log("match: ", match.src);
                                 image.src = match.src;
                             } else {
                                 image.src = `../images/${match}`;
                             }
-                            // let Msrc = JSON.stringify(match.src);
-                            // if (Msrc.includes("http")) {
-                                // image.src = match.src;
-                            // } else {
-                                // image.src = `../images/${match}`;
-                            // }
-                            
+
                             image.height = 64;
                             image.width = 64;
                             imagePrevDiv.appendChild(image);
                             image.style = "padding: 2px; margin: 2px; border-radius: 5px";
                             image.id = "Image#" + image.src;
-                            //click the send Image button in th tool menu
-                            // let sendImageBtn = imgEditDiv.querySelector("#sendImageBtn")
-                            // for (img in library["images"]) {
+
+                            //click the send Image button in the tool menu
                             for (var i = 0; i < library["images"].length; i++) {
                                 if (library["images"][i].src == image.src) {
                                     image.style.background = "lightgreen";
                                     console.log("Image ", image.src, " is in libary.")
                                 }
                             }
-                            //else {
-                            //   console.log("Image ", image.src, " is not in libary.")
-                            //}
-                            // }
+
 
                             // if (sendImageBtn != null)
                             //     sendImageBtn.addEventListener("click", () => {
@@ -1409,10 +1392,6 @@ if (1) {
 
                             var timeout_id = 0,
                                 hold_time = 1000;
-                            // hold_menu = document.getElementById("Image#"+image.src), //$("Image#"+image.src),
-                            // hold_trigger = document.getElementById("Image#"+image.src);//$('.hold_trigger');
-
-                            // hold_menu.hide();
 
                             image.addEventListener("mousedown", () => {
                                 timeout_id = setTimeout(editAnImage, hold_time);
@@ -1424,27 +1403,15 @@ if (1) {
                                 })
                             })
 
-                            // .bind('mouseup mouseleave', function () {
-                            //     clearTimeout(timeout_id);
-                            // });
-
                             function editAnImage() {
-                                // hold_menu.toggle();
                                 //Do what is needed as the long click and hold events
                                 targetCanvas = document.getElementById(focusedCanvas);
                                 let editImage = document.getElementById("editImage");
-                                // let editImage = image.cloneNode(true);
-                                // editImage.id = "editImage";
                                 editImage.src = image.src;
 
                                 let imgEditDiv = document.getElementById("imgEditDiv");
                                 // if there is an image already in the image edit prev div 
                                 // //then try to remove it and add the new image
-                                // try {
-                                //     imgEditDiv.querySelector("#editImage").remove();
-                                // } catch (error) {
-                                //     imgEditDiv.appendChild(editImage);
-                                // }
 
                                 // Set the image data so that the send button can send images to the stream and others
                                 let sendImageDataObj = document.getElementById("sendImageData");
@@ -1477,10 +1444,7 @@ if (1) {
                                     // send the image to other user in the room
                                     sendMediaToCanvas("image", image.src, focusedCanvas, 0, 100, 100, 100);
                                 }
-
                             })
-
-
 
                             // Click on a image
                             image.addEventListener("click", () => {
@@ -1546,7 +1510,7 @@ if (1) {
                             var soundElmt = document.createElement("div");
                             soundElmt = thing.cloneNode(true);
                             soundElmt.id = match;
-                            // let playbtn = soundElmt.querySelector('#playSnd');
+
                             let sendBtn = soundElmt.querySelector('#sendSnd');
                             let mediaTypeBtn = soundElmt.querySelector('#addToLib');
                             let soundName = soundElmt.querySelector('#sndName');
@@ -1582,7 +1546,6 @@ if (1) {
                                 soundPlayerLink.src = "./sounds/" + snd;
 
                                 // volume is from the volume element in the media editing tools section
-                                // sendMediaToCanvas("sound", snd, focusedCanvas, 0, 100, 100, volume.innerText);
 
                                 let sendSoundObj = document.getElementById("sendSoundData");
                                 let msg = `from: ${userID}`;
@@ -1596,33 +1559,9 @@ if (1) {
                                 sendSoundObj.innerText = JSON.stringify(sendSndData);
                             })
 
-
-                            // playbtn.addEventListener("click", () => {
-                            //     let playbtnText = playbtn.querySelector("#playSndText");
-                            //     if (playbtnText.innerText == "Stop") {
-                            //         stopSounds();
-                            //         playbtnText.innerText = "Play";
-                            //     } else {
-                            //         playbtnText.innerText = "Stop";
-                            //         playSound(match);
-                            //     }
-
-                            //     function changePlaybtnText() {
-                            //         if (playbtnText.innerText == "Stop")
-                            //             if (!isPlaying(currentSound)) {
-                            //                 playbtnText.innerText = "Play";
-                            //             } else {
-                            //                 setTimeout(changePlaybtnText, 1000)
-                            //             }
-                            //     }
-                            //     setTimeout(changePlaybtnText, 1000)
-                            //     //    changePlaybtnText();
-
-                            // })
                             //Send a sound in Find/Search mode to the user in the focused canvas
                             sendBtn.addEventListener("click", () => {
                                 sendMediaToCanvas("sound", snd, focusedCanvas, 0, 100, 100, 75);
-
                             })
 
                             soundElmt.hidden = false;
@@ -1632,7 +1571,6 @@ if (1) {
                     }
                 });
             }
-
         } else {
             showErrorMsg("Type more than 3 characters to start search")
         }
@@ -1641,7 +1579,6 @@ if (1) {
 
 
     function showErrorMsg(msg) {
-        // var imagePrevDiv = document.getElementById("imgPrevDiv");
         let errorMSG = document.getElementById("errorMsg")
         if (errorMSG == null) {
             errorMSG = document.createElement("strong")
@@ -1663,7 +1600,6 @@ if (1) {
 
         let x = library[type];
         var matches = [], errored = false;
-        // console.log("var x:", x)
 
         try {
             for (i = 0; i < x.length; i++) {
@@ -1701,7 +1637,7 @@ if (1) {
         }
         console.log("Media type: ", type)
         var matches = [];
-        // console.log("searching for: ", search, " in ", fullImgList);
+
         for (i = 0; i < x.length; i++) {
             if (x[i].toLowerCase().includes(search)) {
                 // x[i].style.display = "none";
@@ -1726,7 +1662,7 @@ if (1) {
                 // set the image scale to the scale value
                 let w = h = 64 * (scale / 100);
                 let targetCanvas = document.getElementById(focusedCanvas);
-                let imgSentToCanvas = new canvasImage(w, h, `${imagesrc}`, targetCanvas.xcursor, targetCanvas.ycursor - h / 2, "image", targetCanvas, userID, `from:${userID} `, 10000, rotation);
+                let imgSentToCanvas = new canvasImage(w, h, `${imagesrc}`, targetCanvas.xcursor, targetCanvas.ycursor - h / 2, "image", targetCanvas, userID, `from:${userID} `, 10000, rotation, scale);
                 imgSentToCanvas.update();
                 // send the image to other user in the room
                 videoSocket.emit("sendImageToCanvas", imagesrc, focusedCanvas, ROOM_ID, userID, imgSentToCanvas, 0, 1)
@@ -1736,7 +1672,6 @@ if (1) {
                 videoSocket.emit("sendSoundToCanvas", snd, focusedCanvas, ROOM_ID, userID, msg, volume);
                 console.log("Sending sound: ", snd)
             }
-
     }
 
     let mediaTypeButton = document.getElementById("mediaTypeBtn");
@@ -1751,10 +1686,12 @@ if (1) {
     let scaleAmount = document.getElementById("scaleAmount");
     let imgEditPrevDiv = document.getElementById("imgPrevEditDiv");
     let soundEditor = document.getElementById("soundEditor");
+    let soundPlayer = document.getElementById("soundPlayer");
+    soundPlayer.style.display = "none";
+    soundEditor.style.display = "none";
     let imageEditor = document.getElementById("imageEditor");
     let sendSoundBtn = document.getElementById("sendSoundBtn");
     let sendImageBtn = document.getElementById("sendImageBtn");
-    // let removeFromLibBtn = document.getElementById("removeFromLibBtn");
     let rt = document.getElementById("rotateTool");
     let st = document.getElementById("scaleTool");
     let vt = document.getElementById("volumeTool");
@@ -1769,7 +1706,8 @@ if (1) {
             vt.hidden = false;
             rt.hidden = true;
             st.hidden = true;
-            soundEditor.hidden = false;
+            soundPlayer.style.display = "block";
+            soundEditor.style.display = "block";
             imageEditor.hidden = true;
             imgEditPrevDiv.hidden = true;
         }
@@ -1778,7 +1716,8 @@ if (1) {
             vt.hidden = true;
             rt.hidden = false;
             st.hidden = false;
-            soundEditor.hidden = true;
+            soundPlayer.style.display = "none";
+            soundEditor.style.display = "none";
             imageEditor.hidden = false;
             imgEditPrevDiv.hidden = false;
         }
@@ -1817,13 +1756,11 @@ if (1) {
         } else {
             let SID = JSON.parse(document.getElementById("sendImageData").innerText);
             console.log("sendImageData", SID);
-            // SID.img.replace("http://localhost:3000/images/", "../images/");
             let w = h = 64;
             var targetCanvas = document.getElementById(focusedCanvas);
-            var imgSentToCanvas = new canvasImage(w, h, `${SID.img}`, targetCanvas.xcursor, targetCanvas.ycursor - h / 2, "image", targetCanvas, userID, `from:${userID} `, 10000, 0);
+            var imgSentToCanvas = new canvasImage(w, h, `${SID.img}`, targetCanvas.xcursor, targetCanvas.ycursor - h / 2, "image", targetCanvas, userID, `from:${userID} `, 10000, 0, 1);
             imgSentToCanvas.update();
             sendMediaToCanvas("image", SID.img, focusedCanvas, rotation.innerText, scale.innerText, 100, 100)
-            // videoSocket.emit("sendImageToCanvas", SID.img, SID.focusedCanvas, SID.roomID, SID.userID, imgSentToCanvas, rotation.innerText, scaleAmount.innerText);
         }
     })
 
@@ -1831,9 +1768,7 @@ if (1) {
     sendSoundBtn.addEventListener("click", () => {
         let sSD = JSON.parse(document.getElementById("sendSoundData").innerText);
         console.log("sendSoundData", sSD);
-        // videoSocket.emit("sendSoundToCanvas", sSD.snd, sSD.focusedCanvas, sSD.roomID, sSD.userID, sSD.msg, volume.innerText);
         sendMediaToCanvas("sound", sSD.snd, focusedCanvas, 0, 100, 100, volume.innerText);
-
     })
 
     var removeImgFromLibrary = false;

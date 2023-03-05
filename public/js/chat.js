@@ -637,9 +637,11 @@ function createMessage(message, replyTo) {
     replyBtn.addEventListener('mouseenter', function (evt) {
       replyBtn.style.color = "red";
     })
-     replyBtn.addEventListener('mouseleave', function (evt) {
+
+    replyBtn.addEventListener('mouseleave', function (evt) {
       replyBtn.style.color = "blue";
     })
+
     replyBtn.addEventListener('click', function (evt) {
       cancelBtn.style = "display: block";
       // Check if your has a nickname
@@ -712,7 +714,7 @@ function teamsDisplay() {
 
 
   teams.forEach((item, index) => {
-    
+
     let tr = document.createElement("tr");
     let tdName = document.createElement("td");
     let tdScore = document.createElement("td");
@@ -745,7 +747,7 @@ function teamsDisplay() {
     // tr.appendChild(tdBtn);
     tbody.appendChild(tr)
   });
-  
+
   tbl.style = "margin: auto;";
   tbl.appendChild(tbody);
   teamBox.appendChild(tbl);
@@ -770,125 +772,264 @@ function displayUserStats() {
 function outputUsers(users) {
   userList.innerHTML = "";
   console.log("Output Users: ", users);
+  // users.forEach((user) => {
+
+  //   const tr = document.createElement("tr");
+  //   tr.className = "userTR"
+  //   const tdName = document.createElement("td");
+  //   tdName.id = "userTD";
+  //   const tdBlock = document.createElement("td");
+  //   const tdFriend = document.createElement("td");
+  //   const tdTip = document.createElement("td");
+  //   if (user.username == userJSON[0].username) {
+  //     const tdName = document.createElement("td"); const tdBlock = document.createElement("td"); const tdFriend = document.createElement("td"); const tdTip = document.createElement("td");
+  //     tdName.innerText = user.username;
+  //     tdName.id = "userTD";
+  //     // const tr = document.createElement("tr");
+  //     tr.appendChild(tdName);
+  //     tr.appendChild(tdTip);
+  //     tr.appendChild(tdFriend);
+  //     tr.appendChild(tdBlock);
+  //     userList.appendChild(tr);
+  //   }
+  //   else {
+
+  //     //name
+  //     const tdName = document.createElement("td");
+  //     tdName.id = "userTD";
+  //     tdName.innerText = user.username;
+  //     tr.appendChild(tdName);
+
+  //     //tip
+  //     if (1) {
+  //       const tdTip = document.createElement("td");
+  //       const coinBtn = document.createElement("div");
+  //       const coin = document.createElement("i");
+  //       coin.className = "fas fa-coins";
+  //       coin.style = "font-size:24px;color:gray;padding: 2px;";
+  //       coinBtn.type = "submit";
+  //       coinBtn.appendChild(coin);
+  //       tdTip.appendChild(coinBtn);
+  //       tr.appendChild(tdTip);
+
+  //       coinBtn.addEventListener("mouseleave", (event) => {
+  //         coin.style.color = "silver"
+  //       });
+
+  //       coinBtn.addEventListener("mouseover", function () {
+  //         coin.style.color = "gold"
+  //       });
+
+  //       tdTip.addEventListener("click", function () {
+  //         // alert("Tip me");
+  //         if (username != tdName.innerText) {
+  //           tipUsers(username, tdName.innerText, 1);
+  //           console.log(`${username} Tipped ${tdName.innerText}`);
+  //         }
+  //       });
+
+  //     }
+
+  //     //add friend
+  //     if (1) {
+  //       const tdFriend = document.createElement("td");
+  //       const friendBtn = document.createElement("div");
+  //       const friendIcon = document.createElement("i");
+  //       friendBtn.type = "submit";
+
+  //       if (friendsList.length > 0) {
+  //         for (const [index, val] of friendsList.entries()) {
+  //           if (user.username == val) {
+  //             friendIcon.className = "fas fa-check";
+  //             break;
+  //           } else {
+  //             friendIcon.className = "fas fa-plus-square";
+  //           }
+  //         }
+  //       } else {
+  //         friendIcon.className = "fas fa-plus-square";
+  //       }
+
+  //       friendIcon.style = "font-size:24px;color:green;padding: 2px;";
+  //       friendIcon.name = "friend";
+
+  //       friendBtn.appendChild(friendIcon);
+  //       tdFriend.appendChild(friendBtn);
+
+
+  //       tdFriend.addEventListener("click", function () {
+  //         addFriend(username, tdName.innerText, friendIcon.className);
+  //       });
+
+  //       tr.appendChild(tdFriend);
+  //     }
+
+  //     //Add block button
+  //     if (1) {
+  //       const tdBlock = document.createElement("td");
+  //       const blockBtn = document.createElement("div");
+  //       const block = document.createElement("i");
+  //       block.className = "fas fa-ban"; block.style = "font-size:24px;color:red;padding: 2px;";
+
+  //       blockedList.forEach((item, index) => {
+  //         if (user.username == item)
+  //           block.style = "font-size:24px;color:grey;padding: 2px;";
+  //       })
+
+  //       blockBtn.type = "submit";
+  //       blockBtn.appendChild(block);
+  //       tdBlock.appendChild(blockBtn);
+
+  //       tdBlock.addEventListener("click", function () {
+  //         blockUser(tdName.innerText, room, username);
+  //       });
+
+  //       tr.appendChild(tdBlock);
+  //     }
+
+  //     userList.appendChild(tr);
+
+  //   }
+  // });
+
   users.forEach((user) => {
+    console.log("user: " , user);
+    var userTable = document.getElementById("usersTable");
+    var userListingTemplate = document.getElementById("userListingLobby");
+    let userListing = userListingTemplate.cloneNode(true)
+    userListing.hidden = false;
 
-    const tr = document.createElement("tr");
-    tr.className = "userTR"
-    const tdName = document.createElement("td");
-    tdName.id = "userTD";
-    const tdBlock = document.createElement("td");
-    const tdFriend = document.createElement("td");
-    const tdTip = document.createElement("td");
-    if (user.username == userJSON[0].username) {
-      const tdName = document.createElement("td"); const tdBlock = document.createElement("td"); const tdFriend = document.createElement("td"); const tdTip = document.createElement("td");
-      tdName.innerText = user.username;
-      tdName.id = "userTD";
-      // const tr = document.createElement("tr");
-      tr.appendChild(tdName);
-      tr.appendChild(tdTip);
-      tr.appendChild(tdFriend);
-      tr.appendChild(tdBlock);
-      userList.appendChild(tr);
-    }
-    else {
+    let uName = userListing.querySelector("#uName");
+    uName.innerText = user.username;
 
-      //name
-      const tdName = document.createElement("td");
-      tdName.id = "userTD";
-      tdName.innerText = user.username;
-      tr.appendChild(tdName);
-
-      //tip
-      if (1) {
-        const tdTip = document.createElement("td");
-        const coinBtn = document.createElement("div");
-        const coin = document.createElement("i");
-        coin.className = "fas fa-coins";
-        coin.style = "font-size:24px;color:gray;padding: 2px;";
-        coinBtn.type = "submit";
-        coinBtn.appendChild(coin);
-        tdTip.appendChild(coinBtn);
-        tr.appendChild(tdTip);
-
-        coinBtn.addEventListener("mouseleave", (event) => {
-          coin.style.color = "silver"
-        });
-        
-        coinBtn.addEventListener("mouseover", function () {
-          coin.style.color = "gold"
-        });
-
-        tdTip.addEventListener("click", function () {
-          // alert("Tip me");
-          if (username != tdName.innerText) {
-            tipUsers(username, tdName.innerText, 1);
-            console.log(`${username} Tipped ${tdName.innerText}`);
-          }
-        });
-
+    var addFriendBtnLobby = userListing.querySelector("#addFriendBtnLobby");
+    let icon = addFriendBtnLobby.querySelector("#addFriendIconLobby");
+    let action;
+    for (let i = 0; i < friendsList.length; i++) {
+      if (friendsList[i] == uName.innerText) {
+        action = "add";
+        break;
       }
+    }
+    if (action == "add") {
+      icon.className = "fas fa-check";
+    } else {
+      icon.className = "fas fa-plus-square";
+    }
 
-      //add friend
-      if (1) {
-        const tdFriend = document.createElement("td");
-        const friendBtn = document.createElement("div");
-        const friendIcon = document.createElement("i");
-        friendBtn.type = "submit";
-
-        if (friendsList.length > 0) {
-          for (const [index, val] of friendsList.entries()) {
-            if (user.username == val) {
-              friendIcon.className = "fas fa-check";
-              break;
-            } else {
-              friendIcon.className = "fas fa-plus-square";
-            }
+    addFriendBtnLobby.addEventListener("click", function () {
+      icon.addEventListener("click", function () {
+        let action = "remove";
+        for (let i = 0; i < friendsList.length; i++) {
+          if (friendsList[i] == uName.innerText) {
+            action = "add";
+            friendsList[i].splice(i, 1)
+            break;
           }
-        } else {
-          friendIcon.className = "fas fa-plus-square";
         }
+        if (action == "add") {
+          icon.className = "fas fa-check";
+        } else {
+          icon.className = "fas plus-square";
+        }
+        addFriend(username, uName.innerText, action);
+      });
+    });
 
-        friendIcon.style = "font-size:24px;color:green;padding: 2px;";
-        friendIcon.name = "friend";
+    var coinBtnLobby = userListing.querySelector("#coinBtnLobby");
+    var coin = coinBtnLobby.querySelector("#coinIconLobby");
 
-        friendBtn.appendChild(friendIcon);
-        tdFriend.appendChild(friendBtn);
+    coinBtnLobby.addEventListener("mouseleave", (event) => {
+      coin.style.color = "silver"
+    });
 
+    coinBtnLobby.addEventListener("mouseover", function () {
+      coin.style.color = "gold"
+    });
 
-        tdFriend.addEventListener("click", function () {
-          addFriend(username, tdName.innerText, friendIcon.className);
-        });
+    coinBtnLobby.addEventListener("click", function () {
+      if (username != uName.innerText) {
+        tipUsers(username, uName.innerText, 1);
+        console.log(`${username} Tipped ${uName.innerText}`);
+        playSound("cash-register-sound-fx.mp3", 1, 0, 100);
+      }
+    });
 
-        tr.appendChild(tdFriend);
+    var blockBtnLobby = userListing.querySelector("#blockBtnLobby");
+    var blockIconLobby = blockBtnLobby.querySelector("#blockIconLobby");
+    blockedList.forEach((item, index) => {
+      if (user.username == item) {
+        blockIconLobby.style.color = "grey";
+        userListing.hidden = false;
+      }
+    })
+
+    blockBtnLobby.addEventListener("click", function () {
+      blockUser(uName.innerText, room, username);
+    });
+
+    var commentBtnLobby = userListing.querySelector("#commentBtnLobby");
+    commentBtnLobby.addEventListener("click", function () {
+      cancelBtn.style = "display: block";
+      var usernameText = commentBtnLobby.parentElement.parentElement.querySelector("#uName").innerText;
+      var inputMsg = document.getElementById("msg");
+      // Reset reply mode for replying to dat user 
+      if (usernameText) {
+        inputMsg.placeholder = "Replying to " + usernameText;
+        replyToUser = usernameText;
       }
 
-      //Add block button
-      if (1) {
-        const tdBlock = document.createElement("td");
-        const blockBtn = document.createElement("div");
-        const block = document.createElement("i");
-        block.className = "fas fa-ban"; block.style = "font-size:24px;color:red;padding: 2px;";
+      // reply.action = true;
+      // reply.target = message.username;
+    });
 
-        blockedList.forEach((item, index) => {
-          if (user.username == item)
-            block.style = "font-size:24px;color:grey;padding: 2px;";
-        })
-
-        blockBtn.type = "submit";
-        blockBtn.appendChild(block);
-        tdBlock.appendChild(blockBtn);
-
-        tdBlock.addEventListener("click", function () {
-          blockUser(tdName.innerText, room, username);
-        });
-
-        tr.appendChild(tdBlock);
+    var hideBtnLobby = userListing.querySelector("#hideIconLobby");
+    hideBtnLobby.addEventListener("click", function () {
+      var lobbyIcons = userListing.querySelector("#lobbyIcons");
+      if (lobbyIcons.style.display == "none") {
+        lobbyIcons.style.display = "flex";
+        uName.style.display = "none";
       }
+      else if (lobbyIcons.style.display == "flex") {
+        lobbyIcons.style.display = "none";
+        uName.style.display = "block";
+      }
+    });
 
-      userList.appendChild(tr);
+    userTable.appendChild(userListing);
+  })
 
-    }
-  });
+}
+var currentSound;
+function playSound(sound, volumeLvl) {
+  // let volume = parseFloat(volumeLvl) / 100;
+  // console.log(volumeLvl);
+  // if there is no current sound playing
+  if (!isPlaying(currentSound)) {
+    currentSound = new Audio(`/sounds/${sound}`);
+    console.log("Sound Source: ", currentSound.src);
+    currentSound.volume = 1;
+    currentSound.play();
+  }
+}
+
+function isPlaying(sound) {
+  if (sound == null) {
+    return false;
+  }
+
+  var infoPlaying = false
+
+  var currentTime = sound.currentTime == 0 ? true : false
+  var paused = sound.paused ? true : false
+  var ended = !sound.ended ? true : false
+  var readyState = sound.readyState == 0 ? true : false
+  if (currentTime && paused && ended && readyState) {
+    infoPlaying = true
+  } else if (!currentTime && !paused && ended && !readyState) {
+    infoPlaying = true
+  }
+  return infoPlaying
 }
 
 // //Prompt the user before leave chat room
@@ -953,5 +1094,5 @@ async function postData(url = "", data = {}) {
 }
 
 setTimeout(updates, 1000);
-// updates();
+
 teamsDisplay();

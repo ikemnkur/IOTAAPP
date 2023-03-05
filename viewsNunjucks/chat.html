@@ -39,39 +39,71 @@
                 <h2 id="teamnames">{{roomObj[0]["teams"]}}</h2>
 
                 <h3><i class="fas fa-smile"></i> User Lobby</h3>
-                <table>
-                    <tr>
-                        <i class="fas fa-search" style="margin: 0px 5px 0px 0px; padding:5px 0px 0px 0px;"></i>
-                        <input type="text" name="searchUser" id="lookupUser" onkeyup="searchUsers()">
-                    </tr>
-                </table>
-                <script>
-                    function searchUsers() {
-                        let input = document.getElementById('lookupUser').value
-                        input = input.toLowerCase();
-                        let x = document.getElementsByClassName('userTR');
-                        // let x = x1.querySelector("#userTD");
-                        for (i = 0; i < x.length; i++) {
-                            if (!x[i].querySelector("#userTD").innerText.toLowerCase().includes(input)) {
-                                x[i].style.display = "none";
-                            }
-                            else {
-                                x[i].style.display = "";
-                            }
-                        }
-                    }
-                </script>
+
                 <h2>
                     <table id="userTableObj">
+                        <div style="display:flex;">
+                            <!-- <tr> -->
+                            <i class="fas fa-search" style="margin: auto; padding:5px ;"></i>
+                            <input type="text" name="searchUser" id="lookupUser"
+                                style="margin: auto; padding:5px; width: 160px;" onkeyup="searchUsers()">
+                            <!-- </tr> -->
+                        </div>
+                        <script>
+                            function searchUsers() {
+                                let input = document.getElementById('lookupUser').value
+                                input = input.toLowerCase();
+                                let x = document.getElementsByClassName('usernameText');
+                                // let x = x1.querySelector("#userTD");
+                                for (i = 0; i < x.length; i++) {
+                                    if (!x[i].innerText.toLowerCase().includes(input)) {
+                                        x[i].parentElement.parentElement.parentElement.style.display = "none";
+                                    }
+                                    else {
+                                        x[i].parentElement.parentElement.parentElement.style.display = "";
+                                    }
+                                }
+                            }
+                        </script>
                         <thead>
-                            <tr>
-                                <th>Name&nbsp;</th>
-                                <th>Tip&nbsp;</th>
-                                <th>Add&nbsp;</th>
-                                <th>Block&nbsp;</th>
+                            <tr id="userListingLobby" hidden>
+                                <td>
+                                    <div style="width: 176px;">
+                                        <div>
+                                            <text id="uName" class="usernameText"
+                                                style="float: left;font-size: 12px;">Username#12345678
+                                            </text>
+                                            <i id="hideIconLobby" class="fas fa-sliders"
+                                                style="float: right;font-size: 12px; color: black;"></i>
+                                        </div>
+                                        <div id="lobbyIcons" style="display: none; padding-left: 3px;">
+                                            <div id="coinBtnLobby" class="lobbyIcon"
+                                                style="float: right; padding: 2px 2px;">
+                                                <i id="coinIconLobby" class="fas fa-coins"
+                                                    style="font-size: 14px;  color: silver;"></i>
+                                            </div>
+                                            <div id="addFriendBtnLobby" class="lobbyIcon"
+                                                style="float: right; padding: 2px 2px;">
+                                                <i id="addFriendIconLobby" class="fas fa-plus-square"
+                                                    style="font-size: 14px;  color: green;"></i>
+                                            </div>
+                                            <div id="blockBtnLobby" class="lobbyIcon"
+                                                style="float: right; padding: 2px 2px;">
+                                                <i id="blockIconLobby" class="fas fa-ban"
+                                                    style="font-size: 14px;  color: red;"></i>
+                                            </div>
+                                            <div id="commentBtnLobby" class="lobbyIcon"
+                                                style="float: right; padding: 2px 2px;">
+                                                <i id="commentIconLobby" class="fas fa-comments"
+                                                    style="font-size: 16px;  color: grey;"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
                             </tr>
                         </thead>
                         <tbody id="usersTable">
+
                         </tbody>
                     </table>
                 </h2>
@@ -79,7 +111,7 @@
                 <!-- DivTable.com -->
             </div>
             <div id="chatBox" class="chat-messages">
-                <div id="msgFormat" class="message" >
+                <div id="msgFormat" class="message" hidden>
 
                     <div class="meta" style="color: rgb(15, 15, 15)">
                         <!-- The User name Tag -->
@@ -134,8 +166,6 @@
                                 <span id="trashBtn"><i id="trashIcon" class="fas fa-trash"
                                         style="font-size: 16px; margin: 0px 0px 0px 5px; color: blue;"></i>
                                 </span>
-
-
                             </span>
                         </div>
                         <!-- The message text -->
@@ -148,9 +178,7 @@
                             </span>
                             <div id="msgTextDiv"
                                 style="display:-webkit-inline-box; text-align: center; padding: 2px; font-size: 12px; color: black; ">
-
                                 Msg Text
-
                                 <!-- <i id="replyBtn" class="fas fa-reply" style="font-size: 16px; margin-top: 3px; color: blue;"></i> -->
                                 <!-- </div> -->
                             </div>
