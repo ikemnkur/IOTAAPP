@@ -33,6 +33,7 @@ try {
 
 const room = roomJSON[0]["roomID"];
 const topic = roomJSON[0]["topic"];
+const pfp = userJSON[0]["profilePic"];
 
 var secretMode = document.getElementById("secretMode").innerText;
 var coins = userJSON[0].coins;
@@ -67,8 +68,9 @@ const socket = io({
   pingTimeout: 1000 * 60 * 3
 });
 
+
 // Join chatroom
-socket.emit("joinRoom", { username, nickname, coins, xp, room, secretMode, team, score, teams });
+socket.emit("joinRoom", { username, nickname, coins, xp, room, secretMode, team, score, teams, pfp });
 
 // Get room and users
 socket.on("roomUsers", (roomname, users) => {
@@ -127,9 +129,6 @@ socket.on("vote", (msg_ID, vote, msg_username) => {
 // if ()
 socket.emit("startScoreKeeping", room, teams)
 
-
-
-
 socket.on("Scores", (roomName, scoreData) => {
   if (room == roomName) {
     // console.log("Scores Event: ", scoreData)
@@ -148,8 +147,6 @@ socket.on("Scores", (roomName, scoreData) => {
     })
   }
 });
-
-
 
 setTimeout(addToScore, 1000);
 
@@ -186,6 +183,7 @@ function updates() {
 // Message from server BOT
 socket.on("messageTo", (message, toUser) => {
   message.username = "BOT";
+  message.pfp = "../images/robotIcon.png"
   if (toUser == username)
     createMessage(message, "CHATBOT")
 
@@ -277,8 +275,8 @@ function createMessage(message, replyTo) {
   msgBlock.id = message.username + "-" + message.time;
   msgBlock.hidden = false;
 
-
-  let usernameTag = msgBlock.querySelector('#userTag');
+  let userTag = msgBlock.querySelector('#userTag');
+  let usernameTag = msgBlock.querySelector('#usernameTag');
   let userstats = msgBlock.querySelector('#userStats');
   let teamStat = msgBlock.querySelector('#teamStat');
   let xpStat = msgBlock.querySelector('#xpStat');
@@ -313,9 +311,39 @@ function createMessage(message, replyTo) {
   let timeTag = msgBlock.querySelector('#timeTag');
   timeTag.innerText = message.time;
 
+  let profilePic = msgBlock.querySelector('#profilePic');
+  profilePic.src = pfp;
 
+  // function imageExists(src) {
+  //   // var http = new XMLHttpRequest();
+  //   // http.open('HEAD', image_url, false);
+  //   // try {
+  //   //   http.send();
+  //   // } catch (error) {
+  //   //   console.log("Img not found: " + image_url);
+  //   // }
+  //   // return http.status != 404;
+  //   profilePic.src = src;
+  //   if(profilePic.width > 0){
+  //     return false;
+  //   } else {
+  //     return true;
+  //   }
+  // // }
 
+  // let srcJPG = "../upload/" + "-" + username + "-" + "profilePic" + ".jpg"
+  // let srcGIF = "../upload/" + "-" + username + "-" + "profilePic" + ".gif"
+  // let srcPNG = "../upload/" + "-" + username + "-" + "profilePic" + ".png"
 
+  // if (imageExists(srcJPG)) {
+  //   profilePic.src = srcJPG;
+  // } else if (imageExists(srcPNG)) {
+  //   profilePic.src = srcPNG;
+  // } else if (imageExists(srcGIF)) {
+  //   profilePic.src = srcGIF;
+  // } else {
+  //   profilePic.src = "../images/profilepicother.png";
+  // }
 
   usernameTag.innerText = uname;
   xpStat.innerText = "XP: " + message.xp;
@@ -327,7 +355,7 @@ function createMessage(message, replyTo) {
     })
   }
 
-  usernameTag.addEventListener("mouseleave", () => {
+  userTag.addEventListener("mouseleave", () => {
     userstats.hidden = true;
   })
 
@@ -893,7 +921,7 @@ function outputUsers(users) {
   // });
 
   users.forEach((user) => {
-    console.log("user: " , user);
+    console.log("user: ", user);
     var userTable = document.getElementById("usersTable");
     var userListingTemplate = document.getElementById("userListingLobby");
     let userListing = userListingTemplate.cloneNode(true)
