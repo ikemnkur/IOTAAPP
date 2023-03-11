@@ -1088,7 +1088,6 @@ function getClickedSpot(canvas, event) {
 
 //added these functions below
 function draw(video, context, width, height, id, userData) {
-
     var canvas = document.getElementById(id);
     var ctxt = canvas.getContext('2d');
 
@@ -1107,7 +1106,7 @@ function draw(video, context, width, height, id, userData) {
         imgSentToCanvas.update();
     }
 
-    setTimeout(draw, 10, video, context, width, height, id, userData);
+    setTimeout(draw,s10, video, context, width, height, id, userData);
 }
 
 function drawRotated(degrees) {

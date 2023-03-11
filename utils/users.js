@@ -2,9 +2,10 @@ const users = [];
 var activeRoom;
 
 // Join user to chat
-function userJoin(id, username, nickname, points, xp, room, secretMode, team, score, teams) {
-  const user = { id, username, nickname, points, xp, room, secretMode, team, score, teams };
+function userJoin(id, username, nickname, points, xp, room, secretMode, team, score, teams, pfp) {
+  const user = { id, username, nickname, points, xp, room, secretMode, team, score, teams, pfp };
   activeRoom = user.room;
+  console.log("PFP: ", pfp)
   users.push(user);
   return user;
 }

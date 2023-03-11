@@ -1550,21 +1550,6 @@ io.on('connection', socket => {
 	socket.on('createRoomHome', (payload) => {
 		let room = payload;
 		console.log("Room Info (socketIO): ", room.roomID);
-		// connection.query('INSERT INTO rooms (roomID,host,passcode,topic,createDate,teams,users, private, watchCost, joinCost, tags, roomCfg) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
-		// 	[room.roomID, room.host, room.passcode, room.topic, room.createDate, room.teams, room.users, room.private, room.watchCost, room.joinCost, room.tags, room]);
-
-		// connection.query("SELECT * FROM rooms WHERE roomID = ?", [room.roomID], function (err, finalresult) {
-		// 	console.log("Joined Room Info: ", finalresult);
-
-		// 	connection.query("SELECT * FROM userstats WHERE username = ?", [room.host], function (err, userStatsResult) {
-		// 		if (err) throw err;
-		// 		userStats = JSON.stringify(userStatsResult);
-		// 		console.log("user Info: ", userStats);
-		// 		response.render('modal.html', { roomObj: finalresult, roomOBJ: JSON.stringify(finalresult), userOBJ: userStatsResult, userJSON: JSON.stringify(userStatsResult) });
-		// 	})
-
-		// });
-
 		createRoomData[room.randNum] = room;
 	})
 
@@ -1573,11 +1558,8 @@ io.on('connection', socket => {
 		if (activeRoomandUsers[roomId] == null) {
 			activeRoomandUsers[roomId] = [];
 		}
-
 		let objIndex = activeRoomandUsers[roomId].findIndex((obj => obj.name == userData.name))
-
 		activeRoomandUsers[roomId][objIndex] = userData;
-
 	});
 
 	// send an array object of the users' stats in the room roomId 
@@ -1585,7 +1567,6 @@ io.on('connection', socket => {
 		if (activeRoomandUsers[roomId] == null) {
 			activeRoomandUsers[roomId] = [];
 		}
-		// console.log(`sending update for room: ${roomId}`);
 		io.emit('getActiveUsers', roomId, activeRoomandUsers[roomId]);
 	});
 
@@ -1680,8 +1661,8 @@ io.on('connection', socket => {
 	})
 
 	//LIVE CHAT
-	socket.on('joinRoom', ({ username, room, nickname, points, xp, secretMode, team, score, teams }) => {
-		const user = userJoin(socket.id, username, nickname, points, xp, room, secretMode, team, score);
+	socket.on('joinRoom', ({ username, room, nickname, points, xp, secretMode, team, score, pfp }) => {
+		const user = userJoin(socket.id, username, nickname, points, xp, room, secretMode, team, score, pfp);
 
 		socket.join(user.room);
 
@@ -1787,7 +1768,7 @@ io.on('connection', socket => {
 	socket.on('chatMessageTo', (msg, toUser) => {
 		try {
 			const user = getCurrentUser(socket.id);
-			io.to(user.room).emit('messageTo', formatMessage(user.username, msg, user.secretMode), toUser);
+			io.to(user.room).emit('messageTo', formatMessage(user.username, msg, user.secretMode, user.pfp), toUser);
 		} catch (e) {
 			console.log(e);
 		}
@@ -1797,7 +1778,7 @@ io.on('connection', socket => {
 	socket.on('chatMessage', msg => {
 		try {
 			const user = getCurrentUser(socket.id);
-			io.to(user.room).emit('message', formatMessage(user.username, msg, user.secretMode), null);
+			io.to(user.room).emit('message', formatMessage(user.username, msg, user.secretMode, user.pfp), null);
 		} catch (e) {
 			console.log(e);
 		}
@@ -1807,7 +1788,7 @@ io.on('connection', socket => {
 	socket.on('replyMessage', (msg, replyTo) => {
 		try {
 			const user = getCurrentUser(socket.id);
-			io.to(user.room).emit('message', formatMessage(user.username, msg, user.secretMode), replyTo);
+			io.to(user.room).emit('message', formatMessage(user.username, msg, user.secretMode, user.pfp), replyTo);
 		} catch (e) {
 			console.log(e);
 		}
