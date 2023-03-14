@@ -312,38 +312,14 @@ function createMessage(message, replyTo) {
   timeTag.innerText = message.time;
 
   let profilePic = msgBlock.querySelector('#profilePic');
-  profilePic.src = pfp;
-
-  // function imageExists(src) {
-  //   // var http = new XMLHttpRequest();
-  //   // http.open('HEAD', image_url, false);
-  //   // try {
-  //   //   http.send();
-  //   // } catch (error) {
-  //   //   console.log("Img not found: " + image_url);
-  //   // }
-  //   // return http.status != 404;
-  //   profilePic.src = src;
-  //   if(profilePic.width > 0){
-  //     return false;
-  //   } else {
-  //     return true;
-  //   }
-  // // }
-
-  // let srcJPG = "../upload/" + "-" + username + "-" + "profilePic" + ".jpg"
-  // let srcGIF = "../upload/" + "-" + username + "-" + "profilePic" + ".gif"
-  // let srcPNG = "../upload/" + "-" + username + "-" + "profilePic" + ".png"
-
-  // if (imageExists(srcJPG)) {
-  //   profilePic.src = srcJPG;
-  // } else if (imageExists(srcPNG)) {
-  //   profilePic.src = srcPNG;
-  // } else if (imageExists(srcGIF)) {
-  //   profilePic.src = srcGIF;
-  // } else {
-  //   profilePic.src = "../images/profilepicother.png";
-  // }
+  // profilePic.src = pfp;
+  if(pfp != ""){
+    profilePic.src = pfp;
+  } 
+  if(message.username == "BOT"){
+    profilePic.src = "../images/robotIcon.png";
+  }
+  console.log("PFP: ", pfp);
 
   usernameTag.innerText = uname;
   xpStat.innerText = "XP: " + message.xp;
@@ -353,11 +329,15 @@ function createMessage(message, replyTo) {
     usernameTag.addEventListener("mouseover", (e) => {
       userstats.hidden = false;
     })
+  
+    usernameTag.addEventListener("mouseleave", (e) => {
+      userstats.hidden = true;
+    })
   }
 
-  userTag.addEventListener("mouseleave", () => {
-    userstats.hidden = true;
-  })
+
+
+
 
   teams.forEach((item, index) => {
     // if (message.team == team) {

@@ -113,16 +113,17 @@
             <div id="chatBox" class="chat-messages">
                 <div id="msgFormat" class="message" hidden>
 
-                    <div class="meta" style="color: rgb(15, 15, 15)">
+                    <div class="meta" style="color: rgb(15, 15, 15); padding: 3px; margin: 2px;">
                         <!-- The User name Tag -->
-                        <div id="usernameTag" style="font-size: 12px; background: rgb(247, 246, 246); float: left; padding: 3px; border-radius: 3px;">
-                            <i id="secretIcon" hidden class="fas fa-user-secret" aria-hidden="true"></i>
-                            <span id="userTag">
-                                • user6
-                            </span>
-                            <img id="profilePic" src="../images/profilepic.png" width="32" hieght="32"></img>
+                        <div style="font-size: 12px; background: rgb(247, 246, 246); float: left; border-radius: 3px; min-width: 96px; ">
+                            <img id="profilePic" src="../images/profilepic.png" width="32" hieght="32" style="margin-left: 0px; padding: 2px; float:left"></img>
+                            <div id="usernameTag">
+                                <i id="secretIcon" hidden class="fas fa-user-secret" aria-hidden="true"></i>
+                                <span id="userTag">
+                                    • user6
+                                </span>
+                            </div>
                         </div>
-
                         <!-- The Time stamp -->
                         <i class="fas fa-clock"></i>
                         <span id="timeTag" style="font-size: 12px; margin: auto; padding: 3px;"> 6:43:31pm </span>
